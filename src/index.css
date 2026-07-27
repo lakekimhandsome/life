@@ -1194,9 +1194,16 @@ select {
   -webkit-user-select: none;
 }
 
+.assets-row-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
 .assets-row-title {
   display: block;
-  width: 100%;
+  min-width: 0;
   margin: 0;
   padding: 0;
   border: 0;
@@ -1206,6 +1213,9 @@ select {
   color: var(--ink);
   text-align: left;
   cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .assets-row-title:hover {
@@ -1218,11 +1228,11 @@ select {
   border-radius: 6px;
 }
 
-.assets-row-meta {
-  margin: 0.3rem 0 0;
+.assets-row-qty {
+  flex-shrink: 0;
   color: var(--muted);
   font-size: 0.88rem;
-  line-height: 1.4;
+  font-weight: 500;
 }
 
 .assets-row-error {

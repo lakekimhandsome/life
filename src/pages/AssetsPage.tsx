@@ -163,11 +163,6 @@ function AssetRow({
     swiping.current = false
   }
 
-  const unitPriceMeta =
-    item.kind !== 'cash' && item.unitPriceKrw !== null
-      ? ` · 단가 ${formatKrw(item.unitPriceKrw)}`
-      : ''
-
   return (
     <li
       className={`assets-row${dragging ? ' is-dragging' : ''}`}
@@ -183,20 +178,23 @@ function AssetRow({
       >
         <div className="assets-row-inner">
           <div className="assets-row-main">
-            <button
-              type="button"
-              className="assets-row-title"
-              onClick={() => {
-                if (swiped.current) return
-                onEdit()
-              }}
-            >
-              {item.object.title}
-            </button>
-            <p className="assets-row-meta">
-              {item.symbol} · {formatQuantity(item.kind, item.quantity, item.symbol)}
-              {unitPriceMeta}
-            </p>
+            <div className="assets-row-heading">
+              <button
+                type="button"
+                className="assets-row-title"
+                onClick={() => {
+                  if (swiped.current) return
+                  onEdit()
+                }}
+              >
+                {item.object.title}
+              </button>
+              {item.kind !== 'cash' ? (
+                <span className="assets-row-qty">
+                  {formatQuantity(item.kind, item.quantity, item.symbol)}
+                </span>
+              ) : null}
+            </div>
             {item.error ? <p className="assets-row-error">{item.error}</p> : null}
           </div>
           <div className="assets-row-side">
