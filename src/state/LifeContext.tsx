@@ -16,6 +16,7 @@ import type {
   RelationshipKind,
   UpdateObjectInput,
 } from '../core/types'
+import { useAuth } from './AuthContext'
 
 interface LifeContextValue {
   ready: boolean
@@ -48,6 +49,7 @@ const emptyCounts: Record<ObjectType, number> = {
 }
 
 export function LifeProvider({ children }: { children: ReactNode }) {
+  const { ready: authReady, user } = useAuth()
   const [ready, setReady] = useState(false)
   const [objects, setObjects] = useState<LifeObject[]>([])
   const [counts, setCounts] = useState(emptyCounts)
@@ -62,15 +64,27 @@ export function LifeProvider({ children }: { children: ReactNode }) {
   }, [])
 
   useEffect(() => {
+    if (!authReady) return
+
     let active = true
+    setReady(false)
     ;(async () => {
-      await refresh()
-      if (active) setReady(true)
+      try {
+        if (user) {
+          await repository.migrateLocalToCloudIfNeeded()
+        }
+        await refresh()
+      } catch (error) {
+        console.error('Failed to load life data', error)
+      } finally {
+        if (active) setReady(true)
+      }
     })()
+
     return () => {
       active = false
     }
-  }, [refresh])
+  }, [authReady, user, refresh])
 
   const createObject = useCallback(
     async (input: CreateObjectInput) => {
