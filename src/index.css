@@ -11,8 +11,10 @@
   --danger: #a33b3b;
   --shadow: 0 24px 60px rgba(15, 42, 46, 0.08);
   --radius: 18px;
-  --font-display: 'Fraunces', Georgia, serif;
-  --font-body: 'Figtree', sans-serif;
+  --font-display: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont,
+    system-ui, sans-serif;
+  --font-body: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui,
+    sans-serif;
   --max: 1080px;
 
   --accent-journal: #2f6f8f;
@@ -548,7 +550,7 @@ select {
   gap: 0.35rem;
   min-width: 0;
   padding: 0.35rem 0.35rem 0.35rem 0.45rem;
-  border-radius: 14px;
+  border-radius: 0;
   background: color-mix(in srgb, var(--paper) 88%, white);
   touch-action: pan-y;
   user-select: none;
@@ -857,7 +859,7 @@ select {
   width: 100%;
   min-width: 0;
   padding: 0.9rem 1rem;
-  border-radius: 14px;
+  border-radius: 0;
   background: color-mix(in srgb, var(--paper) 88%, white);
   touch-action: pan-y;
   user-select: none;
