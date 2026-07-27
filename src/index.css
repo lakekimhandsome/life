@@ -376,32 +376,54 @@ select {
 }
 
 .todo-item {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.2rem 0.35rem 0.2rem 0.2rem;
+  position: relative;
+  overflow: hidden;
   border-radius: 14px;
-  transition: background 160ms ease;
+  background: rgba(255, 255, 255, 0.35);
+  touch-action: pan-y;
 }
 
-.todo-item:hover {
-  background: rgba(255, 255, 255, 0.55);
+.todo-swipe-action {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 1.15rem;
+  background: var(--danger);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
 
 .todo-check {
+  position: relative;
+  z-index: 1;
   display: flex;
+  width: 100%;
   align-items: center;
   gap: 0.85rem;
-  flex: 1;
   min-width: 0;
-  padding: 0.7rem 0.55rem;
+  margin: 0;
+  padding: 0.85rem 0.9rem;
+  border: 0;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--paper) 88%, white);
+  text-align: left;
   cursor: pointer;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
-.todo-check input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
+.todo-check.is-animating {
+  transition: transform 160ms ease;
+}
+
+.todo-check:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent-study) 55%, white);
+  outline-offset: 2px;
 }
 
 .todo-box {
@@ -417,11 +439,7 @@ select {
     box-shadow 160ms ease;
 }
 
-.todo-check input:focus-visible + .todo-box {
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-study) 20%, transparent);
-}
-
-.todo-check input:checked + .todo-box {
+.todo-box.is-checked {
   background: var(--accent-study);
   border-color: var(--accent-study);
   box-shadow: inset 0 0 0 2px #fff;
@@ -438,31 +456,6 @@ select {
   color: var(--muted);
   text-decoration: line-through;
   text-decoration-thickness: 1px;
-}
-
-.todo-delete {
-  flex-shrink: 0;
-  width: 2rem;
-  height: 2rem;
-  border: 0;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--muted);
-  font-size: 1.2rem;
-  line-height: 1;
-  opacity: 0;
-  cursor: pointer;
-  transition: opacity 140ms ease, background 140ms ease, color 140ms ease;
-}
-
-.todo-item:hover .todo-delete,
-.todo-item:focus-within .todo-delete {
-  opacity: 1;
-}
-
-.todo-delete:hover {
-  background: color-mix(in srgb, var(--danger) 10%, transparent);
-  color: var(--danger);
 }
 
 .todo-empty {
