@@ -690,20 +690,25 @@ export function AssetsPage() {
           )
         : null}
 
-      <section className="assets-total" aria-label="총자산">
-        <p className="assets-total-label">총자산</p>
-        <strong className="assets-total-value">
-          {!ready || pricing
-            ? '계산 중…'
-            : items.some((item) => item.valueKrw === null)
-              ? '—'
-              : formatKrw(totalKrw)}
-        </strong>
-        {priceError ? <p className="assets-total-note">{priceError}</p> : null}
-        {!priceError && pricing ? (
-          <p className="assets-total-note">시세를 불러오는 중…</p>
-        ) : null}
-      </section>
+      <div
+        className={`assets-summary${ready && assets.length > 0 ? ' has-chart' : ''}`}
+      >
+        <section className="assets-total" aria-label="총자산">
+          <p className="assets-total-label">총자산</p>
+          <strong className="assets-total-value">
+            {!ready || pricing
+              ? '계산 중…'
+              : items.some((item) => item.valueKrw === null)
+                ? '—'
+                : formatKrw(totalKrw)}
+          </strong>
+          {priceError ? <p className="assets-total-note">{priceError}</p> : null}
+          {!priceError && pricing ? (
+            <p className="assets-total-note">시세를 불러오는 중…</p>
+          ) : null}
+        </section>
+        {ready && assets.length > 0 ? <AssetsPieChart items={items} /> : null}
+      </div>
 
       {!ready ? (
         <p className="empty-state">불러오는 중…</p>
@@ -713,39 +718,36 @@ export function AssetsPage() {
           <p>현금, 주식, 금/은을 추가하면 총자산이 여기에 모입니다.</p>
         </div>
       ) : (
-        <>
-          <div className="assets-groups">
-            {grouped.map((group) => (
-              <section key={group.kind} className="assets-group">
-                <header className="assets-group-header">
-                  <h2>{ASSET_KIND_LABEL[group.kind]}</h2>
-                  <strong>{group.pending ? '—' : formatKrw(group.subtotal)}</strong>
-                </header>
-                <ul
-                  className="assets-list"
-                  ref={(node) => {
-                    listRefs.current[group.kind] = node
-                  }}
-                >
-                  {group.items.map((item) => (
-                    <AssetRow
-                      key={item.object.id}
-                      item={item}
-                      dragging={dragId === item.object.id}
-                      reorderDisabled={dragKind !== null && dragKind !== group.kind}
-                      onEdit={() => openEditor(item)}
-                      onDelete={() => void deleteObject(item.object.id)}
-                      onReorderStart={(event) =>
-                        onReorderStart(group.kind, item.object.id, event)
-                      }
-                    />
-                  ))}
-                </ul>
-              </section>
-            ))}
-          </div>
-          <AssetsPieChart items={items} />
-        </>
+        <div className="assets-groups">
+          {grouped.map((group) => (
+            <section key={group.kind} className="assets-group">
+              <header className="assets-group-header">
+                <h2>{ASSET_KIND_LABEL[group.kind]}</h2>
+                <strong>{group.pending ? '—' : formatKrw(group.subtotal)}</strong>
+              </header>
+              <ul
+                className="assets-list"
+                ref={(node) => {
+                  listRefs.current[group.kind] = node
+                }}
+              >
+                {group.items.map((item) => (
+                  <AssetRow
+                    key={item.object.id}
+                    item={item}
+                    dragging={dragId === item.object.id}
+                    reorderDisabled={dragKind !== null && dragKind !== group.kind}
+                    onEdit={() => openEditor(item)}
+                    onDelete={() => void deleteObject(item.object.id)}
+                    onReorderStart={(event) =>
+                      onReorderStart(group.kind, item.object.id, event)
+                    }
+                  />
+                ))}
+              </ul>
+            </section>
+          ))}
+        </div>
       )}
 
       <div className="assets-add-bar">
