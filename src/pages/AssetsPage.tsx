@@ -8,13 +8,14 @@ import {
 } from 'react'
 import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
+import { ModuleIcon } from '../components/ui/ModuleIcon'
 import * as repository from '../core/repository'
 import type { LifeObject } from '../core/types'
 import {
   ASSET_KIND_LABEL,
   ASSET_KIND_ORDER,
   assetNeedsMarketPrice,
-  cashAssetsSnapshot,
+  assetsSnapshot,
   formatKrw,
   formatQuantity,
   valueAssets,
@@ -297,15 +298,8 @@ export function AssetsPage() {
       if (needsPricing) setPricing(true)
       setPriceError(null)
 
-      // KRW 현금 등은 시세 없이 바로 표시. 기존 주식/물질 값은 재조회 동안 유지.
-      setValued((prev) => {
-        const cash = cashAssetsSnapshot(assets)
-        const assetIds = new Set(assets.map((asset) => asset.id))
-        const retained = prev.filter(
-          (item) => item.kind !== 'cash' && assetIds.has(item.object.id),
-        )
-        return sortValued([...cash, ...retained])
-      })
+      // 시세 전에 보유 목록·수량을 먼저 표시. 평가금은 로컬 환산 가능한 것만.
+      setValued(sortValued(assetsSnapshot(assets)))
 
       if (!needsPricing) {
         const next = await valueAssets(assets)
@@ -326,26 +320,7 @@ export function AssetsPage() {
       } catch (error) {
         if (!active) return
         setPriceError(error instanceof Error ? error.message : '시세를 불러오지 못했습니다.')
-        setValued((prev) => {
-          const cash = cashAssetsSnapshot(assets)
-          const cashIds = new Set(cash.map((item) => item.object.id))
-          const failedRest = assets
-            .filter((object) => !cashIds.has(object.id))
-            .map((object) => {
-              const existing = prev.find((item) => item.object.id === object.id)
-              if (existing) return { ...existing, object, error: existing.error ?? '시세 조회 실패' }
-              return {
-                object,
-                kind: (object.meta.kind as AssetKind) || 'cash',
-                symbol: String(object.meta.symbol ?? ''),
-                quantity: typeof object.meta.quantity === 'number' ? object.meta.quantity : 0,
-                unitPriceKrw: null,
-                valueKrw: null,
-                error: '시세 조회 실패',
-              }
-            })
-          return sortValued([...cash, ...failedRest])
-        })
+        setValued(sortValued(assetsSnapshot(assets)))
       } finally {
         if (active) setPricing(false)
       }
@@ -373,8 +348,9 @@ export function AssetsPage() {
   const grouped = useMemo(() => {
     return ASSET_KIND_ORDER.map((groupKind) => {
       const groupItems = items.filter((item) => item.kind === groupKind)
+      const pending = groupItems.some((item) => item.valueKrw === null)
       const subtotal = groupItems.reduce((sum, item) => sum + (item.valueKrw ?? 0), 0)
-      return { kind: groupKind, items: groupItems, subtotal }
+      return { kind: groupKind, items: groupItems, subtotal, pending }
     }).filter((group) => group.items.length > 0)
   }, [items])
 
@@ -579,9 +555,9 @@ export function AssetsPage() {
         <Link to="/" className="back-link">
           ← 홈
         </Link>
-        <div className="module-heading">
+        <div className="module-heading module-heading--assets">
           <span className="module-icon" aria-hidden="true">
-            💰
+            <ModuleIcon id="assets" />
           </span>
           <h1>자산</h1>
         </div>
@@ -735,7 +711,7 @@ export function AssetsPage() {
             <section key={group.kind} className="assets-group">
               <header className="assets-group-header">
                 <h2>{ASSET_KIND_LABEL[group.kind]}</h2>
-                <strong>{formatKrw(group.subtotal)}</strong>
+                <strong>{group.pending ? '—' : formatKrw(group.subtotal)}</strong>
               </header>
               <ul
                 className="assets-list"

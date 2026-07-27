@@ -108,17 +108,16 @@ export function valueAssetLocally(object: LifeObject): ValuedAsset | null {
   }
 }
 
-/** 시세 조회 전에 현금 행을 먼저 보여주기 위한 스냅샷. */
-export function cashAssetsSnapshot(objects: LifeObject[]): ValuedAsset[] {
+/** 시세 조회 전에 자산 행을 먼저 보여주기 위한 스냅샷. 평가금은 로컬 환산 가능한 것만 채움. */
+export function assetsSnapshot(objects: LifeObject[]): ValuedAsset[] {
   const results: ValuedAsset[] = []
 
   for (const object of objects) {
     const kind = getAssetKind(object)
-    if (kind !== 'cash') continue
-
     const symbol = getAssetSymbol(object)
     const quantity = getAssetQuantity(object)
-    if (!symbol || quantity <= 0) {
+
+    if (!kind || !symbol || quantity <= 0) {
       results.push(incompleteAsset(object, kind, symbol, quantity))
       continue
     }

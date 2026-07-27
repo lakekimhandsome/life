@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
+import { ModuleIcon } from '../components/ui/ModuleIcon'
 import { LIFE_MODULES, getModuleStatus } from '../domain/modules'
 import { daysUntilLocalDay, formatDday } from '../lib/format'
 import { useLife } from '../state/LifeContext'
@@ -41,9 +42,13 @@ export function HomePage() {
 
       <div className="hub-grid">
         {LIFE_MODULES.map((module) => (
-          <Link key={module.id} to={module.path} className="hub-card">
+          <Link
+            key={module.id}
+            to={module.path}
+            className={`hub-card hub-card--${module.id}`}
+          >
             <span className="hub-card-icon" aria-hidden="true">
-              {module.icon}
+              <ModuleIcon id={module.id} />
             </span>
             <div className="hub-card-copy">
               <h2>{module.title}</h2>

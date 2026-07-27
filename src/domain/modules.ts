@@ -11,7 +11,6 @@ export type ModuleId =
 
 export interface LifeModule {
   id: ModuleId
-  icon: string
   title: string
   path: string
   /** Linked object type, if any. */
@@ -21,42 +20,36 @@ export interface LifeModule {
 export const LIFE_MODULES: LifeModule[] = [
   {
     id: 'study',
-    icon: '📚',
     title: '공부',
     path: '/study',
     objectType: 'study',
   },
   {
     id: 'workout',
-    icon: '🏋',
     title: '운동',
     path: '/workout',
     objectType: 'workout',
   },
   {
     id: 'assets',
-    icon: '💰',
     title: '자산',
     path: '/assets',
     objectType: 'asset',
   },
   {
     id: 'journal',
-    icon: '📔',
     title: '일기',
     path: '/journal',
     objectType: 'journal',
   },
   {
     id: 'goals',
-    icon: '🎯',
     title: '목표',
     path: '/goals',
     objectType: 'goal',
   },
   {
     id: 'projects',
-    icon: '🚀',
     title: '프로젝트',
     path: '/projects',
     objectType: 'project',
