@@ -16,6 +16,7 @@ type AuthContextValue = {
   session: Session | null
   user: User | null
   signInWithKakao: () => Promise<{ error: Error | null }>
+  signInWithGoogle: () => Promise<{ error: Error | null }>
   signOut: () => Promise<{ error: Error | null }>
 }
 
@@ -73,6 +74,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: error ? new Error(error.message) : null }
   }, [configured])
 
+  const signInWithGoogle = useCallback(async () => {
+    if (!configured) {
+      return { error: new Error('Supabase가 설정되지 않았습니다.') }
+    }
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: authRedirectTo('/'),
+      },
+    })
+
+    return { error: error ? new Error(error.message) : null }
+  }, [configured])
+
   const signOut = useCallback(async () => {
     if (!configured) {
       return { error: new Error('Supabase가 설정되지 않았습니다.') }
@@ -89,9 +105,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       session,
       user: session?.user ?? null,
       signInWithKakao,
+      signInWithGoogle,
       signOut,
     }),
-    [ready, configured, session, signInWithKakao, signOut],
+    [ready, configured, session, signInWithGoogle, signInWithKakao, signOut],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

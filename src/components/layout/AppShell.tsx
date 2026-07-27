@@ -18,7 +18,8 @@ function displayName(user: {
 }
 
 export function AppShell() {
-  const { ready, configured, user, signInWithKakao, signOut } = useAuth()
+  const { ready, configured, user, signInWithKakao, signInWithGoogle, signOut } =
+    useAuth()
   const [menuOpen, setMenuOpen] = useState(false)
   const [authBusy, setAuthBusy] = useState(false)
   const [authError, setAuthError] = useState<string | null>(null)
@@ -52,6 +53,16 @@ export function AppShell() {
     setAuthError(null)
     setAuthBusy(true)
     const { error } = await signInWithKakao()
+    if (error) {
+      setAuthError(error.message)
+      setAuthBusy(false)
+    }
+  }
+
+  async function handleGoogleLogin() {
+    setAuthError(null)
+    setAuthBusy(true)
+    const { error } = await signInWithGoogle()
     if (error) {
       setAuthError(error.message)
       setAuthBusy(false)
@@ -110,15 +121,26 @@ export function AppShell() {
                   로그아웃
                 </button>
               ) : (
-                <button
-                  type="button"
-                  className="user-menu-item is-action user-menu-kakao"
-                  role="menuitem"
-                  disabled={authBusy || !configured}
-                  onClick={() => void handleKakaoLogin()}
-                >
-                  카카오로 로그인
-                </button>
+                <>
+                  <button
+                    type="button"
+                    className="user-menu-item is-action user-menu-google"
+                    role="menuitem"
+                    disabled={authBusy || !configured}
+                    onClick={() => void handleGoogleLogin()}
+                  >
+                    Google로 로그인
+                  </button>
+                  <button
+                    type="button"
+                    className="user-menu-item is-action user-menu-kakao"
+                    role="menuitem"
+                    disabled={authBusy || !configured}
+                    onClick={() => void handleKakaoLogin()}
+                  >
+                    카카오로 로그인
+                  </button>
+                </>
               )}
 
               {!configured ? (
