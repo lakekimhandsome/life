@@ -516,7 +516,7 @@ select {
   position: relative;
   overflow: hidden;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.35);
+  background: color-mix(in srgb, var(--paper) 88%, white);
   touch-action: pan-y;
   transition: box-shadow 160ms ease, opacity 160ms ease;
 }
@@ -527,13 +527,22 @@ select {
   box-shadow: 0 10px 28px rgba(15, 42, 46, 0.12);
 }
 
+.todo-swipe-track {
+  display: flex;
+  width: 100%;
+  align-items: stretch;
+  will-change: transform;
+}
+
+.todo-swipe-track.is-animating {
+  transition: transform 160ms ease;
+}
+
 .todo-swipe-action {
-  position: absolute;
-  inset: 0;
+  flex: 0 0 140px;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  padding-right: 1.15rem;
+  justify-content: center;
   background: var(--danger);
   color: #fff;
   font-size: 0.9rem;
@@ -542,23 +551,18 @@ select {
 }
 
 .todo-row {
-  position: relative;
-  z-index: 1;
-  display: flex;
+  flex: 0 0 100%;
   width: 100%;
+  box-sizing: border-box;
+  display: flex;
   align-items: center;
   gap: 0.35rem;
   min-width: 0;
   padding: 0.35rem 0.35rem 0.35rem 0.45rem;
-  border-radius: 0;
   background: color-mix(in srgb, var(--paper) 88%, white);
   touch-action: pan-y;
   user-select: none;
   -webkit-user-select: none;
-}
-
-.todo-row.is-animating {
-  transition: transform 160ms ease;
 }
 
 .todo-toggle {
@@ -824,7 +828,7 @@ select {
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.72);
+  background: color-mix(in srgb, var(--paper) 88%, white);
   touch-action: pan-y;
   transition: box-shadow 160ms ease, opacity 160ms ease;
 }
@@ -835,13 +839,22 @@ select {
   box-shadow: 0 10px 28px rgba(15, 42, 46, 0.12);
 }
 
+.assets-swipe-track {
+  display: flex;
+  width: 100%;
+  align-items: stretch;
+  will-change: transform;
+}
+
+.assets-swipe-track.is-animating {
+  transition: transform 160ms ease;
+}
+
 .assets-swipe-action {
-  position: absolute;
-  inset: 0;
+  flex: 0 0 140px;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  padding-right: 1.15rem;
+  justify-content: center;
   background: var(--danger);
   color: #fff;
   font-size: 0.9rem;
@@ -850,24 +863,19 @@ select {
 }
 
 .assets-row-inner {
-  position: relative;
-  z-index: 1;
+  flex: 0 0 100%;
+  width: 100%;
+  box-sizing: border-box;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
-  width: 100%;
   min-width: 0;
   padding: 0.9rem 1rem;
-  border-radius: 0;
   background: color-mix(in srgb, var(--paper) 88%, white);
   touch-action: pan-y;
   user-select: none;
   -webkit-user-select: none;
-}
-
-.assets-row-inner.is-animating {
-  transition: transform 160ms ease;
 }
 
 .assets-row-title {

@@ -120,7 +120,15 @@ function AssetRow({
 
     if (axis.current === 'x' && nextOffset <= -SWIPE_DELETE_THRESHOLD) {
       setOffset(-140)
-      window.setTimeout(() => onDelete(), 140)
+      window.setTimeout(() => {
+        const confirmed = window.confirm(`「${item.object.title}」 자산을 삭제할까요?`)
+        if (!confirmed) {
+          setAnimating(true)
+          setOffset(0)
+          return
+        }
+        onDelete()
+      }, 140)
       return
     }
 
@@ -153,63 +161,65 @@ function AssetRow({
       className={`assets-row${dragging ? ' is-dragging' : ''}`}
       data-asset-id={item.object.id}
     >
-      <div className="assets-swipe-action" aria-hidden="true">
-        삭제
-      </div>
       <div
-        className={`assets-row-inner${animating ? ' is-animating' : ''}`}
+        className={`assets-swipe-track${animating ? ' is-animating' : ''}`}
         style={{ transform: `translateX(${offset}px)` }}
         onPointerDown={onSwipePointerDown}
         onPointerMove={onSwipePointerMove}
         onPointerUp={onSwipePointerUp}
         onPointerCancel={onSwipePointerCancel}
       >
-        <div className="assets-row-main">
-          <button
-            type="button"
-            className="assets-row-title"
-            onClick={() => {
-              if (swiped.current) return
-              onEdit()
-            }}
-          >
-            {item.object.title}
-          </button>
-          <p className="assets-row-meta">
-            {item.symbol} · {formatQuantity(item.kind, item.quantity, item.symbol)}
-            {unitPriceMeta}
-          </p>
-          {item.error ? <p className="assets-row-error">{item.error}</p> : null}
-        </div>
-        <div className="assets-row-side">
-          <strong>{item.valueKrw !== null ? formatKrw(item.valueKrw) : '—'}</strong>
-          <div className="assets-row-actions">
+        <div className="assets-row-inner">
+          <div className="assets-row-main">
             <button
               type="button"
-              className="assets-row-edit"
-              onPointerDown={(event) => event.stopPropagation()}
-              onClick={(event) => {
-                event.stopPropagation()
+              className="assets-row-title"
+              onClick={() => {
+                if (swiped.current) return
                 onEdit()
               }}
             >
-              수정
+              {item.object.title}
             </button>
-            <button
-              type="button"
-              className="assets-handle"
-              aria-label={`${item.object.title} 순서 변경`}
-              disabled={reorderDisabled}
-              onPointerDown={(event) => {
-                event.stopPropagation()
-                onReorderStart(event)
-              }}
-            >
-              <span aria-hidden="true" />
-              <span aria-hidden="true" />
-              <span aria-hidden="true" />
-            </button>
+            <p className="assets-row-meta">
+              {item.symbol} · {formatQuantity(item.kind, item.quantity, item.symbol)}
+              {unitPriceMeta}
+            </p>
+            {item.error ? <p className="assets-row-error">{item.error}</p> : null}
           </div>
+          <div className="assets-row-side">
+            <strong>{item.valueKrw !== null ? formatKrw(item.valueKrw) : '—'}</strong>
+            <div className="assets-row-actions">
+              <button
+                type="button"
+                className="assets-row-edit"
+                onPointerDown={(event) => event.stopPropagation()}
+                onClick={(event) => {
+                  event.stopPropagation()
+                  onEdit()
+                }}
+              >
+                수정
+              </button>
+              <button
+                type="button"
+                className="assets-handle"
+                aria-label={`${item.object.title} 순서 변경`}
+                disabled={reorderDisabled}
+                onPointerDown={(event) => {
+                  event.stopPropagation()
+                  onReorderStart(event)
+                }}
+              >
+                <span aria-hidden="true" />
+                <span aria-hidden="true" />
+                <span aria-hidden="true" />
+              </button>
+            </div>
+          </div>
+        </div>
+        <div className="assets-swipe-action" aria-hidden="true">
+          삭제
         </div>
       </div>
     </li>
@@ -283,6 +293,10 @@ export function AssetsPage() {
         return
       }
 
+      const needsPricing = assets.some(assetNeedsMarketPrice)
+      if (needsPricing) setPricing(true)
+      setPriceError(null)
+
       // KRW 현금 등은 시세 없이 바로 표시. 기존 주식/물질 값은 재조회 동안 유지.
       setValued((prev) => {
         const cash = cashAssetsSnapshot(assets)
@@ -292,9 +306,7 @@ export function AssetsPage() {
         )
         return sortValued([...cash, ...retained])
       })
-      setPriceError(null)
 
-      const needsPricing = assets.some(assetNeedsMarketPrice)
       if (!needsPricing) {
         const next = await valueAssets(assets)
         if (!active) return
@@ -303,7 +315,6 @@ export function AssetsPage() {
         return
       }
 
-      setPricing(true)
       try {
         const next = await valueAssets(assets)
         if (!active) return
@@ -703,7 +714,7 @@ export function AssetsPage() {
       <section className="assets-total" aria-label="총자산">
         <p className="assets-total-label">총자산</p>
         <strong className="assets-total-value">
-          {!ready ? '계산 중…' : formatKrw(totalKrw)}
+          {!ready || pricing ? '계산 중…' : formatKrw(totalKrw)}
         </strong>
         {priceError ? <p className="assets-total-note">{priceError}</p> : null}
         {!priceError && pricing ? (

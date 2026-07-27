@@ -112,7 +112,15 @@ function StudyTodoItem({
 
     if (axis.current === 'x' && nextOffset <= -SWIPE_DELETE_THRESHOLD) {
       setOffset(-140)
-      window.setTimeout(() => onDelete(), 140)
+      window.setTimeout(() => {
+        const confirmed = window.confirm(`「${todo.title}」 할 일을 삭제할까요?`)
+        if (!confirmed) {
+          setAnimating(true)
+          setOffset(0)
+          return
+        }
+        onDelete()
+      }, 140)
       return
     }
 
@@ -150,77 +158,79 @@ function StudyTodoItem({
       className={`todo-item${done ? ' is-done' : ''}${dragging ? ' is-dragging' : ''}`}
       data-todo-id={todo.id}
     >
-      <div className="todo-swipe-action" aria-hidden="true">
-        삭제
-      </div>
       <div
-        className={`todo-row${animating ? ' is-animating' : ''}`}
+        className={`todo-swipe-track${animating ? ' is-animating' : ''}`}
         style={{ transform: `translateX(${offset}px)` }}
         onPointerDown={onSwipePointerDown}
         onPointerMove={onSwipePointerMove}
         onPointerUp={onSwipePointerUp}
         onPointerCancel={onSwipePointerCancel}
       >
-        <button
-          type="button"
-          className="todo-toggle"
-          aria-pressed={done}
-          aria-label={done ? `${todo.title} 완료 취소` : `${todo.title} 완료`}
-          onPointerDown={(event) => event.stopPropagation()}
-          onClick={(event) => {
-            event.stopPropagation()
-            onToggle()
-          }}
-        >
-          <span className={`todo-box${done ? ' is-checked' : ''}`} aria-hidden="true" />
-        </button>
-
-        {editing ? (
-          <input
-            ref={inputRef}
-            className="todo-title-input"
-            value={draftTitle}
-            aria-label="할 일 수정"
-            onPointerDown={(event) => event.stopPropagation()}
-            onChange={(event) => setDraftTitle(event.target.value)}
-            onBlur={commitEdit}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter') {
-                event.preventDefault()
-                commitEdit()
-              }
-              if (event.key === 'Escape') {
-                setDraftTitle(todo.title)
-                setEditing(false)
-              }
-            }}
-          />
-        ) : (
+        <div className="todo-row">
           <button
             type="button"
-            className="todo-title"
-            onClick={() => {
-              if (swiped.current) return
-              setEditing(true)
+            className="todo-toggle"
+            aria-pressed={done}
+            aria-label={done ? `${todo.title} 완료 취소` : `${todo.title} 완료`}
+            onPointerDown={(event) => event.stopPropagation()}
+            onClick={(event) => {
+              event.stopPropagation()
+              onToggle()
             }}
           >
-            {todo.title}
+            <span className={`todo-box${done ? ' is-checked' : ''}`} aria-hidden="true" />
           </button>
-        )}
 
-        <button
-          type="button"
-          className="todo-handle"
-          aria-label={`${todo.title} 순서 변경`}
-          onPointerDown={(event) => {
-            event.stopPropagation()
-            onReorderStart(event)
-          }}
-        >
-          <span aria-hidden="true" />
-          <span aria-hidden="true" />
-          <span aria-hidden="true" />
-        </button>
+          {editing ? (
+            <input
+              ref={inputRef}
+              className="todo-title-input"
+              value={draftTitle}
+              aria-label="할 일 수정"
+              onPointerDown={(event) => event.stopPropagation()}
+              onChange={(event) => setDraftTitle(event.target.value)}
+              onBlur={commitEdit}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  event.preventDefault()
+                  commitEdit()
+                }
+                if (event.key === 'Escape') {
+                  setDraftTitle(todo.title)
+                  setEditing(false)
+                }
+              }}
+            />
+          ) : (
+            <button
+              type="button"
+              className="todo-title"
+              onClick={() => {
+                if (swiped.current) return
+                setEditing(true)
+              }}
+            >
+              {todo.title}
+            </button>
+          )}
+
+          <button
+            type="button"
+            className="todo-handle"
+            aria-label={`${todo.title} 순서 변경`}
+            onPointerDown={(event) => {
+              event.stopPropagation()
+              onReorderStart(event)
+            }}
+          >
+            <span aria-hidden="true" />
+            <span aria-hidden="true" />
+            <span aria-hidden="true" />
+          </button>
+        </div>
+        <div className="todo-swipe-action" aria-hidden="true">
+          삭제
+        </div>
       </div>
     </li>
   )
