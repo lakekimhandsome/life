@@ -10,7 +10,10 @@ cp .env.example .env   # Alpha Vantage API 키 입력
 npm run dev
 ```
 
-GitHub Pages 배포 시 Actions secret `ALPHA_VANTAGE_API_KEY`를 설정하세요.
+GitHub Pages 배포 시 **Repository secret**으로 `ALPHA_VANTAGE_API_KEY`를 넣으세요.
+
+Settings → Secrets and variables → Actions → **Repository secrets**  
+(Environments 아래가 아닙니다.)
 
 ## MVP 범위
 

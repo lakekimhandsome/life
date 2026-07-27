@@ -17,7 +17,6 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    environment: github-pages
 
     steps:
       - name: Checkout
@@ -31,6 +30,18 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Check API key
+        env:
+          VITE_ALPHA_VANTAGE_API_KEY: ${{ secrets.ALPHA_VANTAGE_API_KEY }}
+        run: |
+          if [ -z "$VITE_ALPHA_VANTAGE_API_KEY" ]; then
+            echo "::error::ALPHA_VANTAGE_API_KEY secret is empty."
+            echo "Add it under Settings → Secrets and variables → Actions → Repository secrets"
+            echo "(not Environment secrets)."
+            exit 1
+          fi
+          echo "API key is present (${#VITE_ALPHA_VANTAGE_API_KEY} chars)."
 
       - name: Build
         run: npm run build
