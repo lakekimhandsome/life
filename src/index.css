@@ -173,6 +173,53 @@ select {
   cursor: not-allowed;
 }
 
+.user-menu-item.is-action {
+  cursor: pointer;
+  color: var(--ink);
+}
+
+.user-menu-item.is-action:hover:not(:disabled) {
+  background: rgba(18, 32, 39, 0.05);
+}
+
+.user-menu-item.is-action:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.user-menu-kakao {
+  background: #fee500;
+  color: #191919;
+  margin-bottom: 0.25rem;
+}
+
+.user-menu-kakao:hover:not(:disabled) {
+  background: #f5dc00;
+}
+
+.user-menu-hint {
+  margin: 0.15rem 0 0.45rem;
+  padding: 0 0.65rem;
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+.user-menu-hint.is-error {
+  color: var(--danger);
+}
+
+.auth-callback {
+  min-height: 100vh;
+  display: grid;
+  place-content: center;
+  gap: 1rem;
+  padding: 2rem;
+  text-align: center;
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+
 .page {
   width: min(var(--max), calc(100% - 2rem));
   margin: 0 auto;

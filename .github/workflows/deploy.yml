@@ -31,22 +31,34 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Check API key
+      - name: Check build secrets
         env:
           VITE_ALPHA_VANTAGE_API_KEY: ${{ secrets.ALPHA_VANTAGE_API_KEY }}
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
         run: |
-          if [ -z "$VITE_ALPHA_VANTAGE_API_KEY" ]; then
-            echo "::error::ALPHA_VANTAGE_API_KEY secret is empty."
-            echo "Add it under Settings → Secrets and variables → Actions → Repository secrets"
+          missing=0
+          for name in VITE_ALPHA_VANTAGE_API_KEY VITE_SUPABASE_URL VITE_SUPABASE_ANON_KEY; do
+            value="${!name}"
+            if [ -z "$value" ]; then
+              echo "::error::$name secret is empty."
+              missing=1
+            else
+              echo "$name is present (${#value} chars)."
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            echo "Add secrets under Settings → Secrets and variables → Actions → Repository secrets"
             echo "(not Environment secrets)."
             exit 1
           fi
-          echo "API key is present (${#VITE_ALPHA_VANTAGE_API_KEY} chars)."
 
       - name: Build
         run: npm run build
         env:
           VITE_ALPHA_VANTAGE_API_KEY: ${{ secrets.ALPHA_VANTAGE_API_KEY }}
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
