@@ -143,8 +143,10 @@ function LegendRow({ slice }: { slice: SliceWithPercent }) {
 
 export function AssetsPieChart({ items }: { items: ValuedAsset[] }) {
   const [mode, setMode] = useState<ChartMode>('kind')
+  const [chartOpen, setChartOpen] = useState(true)
   const [otherOpen, setOtherOpen] = useState(false)
   const titleId = useId()
+  const bodyId = useId()
   const otherPanelId = useId()
 
   const slices = useMemo(
@@ -163,100 +165,120 @@ export function AssetsPieChart({ items }: { items: ValuedAsset[] }) {
   }
 
   return (
-    <section className="assets-chart" aria-labelledby={titleId}>
+    <section
+      className={`assets-chart${chartOpen ? '' : ' is-collapsed'}`}
+      aria-labelledby={titleId}
+    >
       <header className="assets-chart-header">
-        <h2 id={titleId}>구성</h2>
-        <div className="assets-chart-toggle" role="tablist" aria-label="차트 구분">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={mode === 'kind'}
-            className={mode === 'kind' ? 'is-active' : undefined}
-            onClick={() => setChartMode('kind')}
-          >
-            종류별
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={mode === 'item'}
-            className={mode === 'item' ? 'is-active' : undefined}
-            onClick={() => setChartMode('item')}
-          >
-            항목별
-          </button>
-        </div>
+        <button
+          type="button"
+          className="assets-chart-collapse"
+          aria-expanded={chartOpen}
+          aria-controls={bodyId}
+          onClick={() => setChartOpen((open) => !open)}
+        >
+          <h2 id={titleId}>구성</h2>
+          <span className="assets-chart-collapse-caret" aria-hidden="true">
+            {chartOpen ? '▾' : '▸'}
+          </span>
+        </button>
+        {chartOpen ? (
+          <div className="assets-chart-toggle" role="tablist" aria-label="차트 구분">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mode === 'kind'}
+              className={mode === 'kind' ? 'is-active' : undefined}
+              onClick={() => setChartMode('kind')}
+            >
+              종류별
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mode === 'item'}
+              className={mode === 'item' ? 'is-active' : undefined}
+              onClick={() => setChartMode('item')}
+            >
+              항목별
+            </button>
+          </div>
+        ) : null}
       </header>
 
-      {chartSlices.length === 0 ? (
-        <p className="assets-chart-empty">평가금이 잡히면 구성이 표시됩니다.</p>
-      ) : (
-        <div className="assets-chart-body">
-          <div
-            className="assets-chart-svg"
-            role="img"
-            aria-label={mode === 'kind' ? '종류별 자산 구성' : '항목별 자산 구성'}
-          >
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={chartSlices}
-                  dataKey="value"
-                  nameKey="label"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius="92%"
-                  stroke="none"
-                  isAnimationActive={false}
-                >
-                  {chartSlices.map((slice) => (
-                    <Cell key={slice.key} fill={slice.color} stroke="none" />
-                  ))}
-                </Pie>
-                <Tooltip content={<ChartTooltip />} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-
-          <ul className="assets-chart-legend">
-            {chartSlices.map((slice) => {
-              if (slice.key !== OTHER_KEY) {
-                return (
-                  <li key={slice.key}>
-                    <LegendRow slice={slice} />
-                  </li>
-                )
-              }
-
-              return (
-                <li key={slice.key} className="assets-chart-other">
-                  <button
-                    type="button"
-                    className="assets-chart-other-toggle"
-                    aria-expanded={otherOpen}
-                    aria-controls={otherPanelId}
-                    onClick={() => setOtherOpen((open) => !open)}
-                  >
-                    <LegendRow slice={slice} />
-                    <span className="assets-chart-other-caret" aria-hidden="true">
-                      {otherOpen ? '▾' : '▸'}
-                    </span>
-                  </button>
-                  {otherOpen ? (
-                    <ul id={otherPanelId} className="assets-chart-other-list">
-                      {otherItems.map((item) => (
-                        <li key={item.key}>
-                          <LegendRow slice={item} />
-                        </li>
+      {chartOpen ? (
+        <div id={bodyId}>
+          {chartSlices.length === 0 ? (
+            <p className="assets-chart-empty">평가금이 잡히면 구성이 표시됩니다.</p>
+          ) : (
+            <div className="assets-chart-body">
+              <div
+                className="assets-chart-svg"
+                role="img"
+                aria-label={mode === 'kind' ? '종류별 자산 구성' : '항목별 자산 구성'}
+              >
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={chartSlices}
+                      dataKey="value"
+                      nameKey="label"
+                      cx="50%"
+                      cy="50%"
+                      outerRadius="92%"
+                      stroke="none"
+                      isAnimationActive={false}
+                    >
+                      {chartSlices.map((slice) => (
+                        <Cell key={slice.key} fill={slice.color} stroke="none" />
                       ))}
-                    </ul>
-                  ) : null}
-                </li>
-              )
-            })}
-          </ul>
+                    </Pie>
+                    <Tooltip content={<ChartTooltip />} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+
+              <ul className="assets-chart-legend">
+                {chartSlices.map((slice) => {
+                  if (slice.key !== OTHER_KEY) {
+                    return (
+                      <li key={slice.key}>
+                        <LegendRow slice={slice} />
+                      </li>
+                    )
+                  }
+
+                  return (
+                    <li key={slice.key} className="assets-chart-other">
+                      <button
+                        type="button"
+                        className="assets-chart-other-toggle"
+                        aria-expanded={otherOpen}
+                        aria-controls={otherPanelId}
+                        onClick={() => setOtherOpen((open) => !open)}
+                      >
+                        <LegendRow slice={slice} />
+                        <span className="assets-chart-other-caret" aria-hidden="true">
+                          {otherOpen ? '▾' : '▸'}
+                        </span>
+                      </button>
+                      {otherOpen ? (
+                        <ul id={otherPanelId} className="assets-chart-other-list">
+                          {otherItems.map((item) => (
+                            <li key={item.key}>
+                              <LegendRow slice={item} />
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
+          )}
         </div>
-      )}
+      ) : null}
     </section>
   )
 }

@@ -1,6 +1,5 @@
 import { Link, Navigate, useLocation } from 'react-router-dom'
 import { ObjectCard } from '../components/object/ObjectCard'
-import { ModuleIcon } from '../components/ui/ModuleIcon'
 import { LIFE_MODULES, type ModuleId } from '../domain/modules'
 import { getSchema } from '../domain/schemas'
 import { useLife } from '../state/LifeContext'
@@ -26,9 +25,6 @@ export function ModulePage() {
           ← 홈
         </Link>
         <div className={`module-heading module-heading--${module.id}`}>
-          <span className="module-icon" aria-hidden="true">
-            <ModuleIcon id={module.id} />
-          </span>
           <h1>{module.title}</h1>
         </div>
         <Link to={`/create/${module.objectType}`} className="btn btn-primary">

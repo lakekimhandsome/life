@@ -7,7 +7,6 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from 'react'
 import { Link } from 'react-router-dom'
-import { ModuleIcon } from '../components/ui/ModuleIcon'
 import * as repository from '../core/repository'
 import type { LifeObject } from '../core/types'
 import {
@@ -387,9 +386,6 @@ export function StudyPage() {
           ← 홈
         </Link>
         <div className="module-heading module-heading--study">
-          <span className="module-icon" aria-hidden="true">
-            <ModuleIcon id="study" />
-          </span>
           <h1>공부</h1>
         </div>
       </div>

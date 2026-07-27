@@ -9,7 +9,6 @@ import {
 import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { AssetsPieChart } from '../components/assets/AssetsPieChart'
-import { ModuleIcon } from '../components/ui/ModuleIcon'
 import * as repository from '../core/repository'
 import type { LifeObject } from '../core/types'
 import {
@@ -30,10 +29,21 @@ const COMMODITY_OPTIONS = [
   { value: 'SILVER', label: '은 (SILVER)' },
 ] as const
 
+const COMMODITY_TITLE: Record<string, string> = {
+  GOLD: '금',
+  SILVER: '은',
+}
+
 function kindHint(kind: AssetKind): string {
   if (kind === 'cash') return '통화 코드 (예: KRW, USD, EUR)'
   if (kind === 'stock') return '티커 (예: AAPL, TSLA, 005930.KS)'
   return '금/은 중 선택'
+}
+
+function titleFromSymbol(kind: AssetKind, nextSymbol: string): string {
+  const normalized = nextSymbol.trim().toUpperCase()
+  if (kind === 'commodity') return COMMODITY_TITLE[normalized] ?? normalized
+  return normalized
 }
 
 function orderValue(object: LifeObject): number {
@@ -249,6 +259,8 @@ export function AssetsPage() {
   const [saving, setSaving] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
   const titleInputRef = useRef<HTMLInputElement>(null)
+  const symbolInputRef = useRef<HTMLInputElement>(null)
+  const symbolSelectRef = useRef<HTMLSelectElement>(null)
 
   const [dragId, setDragId] = useState<string | null>(null)
   const [dragKind, setDragKind] = useState<AssetKind | null>(null)
@@ -265,8 +277,15 @@ export function AssetsPage() {
   }, [kind])
 
   useEffect(() => {
+    if (kind === 'cash') return
+    setTitle(titleFromSymbol(kind, symbol))
+  }, [kind, symbol])
+
+  useEffect(() => {
     if (!composerOpen) return
-    titleInputRef.current?.focus()
+    if (kind === 'cash') titleInputRef.current?.focus()
+    else if (kind === 'commodity') symbolSelectRef.current?.focus()
+    else symbolInputRef.current?.focus()
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && !saving) closeComposer()
@@ -279,7 +298,7 @@ export function AssetsPage() {
       document.removeEventListener('keydown', onKeyDown)
       document.body.style.overflow = previousOverflow
     }
-  }, [composerOpen, saving])
+  }, [composerOpen, saving, kind])
 
   useEffect(() => {
     if (!ready) return
@@ -487,11 +506,11 @@ export function AssetsPage() {
 
   async function handleSave(event: FormEvent) {
     event.preventDefault()
-    const nextTitle = title.trim()
     const nextSymbol = symbol.trim().toUpperCase()
+    const nextTitle = kind === 'cash' ? title.trim() : titleFromSymbol(kind, nextSymbol)
     const nextQuantity = Number(quantity)
 
-    if (!nextTitle) {
+    if (kind === 'cash' && !nextTitle) {
       setFormError('이름을 입력해 주세요.')
       return
     }
@@ -559,9 +578,6 @@ export function AssetsPage() {
           ← 홈
         </Link>
         <div className="module-heading module-heading--assets">
-          <span className="module-icon" aria-hidden="true">
-            <ModuleIcon id="assets" />
-          </span>
           <h1>자산</h1>
         </div>
       </div>
@@ -602,8 +618,8 @@ export function AssetsPage() {
                         id="asset-title"
                         value={title}
                         onChange={(event) => setTitle(event.target.value)}
-                        placeholder="예: 비상금, 애플, 금"
-                        disabled={!ready || saving}
+                        placeholder={kind === 'cash' ? '예: 비상금' : '티커/물질과 동일'}
+                        disabled={!ready || saving || kind !== 'cash'}
                       />
                     </div>
                     <div className="field">
@@ -627,6 +643,7 @@ export function AssetsPage() {
                       </label>
                       {kind === 'commodity' ? (
                         <select
+                          ref={symbolSelectRef}
                           id="asset-symbol"
                           value={symbol}
                           onChange={(event) => setSymbol(event.target.value)}
@@ -640,6 +657,7 @@ export function AssetsPage() {
                         </select>
                       ) : (
                         <input
+                          ref={symbolInputRef}
                           id="asset-symbol"
                           value={symbol}
                           onChange={(event) => setSymbol(event.target.value.toUpperCase())}
