@@ -1,10 +1,12 @@
+import { getMarketQuote, marketDayKey, saveMarketQuote } from './marketQuotes'
+
 const API_BASE = 'https://www.alphavantage.co/query'
-const CACHE_TTL_MS = 15 * 60_000
 const MIN_GAP_MS = 12_000
 
-type CacheEntry = { value: number; expiresAt: number }
+type MemoryEntry = { value: number; day: string }
 
-const memoryCache = new Map<string, CacheEntry>()
+const memoryCache = new Map<string, MemoryEntry>()
+const inflight = new Map<string, Promise<number>>()
 let lastRequestAt = 0
 let queue: Promise<void> = Promise.resolve()
 
@@ -16,42 +18,19 @@ function getApiKey(): string {
   return key
 }
 
-function readCache(key: string): number | null {
+function readMemory(key: string): number | null {
+  const today = marketDayKey()
   const entry = memoryCache.get(key)
   if (!entry) return null
-  if (Date.now() > entry.expiresAt) {
+  if (entry.day !== today) {
     memoryCache.delete(key)
     return null
   }
   return entry.value
 }
 
-function writeCache(key: string, value: number) {
-  memoryCache.set(key, { value, expiresAt: Date.now() + CACHE_TTL_MS })
-  try {
-    sessionStorage.setItem(
-      `av:${key}`,
-      JSON.stringify({ value, expiresAt: Date.now() + CACHE_TTL_MS }),
-    )
-  } catch {
-    // ignore quota / private mode
-  }
-}
-
-function readSessionCache(key: string): number | null {
-  try {
-    const raw = sessionStorage.getItem(`av:${key}`)
-    if (!raw) return null
-    const parsed = JSON.parse(raw) as CacheEntry
-    if (Date.now() > parsed.expiresAt) {
-      sessionStorage.removeItem(`av:${key}`)
-      return null
-    }
-    memoryCache.set(key, parsed)
-    return parsed.value
-  } catch {
-    return null
-  }
+function writeMemory(key: string, value: number) {
+  memoryCache.set(key, { value, day: marketDayKey() })
 }
 
 async function throttle() {
@@ -96,37 +75,65 @@ function parseNumber(value: unknown): number | null {
   return null
 }
 
+/** 당일 DB 캐시 → 없으면 API 호출 후 DB 저장. */
+async function resolveQuote(
+  cacheKey: string,
+  fetchValue: () => Promise<number>,
+): Promise<number> {
+  const memory = readMemory(cacheKey)
+  if (memory !== null) return memory
+
+  const pending = inflight.get(cacheKey)
+  if (pending) return pending
+
+  const task = (async () => {
+    const fromDb = await getMarketQuote(cacheKey)
+    if (fromDb !== null) {
+      writeMemory(cacheKey, fromDb)
+      return fromDb
+    }
+
+    const value = await fetchValue()
+    writeMemory(cacheKey, value)
+    await saveMarketQuote(cacheKey, value)
+    return value
+  })().finally(() => {
+    inflight.delete(cacheKey)
+  })
+
+  inflight.set(cacheKey, task)
+  return task
+}
+
 export async function fetchStockPriceUsd(symbol: string): Promise<number> {
   const ticker = symbol.trim().toUpperCase()
   const cacheKey = `stock:${ticker}`
-  const cached = readCache(cacheKey) ?? readSessionCache(cacheKey)
-  if (cached !== null) return cached
 
-  const data = asRecord(await requestJson({ function: 'GLOBAL_QUOTE', symbol: ticker }))
-  const quote = asRecord(data?.['Global Quote'])
-  const price = parseNumber(quote?.['05. price'])
-  if (price === null) {
-    const note = typeof data?.Note === 'string' ? data.Note : null
-    const info = typeof data?.Information === 'string' ? data.Information : null
-    throw new Error(note ?? info ?? `${ticker} 주식 시세를 가져오지 못했습니다.`)
-  }
-  writeCache(cacheKey, price)
-  return price
+  return resolveQuote(cacheKey, async () => {
+    const data = asRecord(await requestJson({ function: 'GLOBAL_QUOTE', symbol: ticker }))
+    const quote = asRecord(data?.['Global Quote'])
+    const price = parseNumber(quote?.['05. price'])
+    if (price === null) {
+      const note = typeof data?.Note === 'string' ? data.Note : null
+      const info = typeof data?.Information === 'string' ? data.Information : null
+      throw new Error(note ?? info ?? `${ticker} 주식 시세를 가져오지 못했습니다.`)
+    }
+    return price
+  })
 }
 
 export async function fetchMetalPriceUsd(symbol: 'GOLD' | 'SILVER'): Promise<number> {
   const cacheKey = `metal:${symbol}`
-  const cached = readCache(cacheKey) ?? readSessionCache(cacheKey)
-  if (cached !== null) return cached
 
-  const data = asRecord(await requestJson({ function: 'GOLD_SILVER_SPOT', symbol }))
-  const price = parseNumber(data?.price)
-  if (price === null) {
-    const note = typeof data?.Note === 'string' ? data.Note : null
-    throw new Error(note ?? `${symbol} 시세를 가져오지 못했습니다.`)
-  }
-  writeCache(cacheKey, price)
-  return price
+  return resolveQuote(cacheKey, async () => {
+    const data = asRecord(await requestJson({ function: 'GOLD_SILVER_SPOT', symbol }))
+    const price = parseNumber(data?.price)
+    if (price === null) {
+      const note = typeof data?.Note === 'string' ? data.Note : null
+      throw new Error(note ?? `${symbol} 시세를 가져오지 못했습니다.`)
+    }
+    return price
+  })
 }
 
 export async function fetchFxRate(from: string, to: string): Promise<number> {
@@ -135,22 +142,21 @@ export async function fetchFxRate(from: string, to: string): Promise<number> {
   if (fromCode === toCode) return 1
 
   const cacheKey = `fx:${fromCode}:${toCode}`
-  const cached = readCache(cacheKey) ?? readSessionCache(cacheKey)
-  if (cached !== null) return cached
 
-  const data = asRecord(
-    await requestJson({
-      function: 'CURRENCY_EXCHANGE_RATE',
-      from_currency: fromCode,
-      to_currency: toCode,
-    }),
-  )
-  const rateBlock = asRecord(data?.['Realtime Currency Exchange Rate'])
-  const rate = parseNumber(rateBlock?.['5. Exchange Rate'])
-  if (rate === null) {
-    const note = typeof data?.Note === 'string' ? data.Note : null
-    throw new Error(note ?? `${fromCode}/${toCode} 환율을 가져오지 못했습니다.`)
-  }
-  writeCache(cacheKey, rate)
-  return rate
+  return resolveQuote(cacheKey, async () => {
+    const data = asRecord(
+      await requestJson({
+        function: 'CURRENCY_EXCHANGE_RATE',
+        from_currency: fromCode,
+        to_currency: toCode,
+      }),
+    )
+    const rateBlock = asRecord(data?.['Realtime Currency Exchange Rate'])
+    const rate = parseNumber(rateBlock?.['5. Exchange Rate'])
+    if (rate === null) {
+      const note = typeof data?.Note === 'string' ? data.Note : null
+      throw new Error(note ?? `${fromCode}/${toCode} 환율을 가져오지 못했습니다.`)
+    }
+    return rate
+  })
 }

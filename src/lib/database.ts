@@ -21,6 +21,13 @@ export type LifeRelationshipRow = {
   created_at: string
 }
 
+export type MarketQuoteRow = {
+  cache_key: string
+  value: number
+  fetched_on: string
+  updated_at: string
+}
+
 export type Database = {
   public: {
     Tables: {
@@ -34,6 +41,12 @@ export type Database = {
         Row: LifeRelationshipRow
         Insert: LifeRelationshipRow
         Update: Partial<LifeRelationshipRow>
+        Relationships: []
+      }
+      life_market_quotes: {
+        Row: MarketQuoteRow
+        Insert: MarketQuoteRow
+        Update: Partial<MarketQuoteRow>
         Relationships: []
       }
     }
