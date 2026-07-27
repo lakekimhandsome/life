@@ -41,7 +41,6 @@ export function AssetsPage() {
   const [saving, setSaving] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
   const titleInputRef = useRef<HTMLInputElement>(null)
-  const composerRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
     if (kind === 'cash') setSymbol((prev) => (prev === 'GOLD' || prev === 'SILVER' ? 'KRW' : prev || 'KRW'))
@@ -51,9 +50,20 @@ export function AssetsPage() {
 
   useEffect(() => {
     if (!composerOpen) return
-    composerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     titleInputRef.current?.focus()
-  }, [composerOpen])
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !saving) closeComposer()
+    }
+    document.addEventListener('keydown', onKeyDown)
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
+    return () => {
+      document.removeEventListener('keydown', onKeyDown)
+      document.body.style.overflow = previousOverflow
+    }
+  }, [composerOpen, saving])
 
   useEffect(() => {
     if (!ready) return
@@ -189,114 +199,124 @@ export function AssetsPage() {
       </div>
 
       {composerOpen ? (
-        <section
-          ref={composerRef}
-          className="assets-composer"
-          aria-label="자산 추가"
-        >
-          <header className="assets-composer-header">
-            <h2>자산 추가</h2>
-            <button
-              type="button"
-              className="assets-composer-close"
-              onClick={closeComposer}
-              disabled={saving}
-            >
-              닫기
-            </button>
-          </header>
-          <form onSubmit={handleAdd}>
-            <div className="assets-composer-grid">
-              <div className="field">
-                <label htmlFor="asset-title">이름</label>
-                <input
-                  ref={titleInputRef}
-                  id="asset-title"
-                  value={title}
-                  onChange={(event) => setTitle(event.target.value)}
-                  placeholder="예: 비상금, 애플, 금"
-                  disabled={!ready || saving}
-                />
-              </div>
-              <div className="field">
-                <label htmlFor="asset-kind">종류</label>
-                <select
-                  id="asset-kind"
-                  value={kind}
-                  onChange={(event) => setKind(event.target.value as AssetKind)}
-                  disabled={!ready || saving}
-                >
-                  {ASSET_KIND_ORDER.map((item) => (
-                    <option key={item} value={item}>
-                      {ASSET_KIND_LABEL[item]}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="field">
-                <label htmlFor="asset-symbol">
-                  {kind === 'cash' ? '통화' : kind === 'stock' ? '티커' : '물질'}
-                </label>
-                {kind === 'commodity' ? (
-                  <select
-                    id="asset-symbol"
-                    value={symbol}
-                    onChange={(event) => setSymbol(event.target.value)}
-                    disabled={!ready || saving}
-                  >
-                    {COMMODITY_OPTIONS.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <input
-                    id="asset-symbol"
-                    value={symbol}
-                    onChange={(event) => setSymbol(event.target.value.toUpperCase())}
-                    placeholder={kindHint(kind)}
-                    disabled={!ready || saving}
-                    autoComplete="off"
-                  />
-                )}
-              </div>
-              <div className="field">
-                <label htmlFor="asset-quantity">
-                  {kind === 'cash' ? '금액' : kind === 'commodity' ? '수량 (oz)' : '수량 (주)'}
-                </label>
-                <input
-                  id="asset-quantity"
-                  type="number"
-                  min={0}
-                  step="any"
-                  value={quantity}
-                  onChange={(event) => setQuantity(event.target.value)}
-                  placeholder="0"
-                  disabled={!ready || saving}
-                />
-              </div>
-            </div>
-            {formError ? <p className="form-error">{formError}</p> : null}
-            <div className="form-actions">
+        <div className="assets-modal-root">
+          <button
+            type="button"
+            className="assets-modal-backdrop"
+            aria-label="닫기"
+            onClick={closeComposer}
+            disabled={saving}
+          />
+          <div
+            className="assets-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="assets-modal-title"
+          >
+            <header className="assets-composer-header">
+              <h2 id="assets-modal-title">자산 추가</h2>
               <button
                 type="button"
-                className="btn btn-ghost"
+                className="assets-composer-close"
                 onClick={closeComposer}
                 disabled={saving}
               >
-                취소
+                닫기
               </button>
-              <button
-                type="submit"
-                className="btn btn-primary"
-                disabled={!ready || saving}
-              >
-                {saving ? '저장 중…' : '저장'}
-              </button>
-            </div>
-          </form>
-        </section>
+            </header>
+            <form onSubmit={handleAdd}>
+              <div className="assets-composer-grid">
+                <div className="field">
+                  <label htmlFor="asset-title">이름</label>
+                  <input
+                    ref={titleInputRef}
+                    id="asset-title"
+                    value={title}
+                    onChange={(event) => setTitle(event.target.value)}
+                    placeholder="예: 비상금, 애플, 금"
+                    disabled={!ready || saving}
+                  />
+                </div>
+                <div className="field">
+                  <label htmlFor="asset-kind">종류</label>
+                  <select
+                    id="asset-kind"
+                    value={kind}
+                    onChange={(event) => setKind(event.target.value as AssetKind)}
+                    disabled={!ready || saving}
+                  >
+                    {ASSET_KIND_ORDER.map((item) => (
+                      <option key={item} value={item}>
+                        {ASSET_KIND_LABEL[item]}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="field">
+                  <label htmlFor="asset-symbol">
+                    {kind === 'cash' ? '통화' : kind === 'stock' ? '티커' : '물질'}
+                  </label>
+                  {kind === 'commodity' ? (
+                    <select
+                      id="asset-symbol"
+                      value={symbol}
+                      onChange={(event) => setSymbol(event.target.value)}
+                      disabled={!ready || saving}
+                    >
+                      {COMMODITY_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      id="asset-symbol"
+                      value={symbol}
+                      onChange={(event) => setSymbol(event.target.value.toUpperCase())}
+                      placeholder={kindHint(kind)}
+                      disabled={!ready || saving}
+                      autoComplete="off"
+                    />
+                  )}
+                </div>
+                <div className="field">
+                  <label htmlFor="asset-quantity">
+                    {kind === 'cash' ? '금액' : kind === 'commodity' ? '수량 (oz)' : '수량 (주)'}
+                  </label>
+                  <input
+                    id="asset-quantity"
+                    type="number"
+                    min={0}
+                    step="any"
+                    value={quantity}
+                    onChange={(event) => setQuantity(event.target.value)}
+                    placeholder="0"
+                    disabled={!ready || saving}
+                  />
+                </div>
+              </div>
+              {formError ? <p className="form-error">{formError}</p> : null}
+              <div className="form-actions">
+                <button
+                  type="button"
+                  className="btn btn-ghost"
+                  onClick={closeComposer}
+                  disabled={saving}
+                >
+                  취소
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={!ready || saving}
+                >
+                  {saving ? '저장 중…' : '저장'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       ) : null}
 
       <section className="assets-total" aria-label="총자산">
@@ -361,18 +381,16 @@ export function AssetsPage() {
         </div>
       )}
 
-      {!composerOpen ? (
-        <div className="assets-add-bar">
-          <button
-            type="button"
-            className="btn btn-primary assets-add-btn"
-            onClick={openComposer}
-            disabled={!ready}
-          >
-            자산 추가
-          </button>
-        </div>
-      ) : null}
+      <div className="assets-add-bar">
+        <button
+          type="button"
+          className="btn btn-primary assets-add-btn"
+          onClick={openComposer}
+          disabled={!ready}
+        >
+          자산 추가
+        </button>
+      </div>
     </div>
   )
 }
