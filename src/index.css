@@ -895,8 +895,27 @@ select {
 .assets-chart-svg {
   flex-shrink: 0;
   width: min(220px, 42vw);
-  height: auto;
+  height: min(220px, 42vw);
+  aspect-ratio: 1;
   filter: drop-shadow(0 8px 18px rgba(15, 42, 46, 0.08));
+}
+
+.assets-chart-tooltip {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 10px 24px rgba(15, 42, 46, 0.1);
+  font-size: 0.84rem;
+  color: var(--ink-soft);
+}
+
+.assets-chart-tooltip strong {
+  color: var(--ink);
+  font-size: 0.88rem;
 }
 
 .assets-chart-legend {
@@ -959,6 +978,7 @@ select {
   .assets-chart-svg {
     align-self: center;
     width: min(200px, 70vw);
+    height: min(200px, 70vw);
   }
 }
 

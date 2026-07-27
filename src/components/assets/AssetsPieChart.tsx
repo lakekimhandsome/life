@@ -1,4 +1,5 @@
 import { useId, useMemo, useState } from 'react'
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
 import {
   ASSET_KIND_LABEL,
   ASSET_KIND_ORDER,
@@ -38,21 +39,6 @@ const ITEM_PALETTE = [
   '#6FA88E',
 ]
 
-function polar(cx: number, cy: number, radius: number, angle: number) {
-  const rad = ((angle - 90) * Math.PI) / 180
-  return {
-    x: cx + radius * Math.cos(rad),
-    y: cy + radius * Math.sin(rad),
-  }
-}
-
-function arcPath(cx: number, cy: number, radius: number, startAngle: number, endAngle: number) {
-  const start = polar(cx, cy, radius, startAngle)
-  const end = polar(cx, cy, radius, endAngle)
-  const largeArc = endAngle - startAngle > 180 ? 1 : 0
-  return `M ${cx} ${cy} L ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArc} 1 ${end.x} ${end.y} Z`
-}
-
 function buildKindSlices(items: ValuedAsset[]): Slice[] {
   return ASSET_KIND_ORDER.flatMap((kind) => {
     const value = items
@@ -81,6 +67,25 @@ function buildItemSlices(items: ValuedAsset[]): Slice[] {
     }))
 }
 
+function ChartTooltip({
+  active,
+  payload,
+}: {
+  active?: boolean
+  payload?: Array<{ payload: Slice & { percent: number } }>
+}) {
+  if (!active || !payload?.[0]) return null
+  const slice = payload[0].payload
+  return (
+    <div className="assets-chart-tooltip">
+      <strong>{slice.label}</strong>
+      <span>
+        {formatKrw(slice.value)} · {slice.percent.toFixed(1)}%
+      </span>
+    </div>
+  )
+}
+
 export function AssetsPieChart({ items }: { items: ValuedAsset[] }) {
   const [mode, setMode] = useState<ChartMode>('kind')
   const titleId = useId()
@@ -89,27 +94,14 @@ export function AssetsPieChart({ items }: { items: ValuedAsset[] }) {
     [items, mode],
   )
   const total = useMemo(() => slices.reduce((sum, slice) => sum + slice.value, 0), [slices])
-
-  const size = 220
-  const cx = size / 2
-  const cy = size / 2
-  const radius = 96
-
-  let angle = 0
-  const paths = slices.map((slice) => {
-    const sweep = total > 0 ? (slice.value / total) * 360 : 0
-    const startAngle = angle
-    const endAngle = angle + sweep
-    angle = endAngle
-    const fullCircle = slices.length === 1
-    return {
-      ...slice,
-      startAngle,
-      endAngle,
-      fullCircle,
-      percent: total > 0 ? (slice.value / total) * 100 : 0,
-    }
-  })
+  const chartData = useMemo(
+    () =>
+      slices.map((slice) => ({
+        ...slice,
+        percent: total > 0 ? (slice.value / total) * 100 : 0,
+      })),
+    [slices, total],
+  )
 
   return (
     <section className="assets-chart" aria-labelledby={titleId}>
@@ -137,42 +129,38 @@ export function AssetsPieChart({ items }: { items: ValuedAsset[] }) {
         </div>
       </header>
 
-      {slices.length === 0 ? (
+      {chartData.length === 0 ? (
         <p className="assets-chart-empty">평가금이 잡히면 구성이 표시됩니다.</p>
       ) : (
         <div className="assets-chart-body">
-          <svg
+          <div
             className="assets-chart-svg"
-            viewBox={`0 0 ${size} ${size}`}
-            width={size}
-            height={size}
             role="img"
             aria-label={mode === 'kind' ? '종류별 자산 구성' : '항목별 자산 구성'}
           >
-            {paths.map((slice) =>
-              slice.fullCircle ? (
-                <circle
-                  key={slice.key}
-                  cx={cx}
-                  cy={cy}
-                  r={radius}
-                  fill={slice.color}
-                />
-              ) : (
-                <path
-                  key={slice.key}
-                  d={arcPath(cx, cy, radius, slice.startAngle, slice.endAngle)}
-                  fill={slice.color}
-                  stroke="rgba(255, 255, 255, 0.92)"
-                  strokeWidth={2.5}
-                  strokeLinejoin="round"
-                />
-              ),
-            )}
-          </svg>
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={chartData}
+                  dataKey="value"
+                  nameKey="label"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius="92%"
+                  stroke="none"
+                  isAnimationActive={false}
+                >
+                  {chartData.map((slice) => (
+                    <Cell key={slice.key} fill={slice.color} stroke="none" />
+                  ))}
+                </Pie>
+                <Tooltip content={<ChartTooltip />} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
 
           <ul className="assets-chart-legend">
-            {paths.map((slice) => (
+            {chartData.map((slice) => (
               <li key={slice.key}>
                 <span
                   className="assets-chart-swatch"
