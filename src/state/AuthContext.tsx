@@ -67,7 +67,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       provider: 'kakao',
       options: {
         redirectTo: authRedirectTo('/'),
-        scopes: 'openid profile_nickname profile_image',
       },
     })
 

@@ -1,6 +1,15 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type FormEvent,
+  type PointerEvent as ReactPointerEvent,
+} from 'react'
 import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
+import * as repository from '../core/repository'
+import type { LifeObject } from '../core/types'
 import {
   ASSET_KIND_LABEL,
   ASSET_KIND_ORDER,
@@ -23,18 +32,40 @@ function kindHint(kind: AssetKind): string {
   return '금/은 중 선택'
 }
 
+function orderValue(object: LifeObject): number {
+  return typeof object.meta.order === 'number' ? object.meta.order : Number.MAX_SAFE_INTEGER
+}
+
+function sortAssets(items: LifeObject[]): LifeObject[] {
+  return [...items].sort((a, b) => {
+    const orderDelta = orderValue(a) - orderValue(b)
+    if (orderDelta !== 0) return orderDelta
+    return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+  })
+}
+
+function sortValued(items: ValuedAsset[]): ValuedAsset[] {
+  return [...items].sort((a, b) => {
+    const orderDelta = orderValue(a.object) - orderValue(b.object)
+    if (orderDelta !== 0) return orderDelta
+    return new Date(a.object.createdAt).getTime() - new Date(b.object.createdAt).getTime()
+  })
+}
+
 export function AssetsPage() {
-  const { ready, objects, createObject, deleteObject } = useLife()
+  const { ready, objects, createObject, updateObject, deleteObject, refresh } = useLife()
   const assets = useMemo(
-    () => objects.filter((object) => object.type === 'asset'),
+    () => sortAssets(objects.filter((object) => object.type === 'asset')),
     [objects],
   )
 
   const [valued, setValued] = useState<ValuedAsset[]>([])
+  const [items, setItems] = useState<ValuedAsset[]>([])
   const [pricing, setPricing] = useState(false)
   const [priceError, setPriceError] = useState<string | null>(null)
 
   const [composerOpen, setComposerOpen] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
   const [title, setTitle] = useState('')
   const [kind, setKind] = useState<AssetKind>('cash')
   const [symbol, setSymbol] = useState('KRW')
@@ -42,6 +73,14 @@ export function AssetsPage() {
   const [saving, setSaving] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
   const titleInputRef = useRef<HTMLInputElement>(null)
+
+  const [dragId, setDragId] = useState<string | null>(null)
+  const [dragKind, setDragKind] = useState<AssetKind | null>(null)
+  const dragIdRef = useRef<string | null>(null)
+  const dragKindRef = useRef<AssetKind | null>(null)
+  const itemsRef = useRef<ValuedAsset[]>([])
+  const dragOrigin = useRef<ValuedAsset[] | null>(null)
+  const listRefs = useRef<Partial<Record<AssetKind, HTMLUListElement | null>>>({})
 
   useEffect(() => {
     if (kind === 'cash') setSymbol((prev) => (prev === 'GOLD' || prev === 'SILVER' ? 'KRW' : prev || 'KRW'))
@@ -85,7 +124,7 @@ export function AssetsPage() {
       try {
         const next = await valueAssets(assets)
         if (!active) return
-        setValued(next)
+        setValued(sortValued(next))
         const failed = next.filter((item) => item.error)
         if (failed.length > 0 && failed.length === next.length) {
           setPriceError(failed[0].error ?? '시세를 불러오지 못했습니다.')
@@ -94,15 +133,17 @@ export function AssetsPage() {
         if (!active) return
         setPriceError(error instanceof Error ? error.message : '시세를 불러오지 못했습니다.')
         setValued(
-          assets.map((object) => ({
-            object,
-            kind: (object.meta.kind as AssetKind) || 'cash',
-            symbol: String(object.meta.symbol ?? ''),
-            quantity: typeof object.meta.quantity === 'number' ? object.meta.quantity : 0,
-            unitPriceKrw: null,
-            valueKrw: null,
-            error: '시세 조회 실패',
-          })),
+          sortValued(
+            assets.map((object) => ({
+              object,
+              kind: (object.meta.kind as AssetKind) || 'cash',
+              symbol: String(object.meta.symbol ?? ''),
+              quantity: typeof object.meta.quantity === 'number' ? object.meta.quantity : 0,
+              unitPriceKrw: null,
+              valueKrw: null,
+              error: '시세 조회 실패',
+            })),
+          ),
         )
       } finally {
         if (active) setPricing(false)
@@ -114,20 +155,30 @@ export function AssetsPage() {
     }
   }, [ready, assets])
 
+  useEffect(() => {
+    if (dragId) return
+    setItems(valued)
+  }, [valued, dragId])
+
+  useEffect(() => {
+    itemsRef.current = items
+  }, [items])
+
   const totalKrw = useMemo(
-    () => valued.reduce((sum, item) => sum + (item.valueKrw ?? 0), 0),
-    [valued],
+    () => items.reduce((sum, item) => sum + (item.valueKrw ?? 0), 0),
+    [items],
   )
 
   const grouped = useMemo(() => {
     return ASSET_KIND_ORDER.map((groupKind) => {
-      const items = valued.filter((item) => item.kind === groupKind)
-      const subtotal = items.reduce((sum, item) => sum + (item.valueKrw ?? 0), 0)
-      return { kind: groupKind, items, subtotal }
+      const groupItems = items.filter((item) => item.kind === groupKind)
+      const subtotal = groupItems.reduce((sum, item) => sum + (item.valueKrw ?? 0), 0)
+      return { kind: groupKind, items: groupItems, subtotal }
     }).filter((group) => group.items.length > 0)
-  }, [valued])
+  }, [items])
 
   function resetComposer() {
+    setEditingId(null)
     setTitle('')
     setQuantity('')
     setKind('cash')
@@ -140,12 +191,121 @@ export function AssetsPage() {
     setComposerOpen(true)
   }
 
+  function openEditor(item: ValuedAsset) {
+    setEditingId(item.object.id)
+    setTitle(item.object.title)
+    setKind(item.kind)
+    setSymbol(item.symbol)
+    setQuantity(String(item.quantity))
+    setFormError(null)
+    setComposerOpen(true)
+  }
+
   function closeComposer() {
     setComposerOpen(false)
+    setEditingId(null)
     setFormError(null)
   }
 
-  async function handleAdd(event: FormEvent) {
+  async function persistOrder(next: ValuedAsset[]) {
+    await Promise.all(
+      next.map((item, index) =>
+        repository.updateObject(item.object.id, {
+          meta: { ...item.object.meta, order: index },
+        }),
+      ),
+    )
+    await refresh()
+  }
+
+  function moveDraggedToIndex(nextIndex: number) {
+    const id = dragIdRef.current
+    const groupKind = dragKindRef.current
+    if (!id || !groupKind) return
+
+    setItems((current) => {
+      const groupItems = current.filter((item) => item.kind === groupKind)
+      const fromIndex = groupItems.findIndex((item) => item.object.id === id)
+      if (fromIndex < 0 || fromIndex === nextIndex) return current
+
+      const nextGroup = [...groupItems]
+      const [moved] = nextGroup.splice(fromIndex, 1)
+      nextGroup.splice(nextIndex, 0, moved)
+
+      let cursor = 0
+      return current.map((item) => {
+        if (item.kind !== groupKind) return item
+        const replacement = nextGroup[cursor]
+        cursor += 1
+        return replacement
+      })
+    })
+  }
+
+  function onReorderStart(
+    groupKind: AssetKind,
+    assetId: string,
+    event: ReactPointerEvent<HTMLButtonElement>,
+  ) {
+    if (event.button !== 0) return
+    event.preventDefault()
+
+    dragOrigin.current = itemsRef.current
+    dragIdRef.current = assetId
+    dragKindRef.current = groupKind
+    setDragId(assetId)
+    setDragKind(groupKind)
+
+    const handle = event.currentTarget
+    handle.setPointerCapture(event.pointerId)
+
+    const onMove = (moveEvent: PointerEvent) => {
+      const list = listRefs.current[groupKind]
+      if (!list) return
+      const rows = [...list.querySelectorAll<HTMLElement>('[data-asset-id]')]
+      const y = moveEvent.clientY
+      let targetIndex = rows.length - 1
+      for (let index = 0; index < rows.length; index += 1) {
+        const rect = rows[index].getBoundingClientRect()
+        if (y < rect.top + rect.height / 2) {
+          targetIndex = index
+          break
+        }
+      }
+      moveDraggedToIndex(targetIndex)
+    }
+
+    const finish = () => {
+      handle.removeEventListener('pointermove', onMove)
+      handle.removeEventListener('pointerup', finish)
+      handle.removeEventListener('pointercancel', finish)
+
+      const current = itemsRef.current
+      const origin = dragOrigin.current
+      const activeKind = dragKindRef.current
+      dragOrigin.current = null
+      dragIdRef.current = null
+      dragKindRef.current = null
+      setDragId(null)
+      setDragKind(null)
+
+      if (!activeKind) return
+
+      const originGroup = origin?.filter((item) => item.kind === activeKind) ?? []
+      const currentGroup = current.filter((item) => item.kind === activeKind)
+      const changed =
+        originGroup.length !== currentGroup.length ||
+        originGroup.some((item, index) => item.object.id !== currentGroup[index]?.object.id)
+
+      if (changed) void persistOrder(currentGroup)
+    }
+
+    handle.addEventListener('pointermove', onMove)
+    handle.addEventListener('pointerup', finish)
+    handle.addEventListener('pointercancel', finish)
+  }
+
+  async function handleSave(event: FormEvent) {
     event.preventDefault()
     const nextTitle = title.trim()
     const nextSymbol = symbol.trim().toUpperCase()
@@ -167,15 +327,42 @@ export function AssetsPage() {
     setSaving(true)
     setFormError(null)
     try {
-      await createObject({
-        type: 'asset',
-        title: nextTitle,
-        meta: {
-          kind,
-          symbol: nextSymbol,
-          quantity: nextQuantity,
-        },
-      })
+      if (editingId) {
+        const existing = assets.find((asset) => asset.id === editingId)
+        await updateObject(editingId, {
+          title: nextTitle,
+          meta: {
+            ...(existing?.meta ?? {}),
+            kind,
+            symbol: nextSymbol,
+            quantity: nextQuantity,
+            order:
+              typeof existing?.meta.order === 'number'
+                ? existing.meta.order
+                : assets.reduce((max, asset) => {
+                    const value = typeof asset.meta.order === 'number' ? asset.meta.order : -1
+                    return Math.max(max, value)
+                  }, -1) + 1,
+          },
+        })
+      } else {
+        const nextOrder =
+          assets.reduce((max, asset) => {
+            const value = typeof asset.meta.order === 'number' ? asset.meta.order : -1
+            return Math.max(max, value)
+          }, -1) + 1
+
+        await createObject({
+          type: 'asset',
+          title: nextTitle,
+          meta: {
+            kind,
+            symbol: nextSymbol,
+            quantity: nextQuantity,
+            order: nextOrder,
+          },
+        })
+      }
       resetComposer()
       setComposerOpen(false)
     } catch (error) {
@@ -216,7 +403,7 @@ export function AssetsPage() {
                 aria-labelledby="assets-modal-title"
               >
                 <header className="assets-composer-header">
-                  <h2 id="assets-modal-title">자산 추가</h2>
+                  <h2 id="assets-modal-title">{editingId ? '자산 수정' : '자산 추가'}</h2>
                   <button
                     type="button"
                     className="assets-composer-close"
@@ -226,7 +413,7 @@ export function AssetsPage() {
                     닫기
                   </button>
                 </header>
-                <form onSubmit={handleAdd}>
+                <form onSubmit={handleSave}>
                   <div className="assets-composer-grid">
                     <div className="field">
                       <label htmlFor="asset-title">이름</label>
@@ -349,13 +536,26 @@ export function AssetsPage() {
                 <h2>{ASSET_KIND_LABEL[group.kind]}</h2>
                 <strong>{formatKrw(group.subtotal)}</strong>
               </header>
-              <ul className="assets-list">
+              <ul
+                className="assets-list"
+                ref={(node) => {
+                  listRefs.current[group.kind] = node
+                }}
+              >
                 {group.items.map((item) => (
-                  <li key={item.object.id} className="assets-row">
+                  <li
+                    key={item.object.id}
+                    className={`assets-row${dragId === item.object.id ? ' is-dragging' : ''}`}
+                    data-asset-id={item.object.id}
+                  >
                     <div className="assets-row-main">
-                      <Link to={`/object/${item.object.id}`} className="assets-row-title">
+                      <button
+                        type="button"
+                        className="assets-row-title"
+                        onClick={() => openEditor(item)}
+                      >
                         {item.object.title}
-                      </Link>
+                      </button>
                       <p className="assets-row-meta">
                         {item.symbol} · {formatQuantity(item.kind, item.quantity, item.symbol)}
                         {item.unitPriceKrw !== null
@@ -368,14 +568,36 @@ export function AssetsPage() {
                       <strong>
                         {item.valueKrw !== null ? formatKrw(item.valueKrw) : '—'}
                       </strong>
-                      <button
-                        type="button"
-                        className="assets-row-delete"
-                        aria-label={`${item.object.title} 삭제`}
-                        onClick={() => void deleteObject(item.object.id)}
-                      >
-                        삭제
-                      </button>
+                      <div className="assets-row-actions">
+                        <button
+                          type="button"
+                          className="assets-row-edit"
+                          onClick={() => openEditor(item)}
+                        >
+                          수정
+                        </button>
+                        <button
+                          type="button"
+                          className="assets-row-delete"
+                          aria-label={`${item.object.title} 삭제`}
+                          onClick={() => void deleteObject(item.object.id)}
+                        >
+                          삭제
+                        </button>
+                        <button
+                          type="button"
+                          className="assets-handle"
+                          aria-label={`${item.object.title} 순서 변경`}
+                          disabled={dragKind !== null && dragKind !== group.kind}
+                          onPointerDown={(event) =>
+                            onReorderStart(group.kind, item.object.id, event)
+                          }
+                        >
+                          <span aria-hidden="true" />
+                          <span aria-hidden="true" />
+                          <span aria-hidden="true" />
+                        </button>
+                      </div>
                     </div>
                   </li>
                 ))}
