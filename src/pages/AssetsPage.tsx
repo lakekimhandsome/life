@@ -52,6 +52,168 @@ function sortValued(items: ValuedAsset[]): ValuedAsset[] {
   })
 }
 
+const SWIPE_DELETE_THRESHOLD = 88
+
+function AssetRow({
+  item,
+  dragging,
+  reorderDisabled,
+  onEdit,
+  onDelete,
+  onReorderStart,
+}: {
+  item: ValuedAsset
+  dragging: boolean
+  reorderDisabled: boolean
+  onEdit: () => void
+  onDelete: () => void
+  onReorderStart: (event: ReactPointerEvent<HTMLButtonElement>) => void
+}) {
+  const startX = useRef(0)
+  const startY = useRef(0)
+  const axis = useRef<'none' | 'x' | 'y'>('none')
+  const swiping = useRef(false)
+  const swiped = useRef(false)
+  const [offset, setOffset] = useState(0)
+  const [animating, setAnimating] = useState(false)
+
+  function onSwipePointerDown(event: ReactPointerEvent<HTMLDivElement>) {
+    if (event.button !== 0 || dragging) return
+    swiping.current = true
+    swiped.current = false
+    axis.current = 'none'
+    setAnimating(false)
+    startX.current = event.clientX
+    startY.current = event.clientY
+  }
+
+  function onSwipePointerMove(event: ReactPointerEvent<HTMLDivElement>) {
+    if (!swiping.current) return
+
+    const deltaX = event.clientX - startX.current
+    const deltaY = event.clientY - startY.current
+
+    if (axis.current === 'none') {
+      if (Math.abs(deltaX) < 8 && Math.abs(deltaY) < 8) return
+      axis.current = Math.abs(deltaX) > Math.abs(deltaY) ? 'x' : 'y'
+      if (axis.current === 'y') {
+        swiping.current = false
+        return
+      }
+      swiped.current = true
+      event.currentTarget.setPointerCapture(event.pointerId)
+    }
+
+    if (axis.current !== 'x') return
+    setOffset(Math.max(-140, Math.min(0, deltaX)))
+  }
+
+  function finishSwipe(nextOffset: number) {
+    if (!swiping.current && axis.current !== 'x') {
+      swiping.current = false
+      return
+    }
+    swiping.current = false
+    setAnimating(true)
+
+    if (axis.current === 'x' && nextOffset <= -SWIPE_DELETE_THRESHOLD) {
+      setOffset(-140)
+      window.setTimeout(() => onDelete(), 140)
+      return
+    }
+
+    setOffset(0)
+  }
+
+  function onSwipePointerUp(event: ReactPointerEvent<HTMLDivElement>) {
+    if (axis.current === 'x') {
+      finishSwipe(event.clientX - startX.current)
+      return
+    }
+    swiping.current = false
+  }
+
+  function onSwipePointerCancel() {
+    if (axis.current === 'x') {
+      finishSwipe(0)
+      return
+    }
+    swiping.current = false
+  }
+
+  const unitPriceMeta =
+    item.kind !== 'cash' && item.unitPriceKrw !== null
+      ? ` · 단가 ${formatKrw(item.unitPriceKrw)}`
+      : ''
+
+  return (
+    <li
+      className={`assets-row${dragging ? ' is-dragging' : ''}`}
+      data-asset-id={item.object.id}
+    >
+      <div className="assets-swipe-action" aria-hidden="true">
+        삭제
+      </div>
+      <div
+        className={`assets-row-inner${animating ? ' is-animating' : ''}`}
+        style={{ transform: `translateX(${offset}px)` }}
+        onPointerDown={onSwipePointerDown}
+        onPointerMove={onSwipePointerMove}
+        onPointerUp={onSwipePointerUp}
+        onPointerCancel={onSwipePointerCancel}
+      >
+        <div className="assets-row-main">
+          <button
+            type="button"
+            className="assets-row-title"
+            onClick={() => {
+              if (swiped.current) return
+              onEdit()
+            }}
+          >
+            {item.object.title}
+          </button>
+          <p className="assets-row-meta">
+            {item.symbol} · {formatQuantity(item.kind, item.quantity, item.symbol)}
+            {unitPriceMeta}
+          </p>
+          {item.error ? <p className="assets-row-error">{item.error}</p> : null}
+        </div>
+        <div className="assets-row-side">
+          <strong>{item.valueKrw !== null ? formatKrw(item.valueKrw) : '—'}</strong>
+          <div className="assets-row-actions">
+            <button
+              type="button"
+              className="assets-row-edit"
+              onPointerDown={(event) => event.stopPropagation()}
+              onClick={(event) => {
+                event.stopPropagation()
+                onEdit()
+              }}
+            >
+              수정
+            </button>
+            <button
+              type="button"
+              className="assets-handle"
+              aria-label={`${item.object.title} 순서 변경`}
+              disabled={reorderDisabled}
+              onPointerDown={(event) => {
+                event.stopPropagation()
+                onReorderStart(event)
+              }}
+            >
+              <span aria-hidden="true" />
+              <span aria-hidden="true" />
+              <span aria-hidden="true" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </li>
+  )
+}
+
 export function AssetsPage() {
   const { ready, objects, createObject, updateObject, deleteObject, refresh } = useLife()
   const assets = useMemo(
@@ -471,7 +633,7 @@ export function AssetsPage() {
                     </div>
                     <div className="field">
                       <label htmlFor="asset-quantity">
-                        {kind === 'cash' ? '금액' : kind === 'commodity' ? '수량 (oz)' : '수량 (주)'}
+                        {kind === 'cash' ? '금액' : kind === 'commodity' ? '수량 (g)' : '수량 (주)'}
                       </label>
                       <input
                         id="asset-quantity"
@@ -543,63 +705,17 @@ export function AssetsPage() {
                 }}
               >
                 {group.items.map((item) => (
-                  <li
+                  <AssetRow
                     key={item.object.id}
-                    className={`assets-row${dragId === item.object.id ? ' is-dragging' : ''}`}
-                    data-asset-id={item.object.id}
-                  >
-                    <div className="assets-row-main">
-                      <button
-                        type="button"
-                        className="assets-row-title"
-                        onClick={() => openEditor(item)}
-                      >
-                        {item.object.title}
-                      </button>
-                      <p className="assets-row-meta">
-                        {item.symbol} · {formatQuantity(item.kind, item.quantity, item.symbol)}
-                        {item.unitPriceKrw !== null
-                          ? ` · 단가 ${formatKrw(item.unitPriceKrw)}`
-                          : ''}
-                      </p>
-                      {item.error ? <p className="assets-row-error">{item.error}</p> : null}
-                    </div>
-                    <div className="assets-row-side">
-                      <strong>
-                        {item.valueKrw !== null ? formatKrw(item.valueKrw) : '—'}
-                      </strong>
-                      <div className="assets-row-actions">
-                        <button
-                          type="button"
-                          className="assets-row-edit"
-                          onClick={() => openEditor(item)}
-                        >
-                          수정
-                        </button>
-                        <button
-                          type="button"
-                          className="assets-row-delete"
-                          aria-label={`${item.object.title} 삭제`}
-                          onClick={() => void deleteObject(item.object.id)}
-                        >
-                          삭제
-                        </button>
-                        <button
-                          type="button"
-                          className="assets-handle"
-                          aria-label={`${item.object.title} 순서 변경`}
-                          disabled={dragKind !== null && dragKind !== group.kind}
-                          onPointerDown={(event) =>
-                            onReorderStart(group.kind, item.object.id, event)
-                          }
-                        >
-                          <span aria-hidden="true" />
-                          <span aria-hidden="true" />
-                          <span aria-hidden="true" />
-                        </button>
-                      </div>
-                    </div>
-                  </li>
+                    item={item}
+                    dragging={dragId === item.object.id}
+                    reorderDisabled={dragKind !== null && dragKind !== group.kind}
+                    onEdit={() => openEditor(item)}
+                    onDelete={() => void deleteObject(item.object.id)}
+                    onReorderStart={(event) =>
+                      onReorderStart(group.kind, item.object.id, event)
+                    }
+                  />
                 ))}
               </ul>
             </section>

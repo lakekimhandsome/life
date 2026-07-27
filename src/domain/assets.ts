@@ -49,13 +49,16 @@ export function formatKrw(value: number): string {
   }).format(Math.round(value))
 }
 
+/** Troy ounce → grams (Alpha Vantage metal spot is USD / oz). */
+const GRAMS_PER_TROY_OUNCE = 31.1034768
+
 export function formatQuantity(kind: AssetKind, quantity: number, symbol: string): string {
   const amount = new Intl.NumberFormat('ko-KR', {
     maximumFractionDigits: 6,
   }).format(quantity)
 
   if (kind === 'cash') return `${amount} ${symbol}`
-  if (kind === 'commodity') return `${amount} oz`
+  if (kind === 'commodity') return `${amount} g`
   return `${amount}주`
 }
 
@@ -77,7 +80,7 @@ async function unitPriceKrw(kind: AssetKind, symbol: string): Promise<number> {
     fetchMetalPriceUsd(metal),
     fetchFxRate('USD', 'KRW'),
   ])
-  return priceUsd * usdKrw
+  return (priceUsd * usdKrw) / GRAMS_PER_TROY_OUNCE
 }
 
 export async function valueAssets(objects: LifeObject[]): Promise<ValuedAsset[]> {

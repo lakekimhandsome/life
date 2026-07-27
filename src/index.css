@@ -807,14 +807,12 @@ select {
 }
 
 .assets-row {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.9rem 1rem;
+  position: relative;
+  overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.72);
+  touch-action: pan-y;
   transition: box-shadow 160ms ease, opacity 160ms ease;
 }
 
@@ -822,6 +820,41 @@ select {
   z-index: 2;
   opacity: 0.92;
   box-shadow: 0 10px 28px rgba(15, 42, 46, 0.12);
+}
+
+.assets-swipe-action {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 1.15rem;
+  background: var(--danger);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.assets-row-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  min-width: 0;
+  padding: 0.9rem 1rem;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--paper) 88%, white);
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.assets-row-inner.is-animating {
+  transition: transform 160ms ease;
 }
 
 .assets-row-title {
@@ -879,8 +912,7 @@ select {
   gap: 0.15rem;
 }
 
-.assets-row-edit,
-.assets-row-delete {
+.assets-row-edit {
   border: 0;
   background: transparent;
   color: var(--muted);
@@ -890,10 +922,6 @@ select {
 
 .assets-row-edit:hover {
   color: var(--accent-asset);
-}
-
-.assets-row-delete:hover {
-  color: var(--danger);
 }
 
 .assets-handle {
