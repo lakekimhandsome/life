@@ -829,6 +829,137 @@ select {
   gap: 0.75rem;
 }
 
+.assets-chart {
+  margin-top: 1.75rem;
+  padding: 1.15rem 1.2rem 1.2rem;
+  border: 1px solid color-mix(in srgb, var(--accent-asset) 22%, var(--line));
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--paper) 90%, white);
+}
+
+.assets-chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.assets-chart-header h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 650;
+}
+
+.assets-chart-toggle {
+  display: inline-flex;
+  padding: 0.18rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.assets-chart-toggle button {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.assets-chart-toggle button.is-active {
+  background: color-mix(in srgb, var(--accent-asset) 18%, white);
+  color: var(--ink);
+}
+
+.assets-chart-toggle button:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent-asset) 55%, white);
+  outline-offset: 2px;
+}
+
+.assets-chart-empty {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.assets-chart-body {
+  display: flex;
+  align-items: center;
+  gap: 1.35rem;
+}
+
+.assets-chart-svg {
+  flex-shrink: 0;
+  width: min(220px, 42vw);
+  height: auto;
+}
+
+.assets-chart-legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.assets-chart-legend li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 0.55rem;
+}
+
+.assets-chart-swatch {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 3px;
+  margin-top: 0.15rem;
+}
+
+.assets-chart-legend-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.assets-chart-legend-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.1rem;
+  color: var(--ink-soft);
+  font-size: 0.84rem;
+  white-space: nowrap;
+}
+
+.assets-chart-legend-meta em {
+  font-style: normal;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+@media (max-width: 560px) {
+  .assets-chart-body {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .assets-chart-svg {
+    align-self: center;
+    width: min(200px, 70vw);
+  }
+}
+
 .assets-add-bar {
   margin-top: 1.5rem;
   padding-top: 0.25rem;

@@ -8,6 +8,7 @@ import {
 } from 'react'
 import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
+import { AssetsPieChart } from '../components/assets/AssetsPieChart'
 import { ModuleIcon } from '../components/ui/ModuleIcon'
 import * as repository from '../core/repository'
 import type { LifeObject } from '../core/types'
@@ -712,36 +713,39 @@ export function AssetsPage() {
           <p>현금, 주식, 금/은을 추가하면 총자산이 여기에 모입니다.</p>
         </div>
       ) : (
-        <div className="assets-groups">
-          {grouped.map((group) => (
-            <section key={group.kind} className="assets-group">
-              <header className="assets-group-header">
-                <h2>{ASSET_KIND_LABEL[group.kind]}</h2>
-                <strong>{group.pending ? '—' : formatKrw(group.subtotal)}</strong>
-              </header>
-              <ul
-                className="assets-list"
-                ref={(node) => {
-                  listRefs.current[group.kind] = node
-                }}
-              >
-                {group.items.map((item) => (
-                  <AssetRow
-                    key={item.object.id}
-                    item={item}
-                    dragging={dragId === item.object.id}
-                    reorderDisabled={dragKind !== null && dragKind !== group.kind}
-                    onEdit={() => openEditor(item)}
-                    onDelete={() => void deleteObject(item.object.id)}
-                    onReorderStart={(event) =>
-                      onReorderStart(group.kind, item.object.id, event)
-                    }
-                  />
-                ))}
-              </ul>
-            </section>
-          ))}
-        </div>
+        <>
+          <div className="assets-groups">
+            {grouped.map((group) => (
+              <section key={group.kind} className="assets-group">
+                <header className="assets-group-header">
+                  <h2>{ASSET_KIND_LABEL[group.kind]}</h2>
+                  <strong>{group.pending ? '—' : formatKrw(group.subtotal)}</strong>
+                </header>
+                <ul
+                  className="assets-list"
+                  ref={(node) => {
+                    listRefs.current[group.kind] = node
+                  }}
+                >
+                  {group.items.map((item) => (
+                    <AssetRow
+                      key={item.object.id}
+                      item={item}
+                      dragging={dragId === item.object.id}
+                      reorderDisabled={dragKind !== null && dragKind !== group.kind}
+                      onEdit={() => openEditor(item)}
+                      onDelete={() => void deleteObject(item.object.id)}
+                      onReorderStart={(event) =>
+                        onReorderStart(group.kind, item.object.id, event)
+                      }
+                    />
+                  ))}
+                </ul>
+              </section>
+            ))}
+          </div>
+          <AssetsPieChart items={items} />
+        </>
       )}
 
       <div className="assets-add-bar">
