@@ -33,6 +33,16 @@ function writeMemory(key: string, value: number) {
   memoryCache.set(key, { value, day: marketDayKey() })
 }
 
+/** DB에서 읽어 온 당일 시세를 메모리에 심어 API를 건너뛰게 함. */
+export function seedQuoteCache(quotes: Map<string, number> | Record<string, number>) {
+  const entries = quotes instanceof Map ? quotes.entries() : Object.entries(quotes)
+  for (const [key, value] of entries) {
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      writeMemory(key, value)
+    }
+  }
+}
+
 async function throttle() {
   const wait = Math.max(0, MIN_GAP_MS - (Date.now() - lastRequestAt))
   if (wait > 0) await new Promise((resolve) => setTimeout(resolve, wait))

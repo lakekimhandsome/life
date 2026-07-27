@@ -11,29 +11,41 @@ export function marketDayKey(date = new Date()): string {
 }
 
 export async function getMarketQuote(cacheKey: string): Promise<number | null> {
-  if (!isSupabaseConfigured()) return null
+  const map = await getMarketQuotes([cacheKey])
+  return map.get(cacheKey) ?? null
+}
+
+/** 당일 저장된 시세를 cache_key 목록으로 일괄 조회. */
+export async function getMarketQuotes(
+  cacheKeys: string[],
+): Promise<Map<string, number>> {
+  const result = new Map<string, number>()
+  const unique = [...new Set(cacheKeys.filter(Boolean))]
+  if (unique.length === 0 || !isSupabaseConfigured()) return result
 
   const {
     data: { session },
   } = await supabase.auth.getSession()
-  if (!session) return null
+  if (!session) return result
 
   const today = marketDayKey()
   const { data, error } = await supabase
     .from('life_market_quotes')
-    .select('value')
-    .eq('cache_key', cacheKey)
+    .select('cache_key, value')
     .eq('fetched_on', today)
-    .maybeSingle()
+    .in('cache_key', unique)
 
   if (error) {
     console.warn('life_market_quotes read failed', error.message)
-    return null
+    return result
   }
-  if (!data || typeof data.value !== 'number' || !Number.isFinite(data.value)) {
-    return null
+
+  for (const row of data ?? []) {
+    if (typeof row.value === 'number' && Number.isFinite(row.value)) {
+      result.set(row.cache_key, row.value)
+    }
   }
-  return data.value
+  return result
 }
 
 export async function saveMarketQuote(cacheKey: string, value: number): Promise<void> {

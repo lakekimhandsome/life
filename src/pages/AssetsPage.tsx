@@ -14,11 +14,11 @@ import type { LifeObject } from '../core/types'
 import {
   ASSET_KIND_LABEL,
   ASSET_KIND_ORDER,
-  assetNeedsMarketPrice,
   assetsSnapshot,
   formatKrw,
   formatQuantity,
   valueAssets,
+  valueAssetsFromTodayCache,
   type AssetKind,
   type ValuedAsset,
 } from '../domain/assets'
@@ -294,20 +294,22 @@ export function AssetsPage() {
         return
       }
 
-      const needsPricing = assets.some(assetNeedsMarketPrice)
-      if (needsPricing) setPricing(true)
       setPriceError(null)
-
-      // 시세 전에 보유 목록·수량을 먼저 표시. 평가금은 로컬 환산 가능한 것만.
+      // 보유 목록은 바로 두고, 당일 시세가 모두 있으면 평가금까지 즉시 채움.
       setValued(sortValued(assetsSnapshot(assets)))
+      setPricing(false)
 
-      if (!needsPricing) {
-        const next = await valueAssets(assets)
-        if (!active) return
-        setValued(sortValued(next))
+      const cached = await valueAssetsFromTodayCache(assets)
+      if (!active) return
+
+      if (cached) {
+        setValued(sortValued(cached))
         setPricing(false)
         return
       }
+
+      // 당일 미조회 시세가 있을 때만 계산 중…
+      setPricing(true)
 
       try {
         const next = await valueAssets(assets)
@@ -690,7 +692,11 @@ export function AssetsPage() {
       <section className="assets-total" aria-label="총자산">
         <p className="assets-total-label">총자산</p>
         <strong className="assets-total-value">
-          {!ready || pricing ? '계산 중…' : formatKrw(totalKrw)}
+          {!ready || pricing
+            ? '계산 중…'
+            : items.some((item) => item.valueKrw === null)
+              ? '—'
+              : formatKrw(totalKrw)}
         </strong>
         {priceError ? <p className="assets-total-note">{priceError}</p> : null}
         {!priceError && pricing ? (
