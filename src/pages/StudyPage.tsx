@@ -1,5 +1,13 @@
-import { useMemo, useRef, useState, type FormEvent, type PointerEvent } from 'react'
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type FormEvent,
+  type PointerEvent as ReactPointerEvent,
+} from 'react'
 import { Link } from 'react-router-dom'
+import * as repository from '../core/repository'
 import type { LifeObject } from '../core/types'
 import {
   addLocalDays,
@@ -16,37 +24,65 @@ function isDone(object: LifeObject): boolean {
   return object.meta.done === true
 }
 
+function orderValue(object: LifeObject): number {
+  return typeof object.meta.order === 'number' ? object.meta.order : Number.MAX_SAFE_INTEGER
+}
+
+function sortTodos(items: LifeObject[]): LifeObject[] {
+  return [...items].sort((a, b) => {
+    const orderDelta = orderValue(a) - orderValue(b)
+    if (orderDelta !== 0) return orderDelta
+    return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+  })
+}
+
 function StudyTodoItem({
   todo,
+  dragging,
   onToggle,
   onDelete,
+  onRename,
+  onReorderStart,
 }: {
   todo: LifeObject
+  dragging: boolean
   onToggle: () => void
   onDelete: () => void
+  onRename: (title: string) => void
+  onReorderStart: (event: ReactPointerEvent<HTMLButtonElement>) => void
 }) {
   const done = isDone(todo)
   const startX = useRef(0)
   const startY = useRef(0)
   const axis = useRef<'none' | 'x' | 'y'>('none')
-  const dragging = useRef(false)
+  const swiping = useRef(false)
   const swiped = useRef(false)
   const [offset, setOffset] = useState(0)
   const [animating, setAnimating] = useState(false)
+  const [editing, setEditing] = useState(false)
+  const [draftTitle, setDraftTitle] = useState(todo.title)
+  const inputRef = useRef<HTMLInputElement>(null)
 
-  function onPointerDown(event: PointerEvent<HTMLButtonElement>) {
-    if (event.button !== 0) return
-    dragging.current = true
+  useEffect(() => {
+    if (!editing) setDraftTitle(todo.title)
+  }, [todo.title, editing])
+
+  useEffect(() => {
+    if (editing) inputRef.current?.focus()
+  }, [editing])
+
+  function onSwipePointerDown(event: ReactPointerEvent<HTMLDivElement>) {
+    if (event.button !== 0 || editing || dragging) return
+    swiping.current = true
     swiped.current = false
     axis.current = 'none'
     setAnimating(false)
     startX.current = event.clientX
     startY.current = event.clientY
-    event.currentTarget.setPointerCapture(event.pointerId)
   }
 
-  function onPointerMove(event: PointerEvent<HTMLButtonElement>) {
-    if (!dragging.current) return
+  function onSwipePointerMove(event: ReactPointerEvent<HTMLDivElement>) {
+    if (!swiping.current) return
 
     const deltaX = event.clientX - startX.current
     const deltaY = event.clientY - startY.current
@@ -54,17 +90,24 @@ function StudyTodoItem({
     if (axis.current === 'none') {
       if (Math.abs(deltaX) < 8 && Math.abs(deltaY) < 8) return
       axis.current = Math.abs(deltaX) > Math.abs(deltaY) ? 'x' : 'y'
-      if (axis.current === 'y') return
+      if (axis.current === 'y') {
+        swiping.current = false
+        return
+      }
+      swiped.current = true
+      event.currentTarget.setPointerCapture(event.pointerId)
     }
 
     if (axis.current !== 'x') return
-
-    swiped.current = true
     setOffset(Math.max(-140, Math.min(0, deltaX)))
   }
 
   function finishSwipe(nextOffset: number) {
-    dragging.current = false
+    if (!swiping.current && axis.current !== 'x') {
+      swiping.current = false
+      return
+    }
+    swiping.current = false
     setAnimating(true)
 
     if (axis.current === 'x' && nextOffset <= -SWIPE_DELETE_THRESHOLD) {
@@ -76,68 +119,164 @@ function StudyTodoItem({
     setOffset(0)
   }
 
-  function onPointerUp(event: PointerEvent<HTMLButtonElement>) {
-    if (!dragging.current) return
-    finishSwipe(event.clientX - startX.current)
+  function onSwipePointerUp(event: ReactPointerEvent<HTMLDivElement>) {
+    if (axis.current === 'x') {
+      finishSwipe(event.clientX - startX.current)
+      return
+    }
+    swiping.current = false
   }
 
-  function onPointerCancel() {
-    if (!dragging.current) return
-    finishSwipe(0)
+  function onSwipePointerCancel() {
+    if (axis.current === 'x') {
+      finishSwipe(0)
+      return
+    }
+    swiping.current = false
   }
 
-  function onClick() {
-    if (swiped.current) return
-    onToggle()
+  function commitEdit() {
+    const next = draftTitle.trim()
+    setEditing(false)
+    if (!next || next === todo.title) {
+      setDraftTitle(todo.title)
+      return
+    }
+    onRename(next)
   }
 
   return (
-    <li className={`todo-item${done ? ' is-done' : ''}`}>
+    <li
+      className={`todo-item${done ? ' is-done' : ''}${dragging ? ' is-dragging' : ''}`}
+      data-todo-id={todo.id}
+    >
       <div className="todo-swipe-action" aria-hidden="true">
         삭제
       </div>
-      <button
-        type="button"
-        className={`todo-check${animating ? ' is-animating' : ''}`}
+      <div
+        className={`todo-row${animating ? ' is-animating' : ''}`}
         style={{ transform: `translateX(${offset}px)` }}
-        aria-pressed={done}
-        aria-label={done ? `${todo.title} 완료 취소` : `${todo.title} 완료`}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerCancel={onPointerCancel}
-        onClick={onClick}
+        onPointerDown={onSwipePointerDown}
+        onPointerMove={onSwipePointerMove}
+        onPointerUp={onSwipePointerUp}
+        onPointerCancel={onSwipePointerCancel}
       >
-        <span className={`todo-box${done ? ' is-checked' : ''}`} aria-hidden="true" />
-        <span className="todo-title">{todo.title}</span>
-      </button>
+        <button
+          type="button"
+          className="todo-toggle"
+          aria-pressed={done}
+          aria-label={done ? `${todo.title} 완료 취소` : `${todo.title} 완료`}
+          onPointerDown={(event) => event.stopPropagation()}
+          onClick={(event) => {
+            event.stopPropagation()
+            onToggle()
+          }}
+        >
+          <span className={`todo-box${done ? ' is-checked' : ''}`} aria-hidden="true" />
+        </button>
+
+        {editing ? (
+          <input
+            ref={inputRef}
+            className="todo-title-input"
+            value={draftTitle}
+            aria-label="할 일 수정"
+            onPointerDown={(event) => event.stopPropagation()}
+            onChange={(event) => setDraftTitle(event.target.value)}
+            onBlur={commitEdit}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                event.preventDefault()
+                commitEdit()
+              }
+              if (event.key === 'Escape') {
+                setDraftTitle(todo.title)
+                setEditing(false)
+              }
+            }}
+          />
+        ) : (
+          <button
+            type="button"
+            className="todo-title"
+            onClick={() => {
+              if (swiped.current) return
+              setEditing(true)
+            }}
+          >
+            {todo.title}
+          </button>
+        )}
+
+        <button
+          type="button"
+          className="todo-handle"
+          aria-label={`${todo.title} 순서 변경`}
+          onPointerDown={(event) => {
+            event.stopPropagation()
+            onReorderStart(event)
+          }}
+        >
+          <span aria-hidden="true" />
+          <span aria-hidden="true" />
+          <span aria-hidden="true" />
+        </button>
+      </div>
     </li>
   )
 }
 
 export function StudyPage() {
-  const { ready, listByType, createObject, updateObject, deleteObject } = useLife()
+  const { ready, listByType, createObject, updateObject, deleteObject, refresh } = useLife()
   const [selectedDay, setSelectedDay] = useState(() => startOfLocalDay())
   const [draft, setDraft] = useState('')
   const [saving, setSaving] = useState(false)
+  const [items, setItems] = useState<LifeObject[]>([])
+  const [dragId, setDragId] = useState<string | null>(null)
+  const dragIdRef = useRef<string | null>(null)
+  const itemsRef = useRef<LifeObject[]>([])
+  const dragOrigin = useRef<LifeObject[] | null>(null)
+  const listRef = useRef<HTMLUListElement>(null)
 
-  const todos = useMemo(() => {
-    const items = listByType('study').filter((object) =>
+  const sourceTodos = useMemo(() => {
+    const dayItems = listByType('study').filter((object) =>
       isSameLocalDay(object.occurredAt, selectedDay),
     )
-    return items.sort((a, b) => {
-      const doneDelta = Number(isDone(a)) - Number(isDone(b))
-      if (doneDelta !== 0) return doneDelta
-      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-    })
+    return sortTodos(dayItems)
   }, [listByType, selectedDay])
 
-  const remaining = todos.filter((todo) => !isDone(todo)).length
+  useEffect(() => {
+    if (dragId) return
+    setItems(sourceTodos)
+  }, [sourceTodos, dragId])
+
+  useEffect(() => {
+    itemsRef.current = items
+  }, [items])
+
+  const remaining = items.filter((todo) => !isDone(todo)).length
+
+  async function persistOrder(next: LifeObject[]) {
+    await Promise.all(
+      next.map((todo, index) =>
+        repository.updateObject(todo.id, {
+          meta: { ...todo.meta, order: index },
+        }),
+      ),
+    )
+    await refresh()
+  }
 
   async function handleAdd(event: FormEvent) {
     event.preventDefault()
     const title = draft.trim()
     if (!title || saving) return
+
+    const nextOrder =
+      items.reduce((max, todo) => {
+        const value = typeof todo.meta.order === 'number' ? todo.meta.order : -1
+        return Math.max(max, value)
+      }, -1) + 1
 
     setSaving(true)
     try {
@@ -145,7 +284,7 @@ export function StudyPage() {
         type: 'study',
         title,
         occurredAt: noonOnLocalDay(selectedDay),
-        meta: { subject: '', done: false },
+        meta: { subject: '', done: false, order: nextOrder },
       })
       setDraft('')
     } finally {
@@ -160,6 +299,74 @@ export function StudyPage() {
         done: !isDone(todo),
       },
     })
+  }
+
+  async function renameTodo(todo: LifeObject, title: string) {
+    await updateObject(todo.id, { title })
+  }
+
+  function moveDraggedToIndex(nextIndex: number) {
+    const id = dragIdRef.current
+    if (!id) return
+    setItems((current) => {
+      const fromIndex = current.findIndex((todo) => todo.id === id)
+      if (fromIndex < 0 || fromIndex === nextIndex) return current
+      const next = [...current]
+      const [moved] = next.splice(fromIndex, 1)
+      next.splice(nextIndex, 0, moved)
+      return next
+    })
+  }
+
+  function onReorderStart(todoId: string, event: ReactPointerEvent<HTMLButtonElement>) {
+    if (event.button !== 0) return
+    event.preventDefault()
+
+    dragOrigin.current = itemsRef.current
+    dragIdRef.current = todoId
+    setDragId(todoId)
+
+    const handle = event.currentTarget
+    handle.setPointerCapture(event.pointerId)
+
+    const onMove = (moveEvent: PointerEvent) => {
+      const list = listRef.current
+      if (!list) return
+      const rows = [...list.querySelectorAll<HTMLElement>('[data-todo-id]')]
+      const y = moveEvent.clientY
+      let targetIndex = rows.length - 1
+      for (let index = 0; index < rows.length; index += 1) {
+        const rect = rows[index].getBoundingClientRect()
+        if (y < rect.top + rect.height / 2) {
+          targetIndex = index
+          break
+        }
+      }
+      moveDraggedToIndex(targetIndex)
+    }
+
+    const finish = () => {
+      handle.removeEventListener('pointermove', onMove)
+      handle.removeEventListener('pointerup', finish)
+      handle.removeEventListener('pointercancel', finish)
+
+      const current = itemsRef.current
+      const origin = dragOrigin.current
+      dragOrigin.current = null
+      dragIdRef.current = null
+      setDragId(null)
+
+      const changed =
+        !origin ||
+        origin.length !== current.length ||
+        origin.some((todo, index) => todo.id !== current[index]?.id)
+
+      if (changed) void persistOrder(current)
+    }
+
+    handle.addEventListener('pointermove', onMove)
+    handle.addEventListener('pointerup', finish)
+    handle.addEventListener('pointercancel', finish)
   }
 
   return (
@@ -187,7 +394,7 @@ export function StudyPage() {
         </button>
         <div className="day-nav-label">
           <strong>{formatDayHeading(selectedDay)}</strong>
-          {ready && todos.length > 0 ? (
+          {ready && items.length > 0 ? (
             <span>
               {remaining === 0 ? '모두 완료' : `${remaining}개 남음`}
             </span>
@@ -234,19 +441,22 @@ export function StudyPage() {
 
       {!ready ? (
         <p className="empty-state">불러오는 중…</p>
-      ) : todos.length === 0 ? (
+      ) : items.length === 0 ? (
         <div className="empty-panel todo-empty">
           <h3>할 일이 없습니다</h3>
           <p>위에서 오늘의 공부를 추가해 보세요.</p>
         </div>
       ) : (
-        <ul className="todo-list">
-          {todos.map((todo) => (
+        <ul className="todo-list" ref={listRef}>
+          {items.map((todo) => (
             <StudyTodoItem
               key={todo.id}
               todo={todo}
+              dragging={dragId === todo.id}
               onToggle={() => void toggleDone(todo)}
               onDelete={() => void deleteObject(todo.id)}
+              onRename={(title) => void renameTodo(todo, title)}
+              onReorderStart={(event) => onReorderStart(todo.id, event)}
             />
           ))}
         </ul>
