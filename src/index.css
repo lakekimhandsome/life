@@ -896,6 +896,7 @@ select {
   flex-shrink: 0;
   width: min(220px, 42vw);
   height: auto;
+  filter: drop-shadow(0 8px 18px rgba(15, 42, 46, 0.08));
 }
 
 .assets-chart-legend {
@@ -917,10 +918,11 @@ select {
 }
 
 .assets-chart-swatch {
-  width: 0.7rem;
-  height: 0.7rem;
-  border-radius: 3px;
-  margin-top: 0.15rem;
+  width: 0.78rem;
+  height: 0.78rem;
+  border-radius: 999px;
+  margin-top: 0.12rem;
+  box-shadow: inset 0 0 0 1px rgba(18, 32, 39, 0.08);
 }
 
 .assets-chart-legend-label {

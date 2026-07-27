@@ -17,22 +17,25 @@ interface Slice {
 }
 
 const KIND_COLORS: Record<AssetKind, string> = {
-  cash: '#8a6a2f',
-  stock: '#3d6b4f',
-  commodity: '#b05a2c',
+  cash: '#D4A84B',
+  stock: '#5BA88A',
+  commodity: '#C97B5A',
 }
 
+/** 비슷한 명도·채도로 맞춘 구분 팔레트 (인접 슬라이스가 잘 갈라지도록 배치) */
 const ITEM_PALETTE = [
-  '#8a6a2f',
-  '#3d6b4f',
-  '#2f6f8f',
-  '#b05a2c',
-  '#5a4f8c',
-  '#1f6f78',
-  '#9a4f3f',
-  '#6b7f3a',
-  '#4a5f7a',
-  '#a67c2a',
+  '#D4A84B',
+  '#5BA88A',
+  '#6B9EC4',
+  '#C97B5A',
+  '#9B8BC4',
+  '#7AABA0',
+  '#D4926A',
+  '#8AA06B',
+  '#5F8FA8',
+  '#B88A5A',
+  '#A67C9A',
+  '#6FA88E',
 ]
 
 function polar(cx: number, cy: number, radius: number, angle: number) {
@@ -148,12 +151,21 @@ export function AssetsPieChart({ items }: { items: ValuedAsset[] }) {
           >
             {paths.map((slice) =>
               slice.fullCircle ? (
-                <circle key={slice.key} cx={cx} cy={cy} r={radius} fill={slice.color} />
+                <circle
+                  key={slice.key}
+                  cx={cx}
+                  cy={cy}
+                  r={radius}
+                  fill={slice.color}
+                />
               ) : (
                 <path
                   key={slice.key}
                   d={arcPath(cx, cy, radius, slice.startAngle, slice.endAngle)}
                   fill={slice.color}
+                  stroke="rgba(255, 255, 255, 0.92)"
+                  strokeWidth={2.5}
+                  strokeLinejoin="round"
                 />
               ),
             )}
