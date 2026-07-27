@@ -126,6 +126,7 @@ export async function countByType(): Promise<Record<ObjectType, number>> {
     workout: 0,
     study: 0,
     goal: 0,
+    asset: 0,
   }
   for (const object of objects) {
     counts[object.type] += 1

@@ -14,8 +14,8 @@ export interface LifeModule {
   icon: string
   title: string
   path: string
-  /** Linked object type, if any. Assets has no object type yet. */
-  objectType?: 'study' | 'workout' | 'journal' | 'goal' | 'project'
+  /** Linked object type, if any. */
+  objectType?: 'study' | 'workout' | 'journal' | 'goal' | 'project' | 'asset'
 }
 
 export const LIFE_MODULES: LifeModule[] = [
@@ -38,6 +38,7 @@ export const LIFE_MODULES: LifeModule[] = [
     icon: '💰',
     title: '자산',
     path: '/assets',
+    objectType: 'asset',
   },
   {
     id: 'journal',
@@ -89,8 +90,11 @@ export function getModuleStatus(
       if (today.length === 0) return '오늘 미기록'
       return today[0].title
     }
-    case 'assets':
-      return '기록 없음'
+    case 'assets': {
+      const assets = ofType(objects, 'asset')
+      if (assets.length === 0) return '기록 없음'
+      return `${assets.length}개 보유`
+    }
     case 'journal': {
       const today = ofType(objects, 'journal').some((object) =>
         isSameLocalDay(object.occurredAt, now),

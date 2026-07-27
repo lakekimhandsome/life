@@ -44,6 +44,7 @@ const emptyCounts: Record<ObjectType, number> = {
   workout: 0,
   study: 0,
   goal: 0,
+  asset: 0,
 }
 
 export function LifeProvider({ children }: { children: ReactNode }) {

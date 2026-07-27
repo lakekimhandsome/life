@@ -111,6 +111,9 @@ export function ObjectDetailPage() {
       </section>
 
       <div className="detail-actions">
+        <Link to={`/object/${object.id}/edit`} className="btn btn-ghost">
+          수정
+        </Link>
         <button
           type="button"
           className="btn btn-danger"

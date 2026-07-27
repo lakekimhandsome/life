@@ -143,6 +143,43 @@ export const OBJECT_SCHEMAS: Record<ObjectType, ObjectTypeSchema> = {
       },
     ],
   },
+  asset: {
+    type: 'asset',
+    label: 'Asset',
+    labelKo: '자산',
+    description: '현금, 주식, 물질로 남긴 가치',
+    titlePlaceholder: '예: 비상금, 애플, 금',
+    bodyPlaceholder: '메모 (선택)',
+    bodyLabel: '메모',
+    accent: 'var(--accent-asset)',
+    fields: [
+      {
+        key: 'kind',
+        label: '종류',
+        kind: 'select',
+        options: [
+          { value: 'cash', label: '현금' },
+          { value: 'stock', label: '주식' },
+          { value: 'commodity', label: '물질' },
+        ],
+        required: true,
+      },
+      {
+        key: 'symbol',
+        label: '심볼 / 통화',
+        kind: 'text',
+        placeholder: 'KRW, AAPL, GOLD…',
+        required: true,
+      },
+      {
+        key: 'quantity',
+        label: '수량',
+        kind: 'number',
+        placeholder: '1',
+        required: true,
+      },
+    ],
+  },
 }
 
 export const CREATE_ORDER: ObjectType[] = [
@@ -151,6 +188,7 @@ export const CREATE_ORDER: ObjectType[] = [
   'workout',
   'study',
   'goal',
+  'asset',
 ]
 
 export function getSchema(type: ObjectType): ObjectTypeSchema {
@@ -169,6 +207,8 @@ export function defaultMeta(type: ObjectType): Record<string, string | number | 
       return { subject: '', done: false }
     case 'goal':
       return { status: 'active', targetDate: null }
+    case 'asset':
+      return { kind: 'cash', symbol: 'KRW', quantity: null }
   }
 }
 
@@ -185,6 +225,9 @@ export function formatMetaValue(
   }
   if (field.kind === 'number' && key === 'durationMin') {
     return `${value}분`
+  }
+  if (type === 'asset' && key === 'quantity') {
+    return String(value)
   }
   return String(value)
 }

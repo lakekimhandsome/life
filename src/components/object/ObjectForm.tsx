@@ -62,6 +62,7 @@ export function ObjectForm({
       })
     } catch (err) {
       setError(err instanceof Error ? err.message : '저장에 실패했습니다.')
+    } finally {
       setSaving(false)
     }
   }

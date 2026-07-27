@@ -4,6 +4,7 @@ export const OBJECT_TYPES = [
   'workout',
   'study',
   'goal',
+  'asset',
 ] as const
 
 export type ObjectType = (typeof OBJECT_TYPES)[number]
