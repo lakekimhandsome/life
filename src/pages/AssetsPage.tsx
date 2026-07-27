@@ -13,6 +13,8 @@ import type { LifeObject } from '../core/types'
 import {
   ASSET_KIND_LABEL,
   ASSET_KIND_ORDER,
+  assetNeedsMarketPrice,
+  cashAssetsSnapshot,
   formatKrw,
   formatQuantity,
   valueAssets,
@@ -281,8 +283,27 @@ export function AssetsPage() {
         return
       }
 
-      setPricing(true)
+      // KRW 현금 등은 시세 없이 바로 표시. 기존 주식/물질 값은 재조회 동안 유지.
+      setValued((prev) => {
+        const cash = cashAssetsSnapshot(assets)
+        const assetIds = new Set(assets.map((asset) => asset.id))
+        const retained = prev.filter(
+          (item) => item.kind !== 'cash' && assetIds.has(item.object.id),
+        )
+        return sortValued([...cash, ...retained])
+      })
       setPriceError(null)
+
+      const needsPricing = assets.some(assetNeedsMarketPrice)
+      if (!needsPricing) {
+        const next = await valueAssets(assets)
+        if (!active) return
+        setValued(sortValued(next))
+        setPricing(false)
+        return
+      }
+
+      setPricing(true)
       try {
         const next = await valueAssets(assets)
         if (!active) return
@@ -294,19 +315,26 @@ export function AssetsPage() {
       } catch (error) {
         if (!active) return
         setPriceError(error instanceof Error ? error.message : '시세를 불러오지 못했습니다.')
-        setValued(
-          sortValued(
-            assets.map((object) => ({
-              object,
-              kind: (object.meta.kind as AssetKind) || 'cash',
-              symbol: String(object.meta.symbol ?? ''),
-              quantity: typeof object.meta.quantity === 'number' ? object.meta.quantity : 0,
-              unitPriceKrw: null,
-              valueKrw: null,
-              error: '시세 조회 실패',
-            })),
-          ),
-        )
+        setValued((prev) => {
+          const cash = cashAssetsSnapshot(assets)
+          const cashIds = new Set(cash.map((item) => item.object.id))
+          const failedRest = assets
+            .filter((object) => !cashIds.has(object.id))
+            .map((object) => {
+              const existing = prev.find((item) => item.object.id === object.id)
+              if (existing) return { ...existing, object, error: existing.error ?? '시세 조회 실패' }
+              return {
+                object,
+                kind: (object.meta.kind as AssetKind) || 'cash',
+                symbol: String(object.meta.symbol ?? ''),
+                quantity: typeof object.meta.quantity === 'number' ? object.meta.quantity : 0,
+                unitPriceKrw: null,
+                valueKrw: null,
+                error: '시세 조회 실패',
+              }
+            })
+          return sortValued([...cash, ...failedRest])
+        })
       } finally {
         if (active) setPricing(false)
       }
@@ -675,7 +703,7 @@ export function AssetsPage() {
       <section className="assets-total" aria-label="총자산">
         <p className="assets-total-label">총자산</p>
         <strong className="assets-total-value">
-          {!ready || pricing ? '계산 중…' : formatKrw(totalKrw)}
+          {!ready ? '계산 중…' : formatKrw(totalKrw)}
         </strong>
         {priceError ? <p className="assets-total-note">{priceError}</p> : null}
         {!priceError && pricing ? (

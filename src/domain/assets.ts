@@ -62,9 +62,88 @@ export function formatQuantity(kind: AssetKind, quantity: number, symbol: string
   return `${amount}주`
 }
 
+/** KRW 현금처럼 외부 시세/환율 없이 바로 환산 가능한지. */
+export function needsMarketPrice(kind: AssetKind, symbol: string): boolean {
+  if (kind === 'cash') {
+    return (symbol || 'KRW').toUpperCase() !== 'KRW'
+  }
+  return true
+}
+
+export function assetNeedsMarketPrice(object: LifeObject): boolean {
+  const kind = getAssetKind(object)
+  const symbol = getAssetSymbol(object)
+  if (!kind || !symbol || getAssetQuantity(object) <= 0) return false
+  return needsMarketPrice(kind, symbol)
+}
+
+function incompleteAsset(object: LifeObject, kind: AssetKind | null, symbol: string, quantity: number): ValuedAsset {
+  return {
+    object,
+    kind: kind ?? 'cash',
+    symbol,
+    quantity,
+    unitPriceKrw: null,
+    valueKrw: null,
+    error: '자산 정보가 불완전합니다.',
+  }
+}
+
+/** 시세 없이 바로 표시할 수 있는 자산(KRW 현금 등). 불가하면 null. */
+export function valueAssetLocally(object: LifeObject): ValuedAsset | null {
+  const kind = getAssetKind(object)
+  const symbol = getAssetSymbol(object)
+  const quantity = getAssetQuantity(object)
+
+  if (!kind || !symbol || quantity <= 0) return null
+  if (needsMarketPrice(kind, symbol)) return null
+
+  return {
+    object,
+    kind,
+    symbol,
+    quantity,
+    unitPriceKrw: 1,
+    valueKrw: quantity,
+  }
+}
+
+/** 시세 조회 전에 현금 행을 먼저 보여주기 위한 스냅샷. */
+export function cashAssetsSnapshot(objects: LifeObject[]): ValuedAsset[] {
+  const results: ValuedAsset[] = []
+
+  for (const object of objects) {
+    const kind = getAssetKind(object)
+    if (kind !== 'cash') continue
+
+    const symbol = getAssetSymbol(object)
+    const quantity = getAssetQuantity(object)
+    if (!symbol || quantity <= 0) {
+      results.push(incompleteAsset(object, kind, symbol, quantity))
+      continue
+    }
+
+    const local = valueAssetLocally(object)
+    results.push(
+      local ?? {
+        object,
+        kind,
+        symbol,
+        quantity,
+        unitPriceKrw: null,
+        valueKrw: null,
+      },
+    )
+  }
+
+  return results
+}
+
 async function unitPriceKrw(kind: AssetKind, symbol: string): Promise<number> {
   if (kind === 'cash') {
-    return fetchFxRate(symbol || 'KRW', 'KRW')
+    const code = symbol || 'KRW'
+    if (code.toUpperCase() === 'KRW') return 1
+    return fetchFxRate(code, 'KRW')
   }
 
   if (kind === 'stock') {
@@ -92,15 +171,13 @@ export async function valueAssets(objects: LifeObject[]): Promise<ValuedAsset[]>
     const quantity = getAssetQuantity(object)
 
     if (!kind || !symbol || quantity <= 0) {
-      results.push({
-        object,
-        kind: kind ?? 'cash',
-        symbol,
-        quantity,
-        unitPriceKrw: null,
-        valueKrw: null,
-        error: '자산 정보가 불완전합니다.',
-      })
+      results.push(incompleteAsset(object, kind, symbol, quantity))
+      continue
+    }
+
+    const local = valueAssetLocally(object)
+    if (local) {
+      results.push(local)
       continue
     }
 
