@@ -1096,12 +1096,16 @@ select {
   }
 }
 
-.assets-add-bar {
+.assets-footer-bar {
   margin-top: 1.5rem;
   padding-top: 0.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
 }
 
-.assets-add-btn {
+.assets-add-btn,
+.assets-edit-mode-btn {
   width: 100%;
 }
 
@@ -1212,17 +1216,20 @@ select {
   font-weight: 650;
   color: var(--ink);
   text-align: left;
-  cursor: pointer;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.assets-row-title:hover {
+button.assets-row-title {
+  cursor: pointer;
+}
+
+button.assets-row-title:hover {
   color: var(--accent-asset);
 }
 
-.assets-row-title:focus-visible {
+button.assets-row-title:focus-visible {
   outline: 2px solid color-mix(in srgb, var(--accent-asset) 55%, white);
   outline-offset: 2px;
   border-radius: 6px;

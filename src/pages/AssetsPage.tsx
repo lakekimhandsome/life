@@ -70,6 +70,7 @@ const SWIPE_DELETE_THRESHOLD = 88
 
 function AssetRow({
   item,
+  editing,
   dragging,
   reorderDisabled,
   onEdit,
@@ -77,6 +78,7 @@ function AssetRow({
   onReorderStart,
 }: {
   item: ValuedAsset
+  editing: boolean
   dragging: boolean
   reorderDisabled: boolean
   onEdit: () => void
@@ -92,7 +94,7 @@ function AssetRow({
   const [animating, setAnimating] = useState(false)
 
   function onSwipePointerDown(event: ReactPointerEvent<HTMLDivElement>) {
-    if (event.button !== 0 || dragging) return
+    if (!editing || event.button !== 0 || dragging) return
     swiping.current = true
     swiped.current = false
     axis.current = 'none'
@@ -179,16 +181,20 @@ function AssetRow({
         <div className="assets-row-inner">
           <div className="assets-row-main">
             <div className="assets-row-heading">
-              <button
-                type="button"
-                className="assets-row-title"
-                onClick={() => {
-                  if (swiped.current) return
-                  onEdit()
-                }}
-              >
-                {item.object.title}
-              </button>
+              {editing ? (
+                <button
+                  type="button"
+                  className="assets-row-title"
+                  onClick={() => {
+                    if (swiped.current) return
+                    onEdit()
+                  }}
+                >
+                  {item.object.title}
+                </button>
+              ) : (
+                <span className="assets-row-title">{item.object.title}</span>
+              )}
               {item.kind !== 'cash' ? (
                 <span className="assets-row-qty">
                   {formatQuantity(item.kind, item.quantity, item.symbol)}
@@ -199,33 +205,35 @@ function AssetRow({
           </div>
           <div className="assets-row-side">
             <strong>{item.valueKrw !== null ? formatKrw(item.valueKrw) : '—'}</strong>
-            <div className="assets-row-actions">
-              <button
-                type="button"
-                className="assets-row-edit"
-                onPointerDown={(event) => event.stopPropagation()}
-                onClick={(event) => {
-                  event.stopPropagation()
-                  onEdit()
-                }}
-              >
-                수정
-              </button>
-              <button
-                type="button"
-                className="assets-handle"
-                aria-label={`${item.object.title} 순서 변경`}
-                disabled={reorderDisabled}
-                onPointerDown={(event) => {
-                  event.stopPropagation()
-                  onReorderStart(event)
-                }}
-              >
-                <span aria-hidden="true" />
-                <span aria-hidden="true" />
-                <span aria-hidden="true" />
-              </button>
-            </div>
+            {editing ? (
+              <div className="assets-row-actions">
+                <button
+                  type="button"
+                  className="assets-row-edit"
+                  onPointerDown={(event) => event.stopPropagation()}
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    onEdit()
+                  }}
+                >
+                  수정
+                </button>
+                <button
+                  type="button"
+                  className="assets-handle"
+                  aria-label={`${item.object.title} 순서 변경`}
+                  disabled={reorderDisabled}
+                  onPointerDown={(event) => {
+                    event.stopPropagation()
+                    onReorderStart(event)
+                  }}
+                >
+                  <span aria-hidden="true" />
+                  <span aria-hidden="true" />
+                  <span aria-hidden="true" />
+                </button>
+              </div>
+            ) : null}
           </div>
         </div>
         <div className="assets-swipe-action" aria-hidden="true">
@@ -249,6 +257,7 @@ export function AssetsPage() {
   const [priceError, setPriceError] = useState<string | null>(null)
 
   const [composerOpen, setComposerOpen] = useState(false)
+  const [editingMode, setEditingMode] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [title, setTitle] = useState('')
   const [kind, setKind] = useState<AssetKind>('cash')
@@ -751,6 +760,7 @@ export function AssetsPage() {
                   <AssetRow
                     key={item.object.id}
                     item={item}
+                    editing={editingMode}
                     dragging={dragId === item.object.id}
                     reorderDisabled={dragKind !== null && dragKind !== group.kind}
                     onEdit={() => openEditor(item)}
@@ -766,14 +776,25 @@ export function AssetsPage() {
         </div>
       )}
 
-      <div className="assets-add-bar">
+      <div className="assets-footer-bar">
+        {editingMode ? (
+          <button
+            type="button"
+            className="btn btn-primary assets-add-btn"
+            onClick={openComposer}
+            disabled={!ready}
+          >
+            자산 추가
+          </button>
+        ) : null}
         <button
           type="button"
-          className="btn btn-primary assets-add-btn"
-          onClick={openComposer}
+          className={`btn ${editingMode ? 'btn-ghost' : 'btn-primary'} assets-edit-mode-btn`}
+          onClick={() => setEditingMode((value) => !value)}
           disabled={!ready}
+          aria-pressed={editingMode}
         >
-          자산 추가
+          {editingMode ? '편집 완료' : '자산 편집'}
         </button>
       </div>
     </div>
