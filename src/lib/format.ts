@@ -74,3 +74,20 @@ export function formatDayHeading(date: Date, today = new Date()): string {
   if (isSameLocalDay(date, addLocalDays(today, 1))) return `내일 · ${label}`
   return label
 }
+
+/** Calendar-day difference: positive = future, 0 = today, negative = past. */
+export function daysUntilLocalDay(target: Date | string, today = new Date()): number {
+  const targetDay = startOfLocalDay(
+    typeof target === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(target)
+      ? new Date(`${target}T12:00:00`)
+      : new Date(target),
+  )
+  const todayDay = startOfLocalDay(today)
+  return Math.round((targetDay.getTime() - todayDay.getTime()) / 86_400_000)
+}
+
+export function formatDday(days: number): string {
+  if (days === 0) return 'D-Day'
+  if (days > 0) return `D-${days}`
+  return `D+${Math.abs(days)}`
+}

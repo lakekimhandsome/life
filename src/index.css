@@ -182,6 +182,82 @@ select {
   padding: 0.75rem 0 1rem;
 }
 
+.hub-dday {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-bottom: 1.15rem;
+}
+
+.hub-dday-item {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--accent-goal) 22%, var(--line));
+  border-radius: 14px;
+  background:
+    linear-gradient(
+      105deg,
+      color-mix(in srgb, var(--accent-goal) 10%, transparent),
+      rgba(255, 255, 255, 0.78) 42%
+    );
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease;
+}
+
+.hub-dday-item:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--accent-goal) 40%, var(--line));
+}
+
+.hub-dday-item.is-today {
+  border-color: color-mix(in srgb, var(--accent-goal) 45%, var(--line));
+  background:
+    linear-gradient(
+      105deg,
+      color-mix(in srgb, var(--accent-goal) 16%, transparent),
+      rgba(255, 255, 255, 0.82) 42%
+    );
+}
+
+.hub-dday-item.is-past {
+  border-color: color-mix(in srgb, var(--danger) 28%, var(--line));
+  background:
+    linear-gradient(
+      105deg,
+      color-mix(in srgb, var(--danger) 10%, transparent),
+      rgba(255, 255, 255, 0.78) 42%
+    );
+}
+
+.hub-dday-badge {
+  flex-shrink: 0;
+  min-width: 3.6rem;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 650;
+  letter-spacing: -0.03em;
+  color: var(--accent-goal);
+}
+
+.hub-dday-item.is-past .hub-dday-badge {
+  color: var(--danger);
+}
+
+.hub-dday-title {
+  min-width: 0;
+  font-size: 0.98rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .hub-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
