@@ -655,7 +655,7 @@ select {
 .assets-modal-root {
   position: fixed;
   inset: 0;
-  z-index: 40;
+  z-index: 1000;
   display: grid;
   place-items: center;
   padding: 1.25rem;
@@ -665,7 +665,7 @@ select {
   position: absolute;
   inset: 0;
   border: 0;
-  background: rgba(15, 42, 46, 0.38);
+  background: rgba(15, 42, 46, 0.45);
   backdrop-filter: blur(4px);
   cursor: pointer;
 }
