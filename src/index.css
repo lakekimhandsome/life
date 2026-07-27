@@ -989,6 +989,61 @@ select {
   font-size: 0.72rem;
 }
 
+.assets-chart-other {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.assets-chart-other-toggle {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: baseline;
+  gap: 0.45rem;
+  width: 100%;
+  margin: 0;
+  padding: 0.15rem 0.2rem;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.assets-chart-other-toggle:hover {
+  background: color-mix(in srgb, var(--accent-asset) 8%, transparent);
+}
+
+.assets-chart-other-toggle:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent-asset) 55%, white);
+  outline-offset: 2px;
+}
+
+.assets-chart-other-caret {
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1;
+}
+
+.assets-chart-other-list {
+  list-style: none;
+  margin: 0;
+  padding: 0.15rem 0 0.1rem 0.95rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  border-left: 2px solid color-mix(in srgb, var(--line-strong) 70%, transparent);
+  margin-left: 0.2rem;
+}
+
+.assets-chart-other-list li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 0.45rem;
+  opacity: 0.92;
+}
+
 @media (max-width: 800px) {
   .assets-summary.has-chart {
     grid-template-columns: 1fr;

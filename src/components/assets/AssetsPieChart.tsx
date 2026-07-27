@@ -17,6 +17,14 @@ interface Slice {
   color: string
 }
 
+interface SliceWithPercent extends Slice {
+  percent: number
+}
+
+const OTHER_KEY = '__other__'
+const OTHER_COLOR = '#9AA4A8'
+const MINOR_THRESHOLD = 1
+
 const KIND_COLORS: Record<AssetKind, string> = {
   cash: '#D4A84B',
   stock: '#5BA88A',
@@ -67,12 +75,42 @@ function buildItemSlices(items: ValuedAsset[]): Slice[] {
     }))
 }
 
+function withPercents(slices: Slice[], total: number): SliceWithPercent[] {
+  return slices.map((slice) => ({
+    ...slice,
+    percent: total > 0 ? (slice.value / total) * 100 : 0,
+  }))
+}
+
+function groupMinorSlices(slices: SliceWithPercent[], total: number) {
+  const major = slices.filter((slice) => slice.percent >= MINOR_THRESHOLD)
+  const minor = slices.filter((slice) => slice.percent < MINOR_THRESHOLD)
+
+  if (minor.length === 0 || major.length === 0) {
+    return { chartSlices: slices, otherItems: [] as SliceWithPercent[] }
+  }
+
+  const otherValue = minor.reduce((sum, slice) => sum + slice.value, 0)
+  const other: SliceWithPercent = {
+    key: OTHER_KEY,
+    label: '기타',
+    value: otherValue,
+    color: OTHER_COLOR,
+    percent: total > 0 ? (otherValue / total) * 100 : 0,
+  }
+
+  return {
+    chartSlices: [...major, other],
+    otherItems: minor,
+  }
+}
+
 function ChartTooltip({
   active,
   payload,
 }: {
   active?: boolean
-  payload?: Array<{ payload: Slice & { percent: number } }>
+  payload?: Array<{ payload: SliceWithPercent }>
 }) {
   if (!active || !payload?.[0]) return null
   const slice = payload[0].payload
@@ -86,22 +124,43 @@ function ChartTooltip({
   )
 }
 
+function LegendRow({ slice }: { slice: SliceWithPercent }) {
+  return (
+    <>
+      <span
+        className="assets-chart-swatch"
+        style={{ background: slice.color }}
+        aria-hidden="true"
+      />
+      <span className="assets-chart-legend-label">{slice.label}</span>
+      <span className="assets-chart-legend-meta">
+        {formatKrw(slice.value)}
+        <em>{slice.percent.toFixed(1)}%</em>
+      </span>
+    </>
+  )
+}
+
 export function AssetsPieChart({ items }: { items: ValuedAsset[] }) {
   const [mode, setMode] = useState<ChartMode>('kind')
+  const [otherOpen, setOtherOpen] = useState(false)
   const titleId = useId()
+  const otherPanelId = useId()
+
   const slices = useMemo(
     () => (mode === 'kind' ? buildKindSlices(items) : buildItemSlices(items)),
     [items, mode],
   )
   const total = useMemo(() => slices.reduce((sum, slice) => sum + slice.value, 0), [slices])
-  const chartData = useMemo(
-    () =>
-      slices.map((slice) => ({
-        ...slice,
-        percent: total > 0 ? (slice.value / total) * 100 : 0,
-      })),
+  const { chartSlices, otherItems } = useMemo(
+    () => groupMinorSlices(withPercents(slices, total), total),
     [slices, total],
   )
+
+  function setChartMode(next: ChartMode) {
+    setMode(next)
+    setOtherOpen(false)
+  }
 
   return (
     <section className="assets-chart" aria-labelledby={titleId}>
@@ -113,7 +172,7 @@ export function AssetsPieChart({ items }: { items: ValuedAsset[] }) {
             role="tab"
             aria-selected={mode === 'kind'}
             className={mode === 'kind' ? 'is-active' : undefined}
-            onClick={() => setMode('kind')}
+            onClick={() => setChartMode('kind')}
           >
             종류별
           </button>
@@ -122,14 +181,14 @@ export function AssetsPieChart({ items }: { items: ValuedAsset[] }) {
             role="tab"
             aria-selected={mode === 'item'}
             className={mode === 'item' ? 'is-active' : undefined}
-            onClick={() => setMode('item')}
+            onClick={() => setChartMode('item')}
           >
             항목별
           </button>
         </div>
       </header>
 
-      {chartData.length === 0 ? (
+      {chartSlices.length === 0 ? (
         <p className="assets-chart-empty">평가금이 잡히면 구성이 표시됩니다.</p>
       ) : (
         <div className="assets-chart-body">
@@ -141,7 +200,7 @@ export function AssetsPieChart({ items }: { items: ValuedAsset[] }) {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={chartData}
+                  data={chartSlices}
                   dataKey="value"
                   nameKey="label"
                   cx="50%"
@@ -150,7 +209,7 @@ export function AssetsPieChart({ items }: { items: ValuedAsset[] }) {
                   stroke="none"
                   isAnimationActive={false}
                 >
-                  {chartData.map((slice) => (
+                  {chartSlices.map((slice) => (
                     <Cell key={slice.key} fill={slice.color} stroke="none" />
                   ))}
                 </Pie>
@@ -160,20 +219,41 @@ export function AssetsPieChart({ items }: { items: ValuedAsset[] }) {
           </div>
 
           <ul className="assets-chart-legend">
-            {chartData.map((slice) => (
-              <li key={slice.key}>
-                <span
-                  className="assets-chart-swatch"
-                  style={{ background: slice.color }}
-                  aria-hidden="true"
-                />
-                <span className="assets-chart-legend-label">{slice.label}</span>
-                <span className="assets-chart-legend-meta">
-                  {formatKrw(slice.value)}
-                  <em>{slice.percent.toFixed(1)}%</em>
-                </span>
-              </li>
-            ))}
+            {chartSlices.map((slice) => {
+              if (slice.key !== OTHER_KEY) {
+                return (
+                  <li key={slice.key}>
+                    <LegendRow slice={slice} />
+                  </li>
+                )
+              }
+
+              return (
+                <li key={slice.key} className="assets-chart-other">
+                  <button
+                    type="button"
+                    className="assets-chart-other-toggle"
+                    aria-expanded={otherOpen}
+                    aria-controls={otherPanelId}
+                    onClick={() => setOtherOpen((open) => !open)}
+                  >
+                    <LegendRow slice={slice} />
+                    <span className="assets-chart-other-caret" aria-hidden="true">
+                      {otherOpen ? '▾' : '▸'}
+                    </span>
+                  </button>
+                  {otherOpen ? (
+                    <ul id={otherPanelId} className="assets-chart-other-list">
+                      {otherItems.map((item) => (
+                        <li key={item.key}>
+                          <LegendRow slice={item} />
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </li>
+              )
+            })}
           </ul>
         </div>
       )}
