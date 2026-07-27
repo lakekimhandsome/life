@@ -1,8 +1,31 @@
-import type { CSSProperties } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
-import { CREATE_ORDER, getSchema } from '../../domain/schemas'
 
 export function AppShell() {
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!menuOpen) return
+
+    const onPointerDown = (event: PointerEvent) => {
+      if (!menuRef.current?.contains(event.target as Node)) {
+        setMenuOpen(false)
+      }
+    }
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setMenuOpen(false)
+    }
+
+    document.addEventListener('pointerdown', onPointerDown)
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown)
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [menuOpen])
+
   return (
     <div className="app-shell">
       <div className="atmosphere" aria-hidden="true" />
@@ -10,23 +33,32 @@ export function AppShell() {
         <NavLink to="/" className="brand-mark" end>
           LIFE
         </NavLink>
-        <nav className="topbar-nav" aria-label="생성">
-          {CREATE_ORDER.map((type) => {
-            const schema = getSchema(type)
-            return (
-              <NavLink
-                key={type}
-                to={`/create/${type}`}
-                className={({ isActive }) =>
-                  `nav-chip${isActive ? ' is-active' : ''}`
-                }
-                style={{ '--chip-accent': schema.accent } as CSSProperties}
+
+        <div className="user-menu" ref={menuRef}>
+          <button
+            type="button"
+            className="user-menu-trigger"
+            aria-haspopup="menu"
+            aria-expanded={menuOpen}
+            aria-label="사용자 메뉴"
+            onClick={() => setMenuOpen((open) => !open)}
+          >
+            나
+          </button>
+          {menuOpen ? (
+            <div className="user-menu-panel" role="menu">
+              <p className="user-menu-label">Personal Life OS</p>
+              <button
+                type="button"
+                className="user-menu-item"
+                role="menuitem"
+                disabled
               >
-                {schema.labelKo}
-              </NavLink>
-            )
-          })}
-        </nav>
+                설정
+              </button>
+            </div>
+          ) : null}
+        </div>
       </header>
       <main className="page">
         <Outlet />
