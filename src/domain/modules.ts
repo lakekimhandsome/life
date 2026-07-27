@@ -1,4 +1,5 @@
 import type { LifeObject } from '../core/types'
+import { isSameLocalDay } from '../lib/format'
 
 export type ModuleId =
   | 'study'
@@ -61,15 +62,6 @@ export const LIFE_MODULES: LifeModule[] = [
   },
 ]
 
-function isSameLocalDay(iso: string, now = new Date()): boolean {
-  const date = new Date(iso)
-  return (
-    date.getFullYear() === now.getFullYear() &&
-    date.getMonth() === now.getMonth() &&
-    date.getDate() === now.getDate()
-  )
-}
-
 function ofType(objects: LifeObject[], type: LifeObject['type']): LifeObject[] {
   return objects.filter((object) => object.type === type)
 }
@@ -85,8 +77,10 @@ export function getModuleStatus(
       const today = ofType(objects, 'study').filter((object) =>
         isSameLocalDay(object.occurredAt, now),
       )
-      if (today.length === 0) return '오늘 미기록'
-      return `오늘 기록 ${today.length}개`
+      if (today.length === 0) return '오늘 할 일 없음'
+      const remaining = today.filter((object) => object.meta.done !== true)
+      if (remaining.length === 0) return '오늘 할 일 완료'
+      return `오늘 해야 할 일 ${remaining.length}개`
     }
     case 'workout': {
       const today = ofType(objects, 'workout').filter((object) =>

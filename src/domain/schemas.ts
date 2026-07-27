@@ -102,9 +102,9 @@ export const OBJECT_SCHEMAS: Record<ObjectType, ObjectTypeSchema> = {
     type: 'study',
     label: 'Study',
     labelKo: '공부',
-    description: '배운 것과 집중한 시간',
-    titlePlaceholder: '예: 알고리즘, 영어 회화',
-    bodyPlaceholder: '무엇을 공부했고, 무엇을 이해했나요?',
+    description: '그날 해야 할 공부',
+    titlePlaceholder: '예: 수학 문제집 10쪽',
+    bodyPlaceholder: '메모 (선택)',
     bodyLabel: '메모',
     accent: 'var(--accent-study)',
     fields: [
@@ -113,12 +113,6 @@ export const OBJECT_SCHEMAS: Record<ObjectType, ObjectTypeSchema> = {
         label: '과목',
         kind: 'text',
         placeholder: '과목 또는 주제',
-      },
-      {
-        key: 'durationMin',
-        label: '시간 (분)',
-        kind: 'number',
-        placeholder: '60',
       },
     ],
   },
@@ -172,7 +166,7 @@ export function defaultMeta(type: ObjectType): Record<string, string | number | 
     case 'workout':
       return { durationMin: null, intensity: 'medium' }
     case 'study':
-      return { subject: '', durationMin: null }
+      return { subject: '', done: false }
     case 'goal':
       return { status: 'active', targetDate: null }
   }

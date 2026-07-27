@@ -31,3 +31,46 @@ export function fromDateInputValue(value: string): string {
   const date = new Date(`${value}T12:00:00`)
   return date.toISOString()
 }
+
+export function startOfLocalDay(date = new Date()): Date {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate())
+}
+
+export function addLocalDays(date: Date, days: number): Date {
+  const next = startOfLocalDay(date)
+  next.setDate(next.getDate() + days)
+  return next
+}
+
+/** Local calendar day key: YYYY-MM-DD */
+export function toLocalDayKey(date: Date | string): string {
+  const value = typeof date === 'string' ? new Date(date) : date
+  const year = value.getFullYear()
+  const month = String(value.getMonth() + 1).padStart(2, '0')
+  const day = String(value.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+export function isSameLocalDay(a: Date | string, b: Date | string): boolean {
+  return toLocalDayKey(a) === toLocalDayKey(b)
+}
+
+export function noonOnLocalDay(date: Date): string {
+  const local = startOfLocalDay(date)
+  local.setHours(12, 0, 0, 0)
+  return local.toISOString()
+}
+
+const dayHeadingFormatter = new Intl.DateTimeFormat('ko-KR', {
+  month: 'long',
+  day: 'numeric',
+  weekday: 'short',
+})
+
+export function formatDayHeading(date: Date, today = new Date()): string {
+  const label = dayHeadingFormatter.format(date)
+  if (isSameLocalDay(date, today)) return `오늘 · ${label}`
+  if (isSameLocalDay(date, addLocalDays(today, -1))) return `어제 · ${label}`
+  if (isSameLocalDay(date, addLocalDays(today, 1))) return `내일 · ${label}`
+  return label
+}

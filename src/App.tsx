@@ -5,6 +5,7 @@ import { CreatePage } from './pages/CreatePage'
 import { HomePage } from './pages/HomePage'
 import { ModulePage } from './pages/ModulePage'
 import { ObjectDetailPage } from './pages/ObjectDetailPage'
+import { StudyPage } from './pages/StudyPage'
 import { LifeProvider } from './state/LifeContext'
 
 export default function App() {
@@ -14,7 +15,7 @@ export default function App() {
         <Routes>
           <Route element={<AppShell />}>
             <Route index element={<HomePage />} />
-            <Route path="study" element={<ModulePage />} />
+            <Route path="study" element={<StudyPage />} />
             <Route path="workout" element={<ModulePage />} />
             <Route path="journal" element={<ModulePage />} />
             <Route path="goals" element={<ModulePage />} />

@@ -277,6 +277,199 @@ select {
   line-height: 1;
 }
 
+.study-page {
+  width: min(640px, 100%);
+  margin: 0 auto;
+}
+
+.day-nav {
+  display: grid;
+  grid-template-columns: 2.5rem 1fr 2.5rem;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.day-nav-btn {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--ink-soft);
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.day-nav-btn:hover {
+  background: #fff;
+  border-color: color-mix(in srgb, var(--accent-study) 40%, white);
+  color: var(--ink);
+}
+
+.day-nav-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  text-align: center;
+}
+
+.day-nav-label strong {
+  font-size: 1.05rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.day-nav-label span {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.day-today-link {
+  display: block;
+  margin: 0 auto 1rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--accent-study);
+  font-size: 0.85rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.todo-composer {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.65rem;
+  margin: 1.25rem 0 1rem;
+}
+
+.todo-composer input {
+  width: 100%;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.78);
+  outline: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.todo-composer input:focus {
+  border-color: color-mix(in srgb, var(--accent-study) 55%, white);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-study) 16%, transparent);
+}
+
+.todo-composer .btn {
+  padding: 0.9rem 1.15rem;
+}
+
+.todo-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.todo-item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.35rem 0.2rem 0.2rem;
+  border-radius: 14px;
+  transition: background 160ms ease;
+}
+
+.todo-item:hover {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.todo-check {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex: 1;
+  min-width: 0;
+  padding: 0.7rem 0.55rem;
+  cursor: pointer;
+}
+
+.todo-check input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.todo-box {
+  flex-shrink: 0;
+  width: 1.2rem;
+  height: 1.2rem;
+  border: 1.5px solid color-mix(in srgb, var(--ink) 28%, transparent);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.85);
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.todo-check input:focus-visible + .todo-box {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-study) 20%, transparent);
+}
+
+.todo-check input:checked + .todo-box {
+  background: var(--accent-study);
+  border-color: var(--accent-study);
+  box-shadow: inset 0 0 0 2px #fff;
+}
+
+.todo-title {
+  min-width: 0;
+  font-size: 1rem;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.todo-item.is-done .todo-title {
+  color: var(--muted);
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+
+.todo-delete {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 1.2rem;
+  line-height: 1;
+  opacity: 0;
+  cursor: pointer;
+  transition: opacity 140ms ease, background 140ms ease, color 140ms ease;
+}
+
+.todo-item:hover .todo-delete,
+.todo-item:focus-within .todo-delete {
+  opacity: 1;
+}
+
+.todo-delete:hover {
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
+  color: var(--danger);
+}
+
+.todo-empty {
+  border-top: 0;
+  padding-top: 1.5rem;
+}
+
 .btn {
   display: inline-flex;
   align-items: center;
