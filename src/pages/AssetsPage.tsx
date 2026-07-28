@@ -592,13 +592,8 @@ export function AssetsPage() {
         </Link>
         <div className="module-heading module-heading--assets">
           <h1>자산</h1>
-          <Link
-            to="/assets/history"
-            className="assets-history-link"
-            aria-label="자산 추이"
-            title="자산 추이"
-          >
-            ›
+          <Link to="/assets/history" className="assets-history-link">
+            자산 추이 ›
           </Link>
         </div>
       </div>
