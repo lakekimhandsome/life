@@ -28,6 +28,19 @@ export type MarketQuoteRow = {
   updated_at: string
 }
 
+export type AssetHistoryRow = {
+  id: string
+  user_id: string
+  recorded_at: string
+  total_value: number
+  cash_value: number
+  stock_value: number
+  material_value: number
+  crypto_value: number
+  kind_values: Record<string, number>
+  created_at: string
+}
+
 export type Database = {
   public: {
     Tables: {
@@ -47,6 +60,12 @@ export type Database = {
         Row: MarketQuoteRow
         Insert: MarketQuoteRow
         Update: Partial<MarketQuoteRow>
+        Relationships: []
+      }
+      asset_history: {
+        Row: AssetHistoryRow
+        Insert: AssetHistoryRow
+        Update: Partial<AssetHistoryRow>
         Relationships: []
       }
     }

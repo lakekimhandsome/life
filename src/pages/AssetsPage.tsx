@@ -22,6 +22,7 @@ import {
   type AssetKind,
   type ValuedAsset,
 } from '../domain/assets'
+import { ensureDailyAssetSnapshot } from '../lib/assetHistory'
 import { useLife } from '../state/LifeContext'
 
 const COMMODITY_OPTIONS = [
@@ -330,8 +331,10 @@ export function AssetsPage() {
       if (!active) return
 
       if (cached) {
-        setValued(sortValued(cached))
+        const sorted = sortValued(cached)
+        setValued(sorted)
         setPricing(false)
+        void ensureDailyAssetSnapshot(sorted)
         return
       }
 
@@ -341,10 +344,13 @@ export function AssetsPage() {
       try {
         const next = await valueAssets(assets)
         if (!active) return
-        setValued(sortValued(next))
+        const sorted = sortValued(next)
+        setValued(sorted)
         const failed = next.filter((item) => item.error)
         if (failed.length > 0 && failed.length === next.length) {
           setPriceError(failed[0].error ?? '시세를 불러오지 못했습니다.')
+        } else {
+          void ensureDailyAssetSnapshot(sorted)
         }
       } catch (error) {
         if (!active) return
@@ -586,6 +592,14 @@ export function AssetsPage() {
         </Link>
         <div className="module-heading module-heading--assets">
           <h1>자산</h1>
+          <Link
+            to="/assets/history"
+            className="assets-history-link"
+            aria-label="자산 추이"
+            title="자산 추이"
+          >
+            ›
+          </Link>
         </div>
       </div>
 

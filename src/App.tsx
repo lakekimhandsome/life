@@ -1,5 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AppShell } from './components/layout/AppShell'
+import { AssetHistoryPage } from './pages/AssetHistoryPage'
 import { AssetsPage } from './pages/AssetsPage'
 import { AuthCallbackPage } from './pages/AuthCallbackPage'
 import { CreatePage } from './pages/CreatePage'
@@ -26,6 +27,7 @@ export default function App() {
               <Route path="goals" element={<ModulePage />} />
               <Route path="projects" element={<ModulePage />} />
               <Route path="assets" element={<AssetsPage />} />
+              <Route path="assets/history" element={<AssetHistoryPage />} />
               <Route path="create/:type" element={<CreatePage />} />
               <Route path="object/:id/edit" element={<EditPage />} />
               <Route path="object/:id" element={<ObjectDetailPage />} />
