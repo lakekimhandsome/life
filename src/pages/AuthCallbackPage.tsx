@@ -61,9 +61,9 @@ export function AuthCallbackPage() {
         <button
           type="button"
           className="btn btn-ghost"
-          onClick={() => navigate('/', { replace: true })}
+          onClick={() => navigate('/login', { replace: true })}
         >
-          홈으로
+          로그인으로
         </button>
       ) : null}
     </div>

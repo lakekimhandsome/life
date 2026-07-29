@@ -1,4 +1,3 @@
-import { db } from '../core/db'
 import {
   defaultHubLayout,
   normalizeHubLayout,
@@ -6,26 +5,16 @@ import {
 } from '../domain/hubLayout'
 import { isSupabaseConfigured, supabase } from './supabase'
 
-const PREFS_KEY = 'hubLayout'
-
-async function currentUserId(): Promise<string | null> {
-  if (!isSupabaseConfigured()) return null
+async function requireUserId(): Promise<string> {
+  if (!isSupabaseConfigured()) {
+    throw new Error('Supabase가 설정되지 않았습니다.')
+  }
   const { data } = await supabase.auth.getSession()
-  return data.session?.user.id ?? null
-}
-
-async function readLocalHubLayout(): Promise<HubLayout | null> {
-  const row = await db.prefs.get(PREFS_KEY)
-  if (!row) return null
-  return normalizeHubLayout(row.value)
-}
-
-async function writeLocalHubLayout(layout: HubLayout): Promise<void> {
-  await db.prefs.put({
-    key: PREFS_KEY,
-    value: layout,
-    updatedAt: new Date().toISOString(),
-  })
+  const userId = data.session?.user.id
+  if (!userId) {
+    throw new Error('로그인이 필요합니다.')
+  }
+  return userId
 }
 
 async function readCloudHubLayout(userId: string): Promise<HubLayout | null> {
@@ -76,38 +65,14 @@ async function writeCloudHubLayout(
 }
 
 export async function getHubLayout(): Promise<HubLayout> {
-  const userId = await currentUserId()
-  if (userId) {
-    const cloud = await readCloudHubLayout(userId)
-    if (cloud) return cloud
-  }
-
-  const local = await readLocalHubLayout()
-  return local ?? defaultHubLayout()
+  const userId = await requireUserId()
+  const cloud = await readCloudHubLayout(userId)
+  return cloud ?? defaultHubLayout()
 }
 
 export async function saveHubLayout(layout: HubLayout): Promise<HubLayout> {
   const next = normalizeHubLayout(layout)
-  await writeLocalHubLayout(next)
-
-  const userId = await currentUserId()
-  if (userId) {
-    await writeCloudHubLayout(userId, next)
-  }
-
+  const userId = await requireUserId()
+  await writeCloudHubLayout(userId, next)
   return next
-}
-
-/** 로그인 후 클라우드 prefs가 비어 있으면 로컬 hubLayout을 올린다. */
-export async function migrateHubLayoutToCloudIfNeeded(): Promise<void> {
-  const userId = await currentUserId()
-  if (!userId) return
-
-  const cloud = await readCloudHubLayout(userId)
-  if (cloud) return
-
-  const local = await readLocalHubLayout()
-  if (!local) return
-
-  await writeCloudHubLayout(userId, local)
 }

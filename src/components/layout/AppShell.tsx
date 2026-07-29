@@ -18,8 +18,7 @@ function displayName(user: {
 }
 
 export function AppShell() {
-  const { ready, configured, user, signInWithKakao, signInWithGoogle, signOut } =
-    useAuth()
+  const { user, signOut } = useAuth()
   const navigate = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
   const [authBusy, setAuthBusy] = useState(false)
@@ -48,27 +47,7 @@ export function AppShell() {
   }, [menuOpen])
 
   const label = user ? displayName(user) : '나'
-  const triggerLabel = user ? label.slice(0, 1) : '나'
-
-  async function handleKakaoLogin() {
-    setAuthError(null)
-    setAuthBusy(true)
-    const { error } = await signInWithKakao()
-    if (error) {
-      setAuthError(error.message)
-      setAuthBusy(false)
-    }
-  }
-
-  async function handleGoogleLogin() {
-    setAuthError(null)
-    setAuthBusy(true)
-    const { error } = await signInWithGoogle()
-    if (error) {
-      setAuthError(error.message)
-      setAuthBusy(false)
-    }
-  }
+  const triggerLabel = label.slice(0, 1)
 
   async function handleSignOut() {
     setAuthError(null)
@@ -80,6 +59,7 @@ export function AppShell() {
       return
     }
     setMenuOpen(false)
+    navigate('/login', { replace: true })
   }
 
   return (
@@ -103,50 +83,18 @@ export function AppShell() {
           </button>
           {menuOpen ? (
             <div className="user-menu-panel" role="menu">
-              <p className="user-menu-label">
-                {!ready
-                  ? '세션 확인 중…'
-                  : user
-                    ? label
-                    : 'Personal Life OS'}
-              </p>
+              <p className="user-menu-label">{label}</p>
 
-              {user ? (
-                <button
-                  type="button"
-                  className="user-menu-item is-action"
-                  role="menuitem"
-                  disabled={authBusy}
-                  onClick={() => void handleSignOut()}
-                >
-                  로그아웃
-                </button>
-              ) : (
-                <>
-                  <button
-                    type="button"
-                    className="user-menu-item is-action user-menu-google"
-                    role="menuitem"
-                    disabled={authBusy || !configured}
-                    onClick={() => void handleGoogleLogin()}
-                  >
-                    Google로 로그인
-                  </button>
-                  <button
-                    type="button"
-                    className="user-menu-item is-action user-menu-kakao"
-                    role="menuitem"
-                    disabled={authBusy || !configured}
-                    onClick={() => void handleKakaoLogin()}
-                  >
-                    카카오로 로그인
-                  </button>
-                </>
-              )}
+              <button
+                type="button"
+                className="user-menu-item is-action"
+                role="menuitem"
+                disabled={authBusy}
+                onClick={() => void handleSignOut()}
+              >
+                로그아웃
+              </button>
 
-              {!configured ? (
-                <p className="user-menu-hint">Supabase 환경 변수를 설정하세요.</p>
-              ) : null}
               {authError ? <p className="user-menu-hint is-error">{authError}</p> : null}
 
               <button

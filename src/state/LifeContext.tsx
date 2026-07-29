@@ -67,12 +67,19 @@ export function LifeProvider({ children }: { children: ReactNode }) {
     if (!authReady) return
 
     let active = true
+
+    if (!user) {
+      setObjects([])
+      setCounts(emptyCounts)
+      setReady(true)
+      return () => {
+        active = false
+      }
+    }
+
     setReady(false)
     ;(async () => {
       try {
-        if (user) {
-          await repository.migrateLocalToCloudIfNeeded()
-        }
         await refresh()
       } catch (error) {
         console.error('Failed to load life data', error)

@@ -11,11 +11,7 @@ import {
   defaultHubLayout,
   type HubLayout,
 } from '../domain/hubLayout'
-import {
-  getHubLayout,
-  migrateHubLayoutToCloudIfNeeded,
-  saveHubLayout,
-} from '../lib/hubPrefs'
+import { getHubLayout, saveHubLayout } from '../lib/hubPrefs'
 import { useAuth } from './AuthContext'
 
 type PrefsContextValue = {
@@ -35,12 +31,18 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
     if (!authReady) return
 
     let active = true
+
+    if (!user) {
+      setHubLayoutState(defaultHubLayout())
+      setReady(true)
+      return () => {
+        active = false
+      }
+    }
+
     setReady(false)
     ;(async () => {
       try {
-        if (user) {
-          await migrateHubLayoutToCloudIfNeeded()
-        }
         const layout = await getHubLayout()
         if (active) setHubLayoutState(layout)
       } catch (error) {
