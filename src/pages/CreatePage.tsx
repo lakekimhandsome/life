@@ -1,5 +1,6 @@
-import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
+import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { ObjectForm } from '../components/object/ObjectForm'
+import { BackLink } from '../components/ui/BackLink'
 import { OBJECT_TYPES, type ObjectType } from '../core/types'
 import { getSchema } from '../domain/schemas'
 import { useLife } from '../state/LifeContext'
@@ -22,9 +23,7 @@ export function CreatePage() {
   return (
     <div className="compose">
       <div className="compose-header">
-        <Link to="/" className="back-link">
-          ← 홈
-        </Link>
+        <BackLink to="/">홈</BackLink>
         <p className="eyebrow" style={{ color: schema.accent }}>
           {schema.label}
         </p>

@@ -1,5 +1,6 @@
-import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
+import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { ObjectForm } from '../components/object/ObjectForm'
+import { BackLink } from '../components/ui/BackLink'
 import { getSchema } from '../domain/schemas'
 import { useLife } from '../state/LifeContext'
 
@@ -23,9 +24,7 @@ export function EditPage() {
   return (
     <div className="compose">
       <div className="compose-header">
-        <Link to={`/object/${object.id}`} className="back-link">
-          ← 돌아가기
-        </Link>
+        <BackLink to={`/object/${object.id}`}>돌아가기</BackLink>
         <p className="eyebrow" style={{ color: schema.accent }}>
           {schema.label}
         </p>

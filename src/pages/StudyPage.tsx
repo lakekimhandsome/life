@@ -6,9 +6,10 @@ import {
   type FormEvent,
   type PointerEvent as ReactPointerEvent,
 } from 'react'
-import { Link } from 'react-router-dom'
+import { Check, ChevronLeft, ChevronRight, GripVertical } from 'lucide-react'
 import * as repository from '../core/repository'
 import type { LifeObject } from '../core/types'
+import { BackLink } from '../components/ui/BackLink'
 import {
   addLocalDays,
   formatDayHeading,
@@ -178,7 +179,9 @@ function StudyTodoItem({
               onToggle()
             }}
           >
-            <span className={`todo-box${done ? ' is-checked' : ''}`} aria-hidden="true" />
+            <span className={`todo-box${done ? ' is-checked' : ''}`} aria-hidden="true">
+              {done ? <Check size={12} strokeWidth={2.75} /> : null}
+            </span>
           </button>
 
           {editing ? (
@@ -223,9 +226,7 @@ function StudyTodoItem({
               onReorderStart(event)
             }}
           >
-            <span aria-hidden="true" />
-            <span aria-hidden="true" />
-            <span aria-hidden="true" />
+            <GripVertical size={16} strokeWidth={2} aria-hidden="true" />
           </button>
         </div>
         <div className="todo-swipe-action" aria-hidden="true">
@@ -382,9 +383,7 @@ export function StudyPage() {
   return (
     <div className="module-page study-page">
       <div className="module-header">
-        <Link to="/" className="back-link">
-          ← 홈
-        </Link>
+        <BackLink to="/">홈</BackLink>
         <div className="module-heading module-heading--study">
           <h1>공부</h1>
         </div>
@@ -397,7 +396,7 @@ export function StudyPage() {
           aria-label="이전 날짜"
           onClick={() => setSelectedDay((day) => addLocalDays(day, -1))}
         >
-          ‹
+          <ChevronLeft size={18} strokeWidth={2} aria-hidden="true" />
         </button>
         <div className="day-nav-label">
           <strong>{formatDayHeading(selectedDay)}</strong>
@@ -413,7 +412,7 @@ export function StudyPage() {
           aria-label="다음 날짜"
           onClick={() => setSelectedDay((day) => addLocalDays(day, 1))}
         >
-          ›
+          <ChevronRight size={18} strokeWidth={2} aria-hidden="true" />
         </button>
       </div>
 

@@ -1,4 +1,5 @@
 import { useId, useMemo, useState } from 'react'
+import { ChevronDown, ChevronRight } from 'lucide-react'
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
 import {
   ASSET_KIND_LABEL,
@@ -179,7 +180,11 @@ export function AssetsPieChart({ items }: { items: ValuedAsset[] }) {
         >
           <h2 id={titleId}>구성</h2>
           <span className="assets-chart-collapse-caret" aria-hidden="true">
-            {chartOpen ? '▾' : '▸'}
+            {chartOpen ? (
+              <ChevronDown size={14} strokeWidth={2} />
+            ) : (
+              <ChevronRight size={14} strokeWidth={2} />
+            )}
           </span>
         </button>
         {chartOpen ? (
@@ -259,7 +264,11 @@ export function AssetsPieChart({ items }: { items: ValuedAsset[] }) {
                       >
                         <LegendRow slice={slice} />
                         <span className="assets-chart-other-caret" aria-hidden="true">
-                          {otherOpen ? '▾' : '▸'}
+                          {otherOpen ? (
+                            <ChevronDown size={12} strokeWidth={2} />
+                          ) : (
+                            <ChevronRight size={12} strokeWidth={2} />
+                          )}
                         </span>
                       </button>
                       {otherOpen ? (

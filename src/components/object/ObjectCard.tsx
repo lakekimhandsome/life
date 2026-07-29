@@ -1,3 +1,4 @@
+import { ChevronRight } from 'lucide-react'
 import type { CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
 import { formatDate } from '../../lib/format'
@@ -33,9 +34,12 @@ export function ObjectCard({ object }: { object: LifeObject }) {
           </div>
         ) : null}
       </div>
-      <span className="object-row-arrow" aria-hidden="true">
-        →
-      </span>
+      <ChevronRight
+        className="object-row-arrow"
+        size={18}
+        strokeWidth={2}
+        aria-hidden="true"
+      />
     </Link>
   )
 }

@@ -1,5 +1,6 @@
 import { Link, Navigate, useLocation } from 'react-router-dom'
 import { ObjectCard } from '../components/object/ObjectCard'
+import { BackLink } from '../components/ui/BackLink'
 import { LIFE_MODULES, type ModuleId } from '../domain/modules'
 import { getSchema } from '../domain/schemas'
 import { useLife } from '../state/LifeContext'
@@ -21,9 +22,7 @@ export function ModulePage() {
   return (
     <div className="module-page">
       <div className="module-header">
-        <Link to="/" className="back-link">
-          ← 홈
-        </Link>
+        <BackLink to="/">홈</BackLink>
         <div className={`module-heading module-heading--${module.id}`}>
           <h1>{module.title}</h1>
         </div>

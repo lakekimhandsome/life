@@ -4,8 +4,9 @@ import {
   useState,
   type PointerEvent as ReactPointerEvent,
 } from 'react'
-import { Link } from 'react-router-dom'
+import { GripVertical } from 'lucide-react'
 import { ModuleIcon } from '../components/ui/ModuleIcon'
+import { BackLink } from '../components/ui/BackLink'
 import {
   addHubModule,
   removeHubModule,
@@ -131,9 +132,7 @@ export function CardEditPage() {
   return (
     <div className="module-page settings-page">
       <div className="module-header">
-        <Link to="/settings" className="back-link">
-          ← 설정
-        </Link>
+        <BackLink to="/settings">설정</BackLink>
         <div className="module-heading">
           <h1>카드 편집</h1>
         </div>
@@ -168,9 +167,7 @@ export function CardEditPage() {
                       aria-label={`${module.title} 순서 변경`}
                       onPointerDown={(event) => onReorderStart(module.id, event)}
                     >
-                      <span />
-                      <span />
-                      <span />
+                      <GripVertical size={16} strokeWidth={2} aria-hidden="true" />
                     </button>
                     <span
                       className={`card-edit-icon hub-card--${module.id}`}

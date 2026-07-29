@@ -6,9 +6,11 @@ import {
   type FormEvent,
   type PointerEvent as ReactPointerEvent,
 } from 'react'
+import { ChevronRight, GripVertical, X } from 'lucide-react'
 import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { AssetsPieChart } from '../components/assets/AssetsPieChart'
+import { BackLink } from '../components/ui/BackLink'
 import * as repository from '../core/repository'
 import type { LifeObject } from '../core/types'
 import {
@@ -229,9 +231,7 @@ function AssetRow({
                     onReorderStart(event)
                   }}
                 >
-                  <span aria-hidden="true" />
-                  <span aria-hidden="true" />
-                  <span aria-hidden="true" />
+                  <GripVertical size={16} strokeWidth={2} aria-hidden="true" />
                 </button>
               </div>
             ) : null}
@@ -592,13 +592,12 @@ export function AssetsPage() {
   return (
     <div className="module-page assets-page">
       <div className="module-header">
-        <Link to="/" className="back-link">
-          ← 홈
-        </Link>
+        <BackLink to="/">홈</BackLink>
         <div className="module-heading module-heading--assets">
           <h1>자산</h1>
           <Link to="/assets/history" className="assets-history-link">
-            자산 추이 ›
+            자산 추이
+            <ChevronRight size={16} strokeWidth={2} aria-hidden="true" />
           </Link>
         </div>
       </div>
@@ -626,8 +625,9 @@ export function AssetsPage() {
                     className="assets-composer-close"
                     onClick={closeComposer}
                     disabled={saving}
+                    aria-label="닫기"
                   >
-                    닫기
+                    <X size={18} strokeWidth={2} aria-hidden="true" />
                   </button>
                 </header>
                 <form onSubmit={handleSave}>

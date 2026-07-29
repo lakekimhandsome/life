@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
+import { BackLink } from '../components/ui/BackLink'
 import { TypeBadge } from '../components/ui/TypeBadge'
 import type { LifeObject, Relationship } from '../core/types'
 import { formatMetaValue, getSchema } from '../domain/schemas'
@@ -45,9 +46,7 @@ export function ObjectDetailPage() {
 
   return (
     <article className="detail">
-      <Link to="/" className="back-link">
-        ← 홈
-      </Link>
+      <BackLink to="/">홈</BackLink>
 
       <header className="detail-header">
         <div className="detail-meta">

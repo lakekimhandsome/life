@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { AssetsHistoryChart } from '../components/assets/AssetsHistoryChart'
+import { BackLink } from '../components/ui/BackLink'
 import {
   ASSET_HISTORY_RANGE_OPTIONS,
   computeHistoryChange,
@@ -49,9 +49,7 @@ export function AssetHistoryPage() {
   return (
     <div className="module-page assets-page assets-history-page">
       <div className="module-header">
-        <Link to="/assets" className="back-link">
-          ← 자산
-        </Link>
+        <BackLink to="/assets">자산</BackLink>
         <div className="module-heading module-heading--assets">
           <h1>자산 추이</h1>
         </div>
