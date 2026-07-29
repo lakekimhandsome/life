@@ -1257,11 +1257,6 @@ select {
   cursor: not-allowed;
 }
 
-.assets-header-btn.is-active {
-  background: color-mix(in srgb, var(--accent-asset) 16%, transparent);
-  color: var(--accent-asset);
-}
-
 .assets-history-page .module-header {
   margin-bottom: 1rem;
 }

@@ -648,7 +648,7 @@ export function AssetsPage() {
           </button>
           <button
             type="button"
-            className={`assets-header-btn${editingMode ? ' is-active' : ''}`}
+            className="assets-header-btn"
             onClick={() => setEditingMode((value) => !value)}
             disabled={!ready}
             aria-label={editingMode ? '편집 완료' : '자산 편집'}
