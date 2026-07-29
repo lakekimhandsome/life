@@ -162,7 +162,9 @@ select {
 }
 
 .user-menu-item {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
   width: 100%;
   padding: 0.65rem 0.7rem;
   border: 0;
@@ -173,6 +175,10 @@ select {
   font-weight: 600;
   color: var(--ink-soft);
   cursor: not-allowed;
+}
+
+.user-menu-item svg {
+  flex-shrink: 0;
 }
 
 .user-menu-item.is-action {
@@ -1229,7 +1235,7 @@ select {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-left: 0.35rem;
+  margin-left: auto;
   padding: 0.35rem;
   border-radius: 8px;
   color: color-mix(in srgb, var(--accent-asset) 72%, var(--ink));

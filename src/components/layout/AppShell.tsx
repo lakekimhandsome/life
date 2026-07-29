@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { LogOut, Settings } from 'lucide-react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../state/AuthContext'
 
@@ -92,6 +93,7 @@ export function AppShell() {
                 disabled={authBusy}
                 onClick={() => void handleSignOut()}
               >
+                <LogOut size={16} strokeWidth={1.75} aria-hidden="true" />
                 로그아웃
               </button>
 
@@ -106,6 +108,7 @@ export function AppShell() {
                   navigate('/settings')
                 }}
               >
+                <Settings size={16} strokeWidth={1.75} aria-hidden="true" />
                 설정
               </button>
             </div>

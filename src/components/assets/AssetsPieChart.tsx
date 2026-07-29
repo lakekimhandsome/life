@@ -185,7 +185,7 @@ export function AssetsPieChart({ items }: { items: ValuedAsset[] }) {
           aria-controls={bodyId}
           onClick={() => setChartOpen((open) => !open)}
         >
-          <h2 id={titleId}>구성</h2>
+          <h2 id={titleId}>자산 구성</h2>
           <span className="assets-chart-collapse-caret" aria-hidden="true">
             {chartOpen ? (
               <ChevronDown size={14} strokeWidth={2} />

@@ -603,14 +603,14 @@ export function AssetsPage() {
         <BackLink to="/" />
         <div className="module-heading module-heading--assets">
           <h1>자산</h1>
-          <Link
-            to="/assets/history"
-            className="assets-history-link"
-            aria-label="자산 추이"
-          >
-            <ChartNoAxesCombined size={20} strokeWidth={1.75} aria-hidden="true" />
-          </Link>
         </div>
+        <Link
+          to="/assets/history"
+          className="assets-history-link"
+          aria-label="자산 추이"
+        >
+          <ChartNoAxesCombined size={20} strokeWidth={1.75} aria-hidden="true" />
+        </Link>
       </div>
 
       {composerOpen
