@@ -1,14 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-1 -1 102 102" fill="none">
   <style>
     .mark { stroke: #000000; fill: #000000; }
     @media (prefers-color-scheme: dark) {
       .mark { stroke: #FFFFFF; fill: #FFFFFF; }
     }
   </style>
-  <g class="mark" stroke-width="6" stroke-linecap="round" fill="none">
-    <circle cx="50" cy="50" r="8" stroke-width="5.5" />
-    <path d="M 62.343 33.011 A 21 21 0 1 0 68.875 40.794" />
-    <path d="M 64.369 19.186 A 34 34 0 1 0 75.66 27.694" />
-    <path d="M 61.37 4.396 A 47 47 0 1 0 76.282 11.035" />
+  <g class="mark" stroke-width="8" stroke-linecap="round" fill="none">
+    <circle cx="50" cy="50" r="11" stroke-width="7.33" />
+    <path d="M 67.046 26.539 A 29 29 0 1 0 76.065 37.287" />
+    <path d="M 69.863 7.404 A 47 47 0 1 0 85.471 19.165" />
   </g>
 </svg>
