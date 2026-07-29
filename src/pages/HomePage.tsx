@@ -1,6 +1,10 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ModuleIcon } from '../components/ui/ModuleIcon'
+import {
+  assetsSnapshot,
+  valueAssetsFromLatestCache,
+} from '../domain/assets'
 import { resolveHubModules } from '../domain/hubLayout'
 import { getModuleStatus } from '../domain/modules'
 import { daysUntilLocalDay, formatDday } from '../lib/format'
@@ -10,8 +14,38 @@ import { usePrefs } from '../state/PrefsContext'
 export function HomePage() {
   const { ready, objects } = useLife()
   const { hubLayout } = usePrefs()
+  const [assetsTotalKrw, setAssetsTotalKrw] = useState<number | null>(null)
 
   const modules = useMemo(() => resolveHubModules(hubLayout), [hubLayout])
+
+  const assets = useMemo(
+    () => objects.filter((object) => object.type === 'asset'),
+    [objects],
+  )
+
+  useEffect(() => {
+    if (!ready) return
+
+    if (assets.length === 0) {
+      setAssetsTotalKrw(null)
+      return
+    }
+
+    let active = true
+
+    ;(async () => {
+      const cached = await valueAssetsFromLatestCache(assets)
+      if (!active) return
+
+      const items = cached?.valued ?? assetsSnapshot(assets)
+      const total = items.reduce((sum, item) => sum + (item.valueKrw ?? 0), 0)
+      setAssetsTotalKrw(total)
+    })()
+
+    return () => {
+      active = false
+    }
+  }, [ready, assets])
 
   const ddayGoals = useMemo(() => {
     return objects
@@ -57,7 +91,11 @@ export function HomePage() {
             </span>
             <div className="hub-card-copy">
               <h2>{module.title}</h2>
-              <p>{ready ? getModuleStatus(module.id, objects) : '…'}</p>
+              <p>
+                {ready
+                  ? getModuleStatus(module.id, objects, { assetsTotalKrw })
+                  : '…'}
+              </p>
             </div>
           </Link>
         ))}

@@ -46,7 +46,7 @@ export function ObjectDetailPage() {
 
   return (
     <article className="detail">
-      <BackLink to="/">홈</BackLink>
+      <BackLink to="/" />
 
       <header className="detail-header">
         <div className="detail-meta">

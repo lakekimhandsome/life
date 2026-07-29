@@ -6,7 +6,7 @@ export function SettingsPage() {
   return (
     <div className="module-page settings-page">
       <div className="module-header">
-        <BackLink to="/">홈</BackLink>
+        <BackLink to="/" />
         <div className="module-heading">
           <h1>설정</h1>
         </div>

@@ -1,4 +1,5 @@
 import type { LifeObject } from '../core/types'
+import { formatKrw } from './assets'
 import { isSameLocalDay } from '../lib/format'
 
 export type ModuleId =
@@ -63,6 +64,7 @@ function ofType(objects: LifeObject[], type: LifeObject['type']): LifeObject[] {
 export function getModuleStatus(
   moduleId: ModuleId,
   objects: LifeObject[],
+  extras?: { assetsTotalKrw?: number | null },
 ): string {
   const now = new Date()
 
@@ -86,7 +88,8 @@ export function getModuleStatus(
     case 'assets': {
       const assets = ofType(objects, 'asset')
       if (assets.length === 0) return '기록 없음'
-      return `${assets.length}개 보유`
+      if (extras?.assetsTotalKrw == null) return '…'
+      return `총자산 ${formatKrw(extras.assetsTotalKrw)}`
     }
     case 'journal': {
       const today = ofType(objects, 'journal').some((object) =>

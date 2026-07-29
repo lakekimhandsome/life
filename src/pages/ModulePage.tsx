@@ -22,7 +22,7 @@ export function ModulePage() {
   return (
     <div className="module-page">
       <div className="module-header">
-        <BackLink to="/">홈</BackLink>
+        <BackLink to="/" />
         <div className={`module-heading module-heading--${module.id}`}>
           <h1>{module.title}</h1>
         </div>

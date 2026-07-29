@@ -23,7 +23,7 @@ export function CreatePage() {
   return (
     <div className="compose">
       <div className="compose-header">
-        <BackLink to="/">홈</BackLink>
+        <BackLink to="/" />
         <p className="eyebrow" style={{ color: schema.accent }}>
           {schema.label}
         </p>

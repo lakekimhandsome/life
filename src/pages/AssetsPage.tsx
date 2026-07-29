@@ -592,7 +592,7 @@ export function AssetsPage() {
   return (
     <div className="module-page assets-page">
       <div className="module-header">
-        <BackLink to="/">홈</BackLink>
+        <BackLink to="/" />
         <div className="module-heading module-heading--assets">
           <h1>자산</h1>
           <Link to="/assets/history" className="assets-history-link">

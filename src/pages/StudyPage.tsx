@@ -383,7 +383,7 @@ export function StudyPage() {
   return (
     <div className="module-page study-page">
       <div className="module-header">
-        <BackLink to="/">홈</BackLink>
+        <BackLink to="/" />
         <div className="module-heading module-heading--study">
           <h1>공부</h1>
         </div>
