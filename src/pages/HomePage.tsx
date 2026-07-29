@@ -1,12 +1,17 @@
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { ModuleIcon } from '../components/ui/ModuleIcon'
-import { LIFE_MODULES, getModuleStatus } from '../domain/modules'
+import { resolveHubModules } from '../domain/hubLayout'
+import { getModuleStatus } from '../domain/modules'
 import { daysUntilLocalDay, formatDday } from '../lib/format'
 import { useLife } from '../state/LifeContext'
+import { usePrefs } from '../state/PrefsContext'
 
 export function HomePage() {
   const { ready, objects } = useLife()
+  const { hubLayout } = usePrefs()
+
+  const modules = useMemo(() => resolveHubModules(hubLayout), [hubLayout])
 
   const ddayGoals = useMemo(() => {
     return objects
@@ -41,7 +46,7 @@ export function HomePage() {
       ) : null}
 
       <div className="hub-grid">
-        {LIFE_MODULES.map((module) => (
+        {modules.map((module) => (
           <Link
             key={module.id}
             to={module.path}

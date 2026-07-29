@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../state/AuthContext'
 
 function displayName(user: {
@@ -20,6 +20,7 @@ function displayName(user: {
 export function AppShell() {
   const { ready, configured, user, signInWithKakao, signInWithGoogle, signOut } =
     useAuth()
+  const navigate = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
   const [authBusy, setAuthBusy] = useState(false)
   const [authError, setAuthError] = useState<string | null>(null)
@@ -150,9 +151,12 @@ export function AppShell() {
 
               <button
                 type="button"
-                className="user-menu-item"
+                className="user-menu-item is-action"
                 role="menuitem"
-                disabled
+                onClick={() => {
+                  setMenuOpen(false)
+                  navigate('/settings')
+                }}
               >
                 설정
               </button>

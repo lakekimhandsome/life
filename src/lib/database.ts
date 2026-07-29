@@ -41,6 +41,12 @@ export type AssetHistoryRow = {
   created_at: string
 }
 
+export type UserPrefsRow = {
+  user_id: string
+  prefs: Record<string, unknown>
+  updated_at: string
+}
+
 export type Database = {
   public: {
     Tables: {
@@ -66,6 +72,12 @@ export type Database = {
         Row: AssetHistoryRow
         Insert: AssetHistoryRow
         Update: Partial<AssetHistoryRow>
+        Relationships: []
+      }
+      life_user_prefs: {
+        Row: UserPrefsRow
+        Insert: UserPrefsRow
+        Update: Partial<UserPrefsRow>
         Relationships: []
       }
     }
