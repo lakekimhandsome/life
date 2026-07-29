@@ -628,7 +628,7 @@ export function AssetsPage() {
           className="assets-history-link"
           aria-label="자산 추이"
         >
-          <ChartNoAxesCombined size={20} strokeWidth={1.75} aria-hidden="true" />
+          <ChartNoAxesCombined size={26} strokeWidth={1.75} aria-hidden="true" />
         </Link>
       </div>
 

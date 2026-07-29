@@ -49,7 +49,7 @@ export function AssetHistoryPage() {
   return (
     <div className="module-page assets-page assets-history-page">
       <div className="module-header">
-        <BackLink to="/assets">자산</BackLink>
+        <BackLink to="/assets" />
         <div className="module-heading module-heading--assets">
           <h1>자산 추이</h1>
         </div>

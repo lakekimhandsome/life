@@ -1235,9 +1235,10 @@ select {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
   margin-left: auto;
-  padding: 0.35rem;
-  border-radius: 8px;
+  border-radius: 10px;
   color: color-mix(in srgb, var(--accent-asset) 72%, var(--ink));
   line-height: 0;
   text-decoration: none;
@@ -1782,6 +1783,10 @@ button.assets-row-title:focus-visible {
 
 .back-link svg {
   flex-shrink: 0;
+}
+
+.back-link--home {
+  min-height: 2rem;
 }
 
 .back-link:hover {

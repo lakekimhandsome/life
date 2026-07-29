@@ -11,16 +11,16 @@ export function BackLink({
 }) {
   if (to === '/') {
     return (
-      <Link to={to} className="back-link" aria-label="홈">
-        <House size={18} strokeWidth={1.75} aria-hidden="true" />
+      <Link to={to} className="back-link back-link--home" aria-label="홈">
+        <House size={24} strokeWidth={1.75} aria-hidden="true" />
       </Link>
     )
   }
 
   return (
-    <Link to={to} className="back-link">
+    <Link to={to} className="back-link" aria-label={children ? undefined : '뒤로'}>
       <ArrowLeft size={16} strokeWidth={2} aria-hidden="true" />
-      <span>{children}</span>
+      {children ? <span>{children}</span> : null}
     </Link>
   )
 }
