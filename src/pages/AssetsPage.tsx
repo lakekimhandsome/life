@@ -78,6 +78,10 @@ function sortValued(items: ValuedAsset[]): ValuedAsset[] {
   })
 }
 
+function formatAssetValue(kind: AssetKind, value: number): string {
+  return formatKrw(kind === 'debt' ? -value : value)
+}
+
 const SWIPE_DELETE_THRESHOLD = 88
 
 function AssetRow({
@@ -224,7 +228,9 @@ function AssetRow({
             {item.error ? <p className="assets-row-error">{item.error}</p> : null}
           </div>
           <div className="assets-row-side">
-            <strong>{item.valueKrw !== null ? formatKrw(item.valueKrw) : '—'}</strong>
+            <strong>
+              {item.valueKrw !== null ? formatAssetValue(item.kind, item.valueKrw) : '—'}
+            </strong>
             {editing ? (
               <div className="assets-row-actions">
                 <button
@@ -814,7 +820,9 @@ export function AssetsPage() {
             <section key={group.kind} className="assets-group">
               <header className="assets-group-header">
                 <h2>{ASSET_KIND_LABEL[group.kind]}</h2>
-                <strong>{group.pending ? '—' : formatKrw(group.subtotal)}</strong>
+                <strong>
+                  {group.pending ? '—' : formatAssetValue(group.kind, group.subtotal)}
+                </strong>
               </header>
               <ul
                 className="assets-list"
