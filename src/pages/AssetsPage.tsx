@@ -6,7 +6,7 @@ import {
   type FormEvent,
   type PointerEvent as ReactPointerEvent,
 } from 'react'
-import { ChartNoAxesCombined, GripVertical, Pencil, Plus, X } from 'lucide-react'
+import { ChartNoAxesCombined, Check, GripVertical, Pencil, Plus, X } from 'lucide-react'
 import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { AssetsPieChart } from '../components/assets/AssetsPieChart'
@@ -654,7 +654,11 @@ export function AssetsPage() {
             aria-label={editingMode ? '편집 완료' : '자산 편집'}
             aria-pressed={editingMode}
           >
-            <Pencil size={20} strokeWidth={1.75} aria-hidden="true" />
+            {editingMode ? (
+              <Check size={22} strokeWidth={1.75} aria-hidden="true" />
+            ) : (
+              <Pencil size={20} strokeWidth={1.75} aria-hidden="true" />
+            )}
           </button>
         </div>
       </div>
