@@ -14,10 +14,12 @@ import {
   resolveHubModules,
 } from '../domain/hubLayout'
 import type { ModuleId } from '../domain/modules'
+import { useLife } from '../state/LifeContext'
 import { usePrefs } from '../state/PrefsContext'
 
 export function CardEditPage() {
   const { ready, hubLayout, setHubLayout } = usePrefs()
+  const { counts } = useLife()
   const [order, setOrder] = useState<ModuleId[]>(hubLayout.order)
   const [excluded, setExcluded] = useState<ModuleId[]>(hubLayout.excluded)
   const [dragId, setDragId] = useState<ModuleId | null>(null)
@@ -40,6 +42,9 @@ export function CardEditPage() {
   const visibleModules = resolveHubModules({ order, excluded })
   const excludedModules = resolveExcludedModules({ order, excluded })
 
+  function contentCount(module: (typeof visibleModules)[number]): number {
+    return module.objectType ? counts[module.objectType] : 0
+  }
   function moveDraggedToIndex(nextIndex: number) {
     const id = dragIdRef.current
     if (!id) return
@@ -173,7 +178,12 @@ export function CardEditPage() {
                     >
                       <ModuleIcon id={module.id} />
                     </span>
-                    <span className="card-edit-title">{module.title}</span>
+                    <span className="card-edit-copy">
+                      <span className="card-edit-title">{module.title}</span>
+                      <span className="card-edit-count">
+                        {contentCount(module)}개
+                      </span>
+                    </span>
                     <button
                       type="button"
                       className="btn btn-ghost card-edit-action"
@@ -206,7 +216,12 @@ export function CardEditPage() {
                     >
                       <ModuleIcon id={module.id} />
                     </span>
-                    <span className="card-edit-title">{module.title}</span>
+                    <span className="card-edit-copy">
+                      <span className="card-edit-title">{module.title}</span>
+                      <span className="card-edit-count">
+                        {contentCount(module)}개
+                      </span>
+                    </span>
                     <button
                       type="button"
                       className="btn btn-primary card-edit-action"

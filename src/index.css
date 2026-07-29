@@ -1960,11 +1960,23 @@ button.assets-row-title:focus-visible {
   height: 1.15rem;
 }
 
-.card-edit-title {
+.card-edit-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
   flex: 1;
   min-width: 0;
+}
+
+.card-edit-title {
   font-weight: 650;
   color: var(--ink);
+}
+
+.card-edit-count {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 600;
 }
 
 .card-edit-action {
