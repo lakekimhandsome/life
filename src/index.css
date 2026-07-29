@@ -109,11 +109,11 @@ select {
 }
 
 .brand-mark {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.35rem;
-  letter-spacing: 0.18em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   color: var(--accent-deep);
+  line-height: 0;
 }
 
 .user-menu {

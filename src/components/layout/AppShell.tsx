@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { LogOut, Settings } from 'lucide-react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../state/AuthContext'
+import { LifeMark } from '../ui/LifeMark'
 
 function displayName(user: {
   email?: string | null
@@ -67,8 +68,8 @@ export function AppShell() {
     <div className="app-shell">
       <div className="atmosphere" aria-hidden="true" />
       <header className="topbar">
-        <NavLink to="/" className="brand-mark" end>
-          LIFE
+        <NavLink to="/" className="brand-mark" aria-label="LIFE 홈" end>
+          <LifeMark size={30} />
         </NavLink>
 
         <div className="user-menu" ref={menuRef}>
