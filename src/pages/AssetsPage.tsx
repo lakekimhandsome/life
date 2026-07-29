@@ -102,14 +102,31 @@ function AssetRow({
   const axis = useRef<'none' | 'x' | 'y'>('none')
   const swiping = useRef(false)
   const swiped = useRef(false)
+  const offsetRef = useRef(0)
   const [offset, setOffset] = useState(0)
   const [animating, setAnimating] = useState(false)
+
+  function updateOffset(nextOffset: number) {
+    offsetRef.current = nextOffset
+    setOffset(nextOffset)
+  }
+
+  function requestDelete() {
+    const confirmed = window.confirm(`「${item.object.title}」 자산을 삭제할까요?`)
+    if (!confirmed) {
+      setAnimating(true)
+      updateOffset(0)
+      return
+    }
+    onDelete()
+  }
 
   function onSwipePointerDown(event: ReactPointerEvent<HTMLDivElement>) {
     if (!editing || event.button !== 0 || dragging) return
     swiping.current = true
     swiped.current = false
     axis.current = 'none'
+    offsetRef.current = 0
     setAnimating(false)
     startX.current = event.clientX
     startY.current = event.clientY
@@ -133,7 +150,8 @@ function AssetRow({
     }
 
     if (axis.current !== 'x') return
-    setOffset(Math.max(-140, Math.min(0, deltaX)))
+    event.preventDefault()
+    updateOffset(Math.max(-140, Math.min(0, deltaX)))
   }
 
   function finishSwipe(nextOffset: number) {
@@ -145,36 +163,26 @@ function AssetRow({
     setAnimating(true)
 
     if (axis.current === 'x' && nextOffset <= -SWIPE_DELETE_THRESHOLD) {
-      setOffset(-140)
-      window.setTimeout(() => {
-        const confirmed = window.confirm(`「${item.object.title}」 자산을 삭제할까요?`)
-        if (!confirmed) {
-          setAnimating(true)
-          setOffset(0)
-          return
-        }
-        onDelete()
-      }, 140)
+      updateOffset(-140)
+      requestDelete()
       return
     }
 
-    setOffset(0)
+    updateOffset(0)
   }
 
-  function onSwipePointerUp(event: ReactPointerEvent<HTMLDivElement>) {
+  function onSwipePointerUp() {
     if (axis.current === 'x') {
-      finishSwipe(event.clientX - startX.current)
+      finishSwipe(offsetRef.current)
       return
     }
     swiping.current = false
   }
 
   function onSwipePointerCancel() {
-    if (axis.current === 'x') {
-      finishSwipe(0)
-      return
-    }
     swiping.current = false
+    setAnimating(true)
+    updateOffset(0)
   }
 
   return (
@@ -229,6 +237,17 @@ function AssetRow({
                   }}
                 >
                   수정
+                </button>
+                <button
+                  type="button"
+                  className="assets-row-delete"
+                  onPointerDown={(event) => event.stopPropagation()}
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    requestDelete()
+                  }}
+                >
+                  삭제
                 </button>
                 <button
                   type="button"

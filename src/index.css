@@ -1521,7 +1521,8 @@ button.assets-row-title:focus-visible {
   gap: 0.15rem;
 }
 
-.assets-row-edit {
+.assets-row-edit,
+.assets-row-delete {
   border: 0;
   background: transparent;
   color: var(--muted);
@@ -1531,6 +1532,10 @@ button.assets-row-title:focus-visible {
 
 .assets-row-edit:hover {
   color: var(--accent-asset);
+}
+
+.assets-row-delete:hover {
+  color: var(--danger);
 }
 
 .assets-handle {
