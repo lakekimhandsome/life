@@ -18,7 +18,7 @@ import {
   formatKrw,
   formatQuantity,
   valueAssets,
-  valueAssetsFromTodayCache,
+  valueAssetsFromLatestCache,
   type AssetKind,
   type ValuedAsset,
 } from '../domain/assets'
@@ -323,22 +323,24 @@ export function AssetsPage() {
       }
 
       setPriceError(null)
-      // 보유 목록은 바로 두고, 당일 시세가 모두 있으면 평가금까지 즉시 채움.
+      // 보유 목록은 바로 두고, DB에 있는 최신 시세(전일 포함)로 먼저 평가금을 채움.
       setValued(sortValued(assetsSnapshot(assets)))
       setPricing(false)
 
-      const cached = await valueAssetsFromTodayCache(assets)
+      const cached = await valueAssetsFromLatestCache(assets)
       if (!active) return
 
       if (cached) {
-        const sorted = sortValued(cached)
+        const sorted = sortValued(cached.valued)
         setValued(sorted)
-        setPricing(false)
-        void ensureDailyAssetSnapshot(sorted)
-        return
+        if (cached.fresh) {
+          setPricing(false)
+          void ensureDailyAssetSnapshot(sorted)
+          return
+        }
       }
 
-      // 당일 미조회 시세가 있을 때만 계산 중…
+      // 당일 미조회 시세가 있으면 전일 값을 보여 둔 채 새로고침.
       setPricing(true)
 
       try {
@@ -355,7 +357,10 @@ export function AssetsPage() {
       } catch (error) {
         if (!active) return
         setPriceError(error instanceof Error ? error.message : '시세를 불러오지 못했습니다.')
-        setValued(sortValued(assetsSnapshot(assets)))
+        // 전일 캐시가 있으면 그대로 두고, 없을 때만 스냅샷으로 되돌림.
+        if (!cached) {
+          setValued(sortValued(assetsSnapshot(assets)))
+        }
       } finally {
         if (active) setPricing(false)
       }
@@ -730,15 +735,17 @@ export function AssetsPage() {
         <section className="assets-total" aria-label="총자산">
           <p className="assets-total-label">총자산</p>
           <strong className="assets-total-value">
-            {!ready || pricing
+            {!ready
               ? '계산 중…'
               : items.some((item) => item.valueKrw === null)
-                ? '—'
+                ? pricing
+                  ? '계산 중…'
+                  : '—'
                 : formatKrw(totalKrw)}
           </strong>
           {priceError ? <p className="assets-total-note">{priceError}</p> : null}
           {!priceError && pricing ? (
-            <p className="assets-total-note">시세를 불러오는 중…</p>
+            <p className="assets-total-note">새로고침 중…</p>
           ) : null}
         </section>
         {ready && assets.length > 0 ? <AssetsPieChart items={items} /> : null}

@@ -15,11 +15,29 @@ export async function getMarketQuote(cacheKey: string): Promise<number | null> {
   return map.get(cacheKey) ?? null
 }
 
+export type StoredMarketQuote = {
+  value: number
+  fetchedOn: string
+}
+
 /** 당일 저장된 시세를 cache_key 목록으로 일괄 조회. */
 export async function getMarketQuotes(
   cacheKeys: string[],
 ): Promise<Map<string, number>> {
+  const today = marketDayKey()
+  const latest = await getLatestMarketQuotes(cacheKeys)
   const result = new Map<string, number>()
+  for (const [key, quote] of latest) {
+    if (quote.fetchedOn === today) result.set(key, quote.value)
+  }
+  return result
+}
+
+/** 가장 최근에 저장된 시세(전일 포함)를 cache_key 목록으로 일괄 조회. */
+export async function getLatestMarketQuotes(
+  cacheKeys: string[],
+): Promise<Map<string, StoredMarketQuote>> {
+  const result = new Map<string, StoredMarketQuote>()
   const unique = [...new Set(cacheKeys.filter(Boolean))]
   if (unique.length === 0 || !isSupabaseConfigured()) return result
 
@@ -28,11 +46,9 @@ export async function getMarketQuotes(
   } = await supabase.auth.getSession()
   if (!session) return result
 
-  const today = marketDayKey()
   const { data, error } = await supabase
     .from('life_market_quotes')
-    .select('cache_key, value')
-    .eq('fetched_on', today)
+    .select('cache_key, value, fetched_on')
     .in('cache_key', unique)
 
   if (error) {
@@ -41,8 +57,8 @@ export async function getMarketQuotes(
   }
 
   for (const row of data ?? []) {
-    if (typeof row.value === 'number' && Number.isFinite(row.value)) {
-      result.set(row.cache_key, row.value)
+    if (typeof row.value === 'number' && Number.isFinite(row.value) && row.fetched_on) {
+      result.set(row.cache_key, { value: row.value, fetchedOn: row.fetched_on })
     }
   }
   return result

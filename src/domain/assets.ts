@@ -5,7 +5,7 @@ import {
   fetchStockPriceUsd,
   seedQuoteCache,
 } from '../lib/alphavantage'
-import { getMarketQuotes } from '../lib/marketQuotes'
+import { getLatestMarketQuotes, marketDayKey } from '../lib/marketQuotes'
 
 export type AssetKind = 'cash' | 'stock' | 'commodity'
 
@@ -241,23 +241,33 @@ export function valueAssetsFromQuotes(
 }
 
 /**
- * 당일 DB에 필요한 시세가 모두 있으면 즉시 평가하고,
- * 없으면 null을 반환해 호출측에서 API 로드를 진행한다.
+ * DB에 저장된 최신 시세(전일 포함)로 평가.
+ * 필요한 키가 하나라도 없으면 null.
+ * fresh=true면 전부 당일 시세 — 이 경우에만 메모리 캐시에 seed한다.
  */
-export async function valueAssetsFromTodayCache(
+export async function valueAssetsFromLatestCache(
   objects: LifeObject[],
-): Promise<ValuedAsset[] | null> {
+): Promise<{ valued: ValuedAsset[]; fresh: boolean } | null> {
   const keys = requiredQuoteKeys(objects)
   if (keys.length === 0) {
-    return valueAssetsFromQuotes(objects, new Map())
+    const valued = valueAssetsFromQuotes(objects, new Map())
+    return valued ? { valued, fresh: true } : null
   }
 
-  const quotes = await getMarketQuotes(keys)
+  const latest = await getLatestMarketQuotes(keys)
+  const quotes = new Map<string, number>()
+  for (const [key, quote] of latest) {
+    quotes.set(key, quote.value)
+  }
+
   const valued = valueAssetsFromQuotes(objects, quotes)
   if (!valued) return null
 
-  seedQuoteCache(quotes)
-  return valued
+  const today = marketDayKey()
+  const fresh = keys.every((key) => latest.get(key)?.fetchedOn === today)
+  // 전일 시세를 당일로 심으면 API 재조회를 건너뛰므로, 당일 시세만 seed한다.
+  if (fresh) seedQuoteCache(quotes)
+  return { valued, fresh }
 }
 
 async function unitPriceKrw(kind: AssetKind, symbol: string): Promise<number> {
