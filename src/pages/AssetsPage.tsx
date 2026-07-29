@@ -6,7 +6,7 @@ import {
   type FormEvent,
   type PointerEvent as ReactPointerEvent,
 } from 'react'
-import { ChevronRight, GripVertical, X } from 'lucide-react'
+import { ChartNoAxesCombined, GripVertical, X } from 'lucide-react'
 import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { AssetsPieChart } from '../components/assets/AssetsPieChart'
@@ -603,9 +603,12 @@ export function AssetsPage() {
         <BackLink to="/" />
         <div className="module-heading module-heading--assets">
           <h1>자산</h1>
-          <Link to="/assets/history" className="assets-history-link">
-            자산 추이
-            <ChevronRight size={16} strokeWidth={2} aria-hidden="true" />
+          <Link
+            to="/assets/history"
+            className="assets-history-link"
+            aria-label="자산 추이"
+          >
+            <ChartNoAxesCombined size={20} strokeWidth={1.75} aria-hidden="true" />
           </Link>
         </div>
       </div>
