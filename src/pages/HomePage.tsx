@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { ModuleIcon } from '../components/ui/ModuleIcon'
 import {
   assetsSnapshot,
+  summarizePortfolio,
   valueAssetsFromLatestCache,
 } from '../domain/assets'
 import { resolveHubModules } from '../domain/hubLayout'
@@ -38,8 +39,8 @@ export function HomePage() {
       if (!active) return
 
       const items = cached?.valued ?? assetsSnapshot(assets)
-      const total = items.reduce((sum, item) => sum + (item.valueKrw ?? 0), 0)
-      setAssetsTotalKrw(total)
+      const { netAssetsKrw } = summarizePortfolio(items)
+      setAssetsTotalKrw(netAssetsKrw)
     })()
 
     return () => {

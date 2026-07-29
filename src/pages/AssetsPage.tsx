@@ -19,6 +19,8 @@ import {
   assetsSnapshot,
   formatKrw,
   formatQuantity,
+  isDirectPriceKind,
+  summarizePortfolio,
   valueAssets,
   valueAssetsFromLatestCache,
   type AssetKind,
@@ -38,9 +40,16 @@ const COMMODITY_TITLE: Record<string, string> = {
 }
 
 function kindHint(kind: AssetKind): string {
-  if (kind === 'cash') return '통화 코드 (예: KRW, USD, EUR)'
+  if (isDirectPriceKind(kind)) return '통화 코드 (예: KRW, USD, EUR)'
   if (kind === 'stock') return '티커 (예: AAPL, TSLA, 005930.KS)'
   return '금/은 중 선택'
+}
+
+function titlePlaceholder(kind: AssetKind): string {
+  if (kind === 'cash') return '예: 비상금'
+  if (kind === 'real_estate') return '예: 집'
+  if (kind === 'debt') return '예: 학자금 대출'
+  return '티커/물질과 동일'
 }
 
 function titleFromSymbol(kind: AssetKind, nextSymbol: string): string {
@@ -198,7 +207,7 @@ function AssetRow({
               ) : (
                 <span className="assets-row-title">{item.object.title}</span>
               )}
-              {item.kind !== 'cash' ? (
+              {!isDirectPriceKind(item.kind) ? (
                 <span className="assets-row-qty">
                   {formatQuantity(item.kind, item.quantity, item.symbol)}
                 </span>
@@ -279,19 +288,21 @@ export function AssetsPage() {
   const listRefs = useRef<Partial<Record<AssetKind, HTMLUListElement | null>>>({})
 
   useEffect(() => {
-    if (kind === 'cash') setSymbol((prev) => (prev === 'GOLD' || prev === 'SILVER' ? 'KRW' : prev || 'KRW'))
+    if (isDirectPriceKind(kind)) {
+      setSymbol((prev) => (prev === 'GOLD' || prev === 'SILVER' ? 'KRW' : prev || 'KRW'))
+    }
     if (kind === 'stock') setSymbol((prev) => (prev === 'KRW' || prev === 'GOLD' || prev === 'SILVER' ? '' : prev))
     if (kind === 'commodity') setSymbol((prev) => (prev === 'SILVER' ? 'SILVER' : 'GOLD'))
   }, [kind])
 
   useEffect(() => {
-    if (kind === 'cash') return
+    if (isDirectPriceKind(kind)) return
     setTitle(titleFromSymbol(kind, symbol))
   }, [kind, symbol])
 
   useEffect(() => {
     if (!composerOpen) return
-    if (kind === 'cash') titleInputRef.current?.focus()
+    if (isDirectPriceKind(kind)) titleInputRef.current?.focus()
     else if (kind === 'commodity') symbolSelectRef.current?.focus()
     else symbolInputRef.current?.focus()
 
@@ -380,10 +391,7 @@ export function AssetsPage() {
     itemsRef.current = items
   }, [items])
 
-  const totalKrw = useMemo(
-    () => items.reduce((sum, item) => sum + (item.valueKrw ?? 0), 0),
-    [items],
-  )
+  const portfolio = useMemo(() => summarizePortfolio(items), [items])
 
   const grouped = useMemo(() => {
     return ASSET_KIND_ORDER.map((groupKind) => {
@@ -525,10 +533,10 @@ export function AssetsPage() {
   async function handleSave(event: FormEvent) {
     event.preventDefault()
     const nextSymbol = symbol.trim().toUpperCase()
-    const nextTitle = kind === 'cash' ? title.trim() : titleFromSymbol(kind, nextSymbol)
+    const nextTitle = isDirectPriceKind(kind) ? title.trim() : titleFromSymbol(kind, nextSymbol)
     const nextQuantity = Number(quantity)
 
-    if (kind === 'cash' && !nextTitle) {
+    if (isDirectPriceKind(kind) && !nextTitle) {
       setFormError('이름을 입력해 주세요.')
       return
     }
@@ -537,7 +545,7 @@ export function AssetsPage() {
       return
     }
     if (!Number.isFinite(nextQuantity) || nextQuantity <= 0) {
-      setFormError('수량을 확인해 주세요.')
+      setFormError(isDirectPriceKind(kind) ? '금액을 확인해 주세요.' : '수량을 확인해 주세요.')
       return
     }
 
@@ -639,8 +647,8 @@ export function AssetsPage() {
                         id="asset-title"
                         value={title}
                         onChange={(event) => setTitle(event.target.value)}
-                        placeholder={kind === 'cash' ? '예: 비상금' : '티커/물질과 동일'}
-                        disabled={!ready || saving || kind !== 'cash'}
+                        placeholder={titlePlaceholder(kind)}
+                        disabled={!ready || saving || !isDirectPriceKind(kind)}
                       />
                     </div>
                     <div className="field">
@@ -660,7 +668,11 @@ export function AssetsPage() {
                     </div>
                     <div className="field">
                       <label htmlFor="asset-symbol">
-                        {kind === 'cash' ? '통화' : kind === 'stock' ? '티커' : '물질'}
+                        {isDirectPriceKind(kind)
+                          ? '통화'
+                          : kind === 'stock'
+                            ? '티커'
+                            : '물질'}
                       </label>
                       {kind === 'commodity' ? (
                         <select
@@ -690,7 +702,11 @@ export function AssetsPage() {
                     </div>
                     <div className="field">
                       <label htmlFor="asset-quantity">
-                        {kind === 'cash' ? '금액' : kind === 'commodity' ? '수량 (g)' : '수량 (주)'}
+                        {isDirectPriceKind(kind)
+                          ? '금액'
+                          : kind === 'commodity'
+                            ? '수량 (g)'
+                            : '수량 (주)'}
                       </label>
                       <input
                         id="asset-quantity"
@@ -732,17 +748,29 @@ export function AssetsPage() {
       <div
         className={`assets-summary${ready && assets.length > 0 ? ' has-chart' : ''}`}
       >
-        <section className="assets-total" aria-label="총자산">
-          <p className="assets-total-label">총자산</p>
+        <section className="assets-total" aria-label="순자산">
+          <p className="assets-total-label">순자산</p>
           <strong className="assets-total-value">
             {!ready
               ? '계산 중…'
-              : items.some((item) => item.valueKrw === null)
+              : portfolio.pending
                 ? pricing
                   ? '계산 중…'
                   : '—'
-                : formatKrw(totalKrw)}
+                : formatKrw(portfolio.netAssetsKrw)}
           </strong>
+          {ready && !portfolio.pending ? (
+            <dl className="assets-total-breakdown">
+              <div>
+                <dt>총자산</dt>
+                <dd>{formatKrw(portfolio.grossAssetsKrw)}</dd>
+              </div>
+              <div>
+                <dt>부채</dt>
+                <dd>{formatKrw(portfolio.debtKrw)}</dd>
+              </div>
+            </dl>
+          ) : null}
           {priceError ? <p className="assets-total-note">{priceError}</p> : null}
           {!priceError && pricing ? (
             <p className="assets-total-note">새로고침 중…</p>
@@ -756,7 +784,7 @@ export function AssetsPage() {
       ) : assets.length === 0 ? (
         <div className="empty-panel">
           <h3>자산 현황</h3>
-          <p>현금, 주식, 금/은을 추가하면 총자산이 여기에 모입니다.</p>
+          <p>현금, 주식, 금/은, 부동산, 부채를 추가하면 순자산이 여기에 모입니다.</p>
         </div>
       ) : (
         <div className="assets-groups">

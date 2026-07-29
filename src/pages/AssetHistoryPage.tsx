@@ -80,7 +80,7 @@ export function AssetHistoryPage() {
 
           <section className="assets-history-stats" aria-label="기간 요약">
             <div className="assets-history-stat">
-              <p className="assets-history-stat-label">현재 총자산</p>
+              <p className="assets-history-stat-label">현재 순자산</p>
               <strong className="assets-history-stat-value">
                 {points.length > 0 ? formatKrw(change.current) : '—'}
               </strong>

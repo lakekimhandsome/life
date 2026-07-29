@@ -89,7 +89,7 @@ export function getModuleStatus(
       const assets = ofType(objects, 'asset')
       if (assets.length === 0) return '기록 없음'
       if (extras?.assetsTotalKrw == null) return '…'
-      return `총자산 ${formatKrw(extras.assetsTotalKrw)}`
+      return `순자산 ${formatKrw(extras.assetsTotalKrw)}`
     }
     case 'journal': {
       const today = ofType(objects, 'journal').some((object) =>

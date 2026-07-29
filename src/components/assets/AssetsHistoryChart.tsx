@@ -15,7 +15,7 @@ import type { AssetHistoryPoint } from '../../lib/assetHistory'
 export type AssetHistorySeries = 'total' | 'cash' | 'stock' | 'material' | 'crypto'
 
 const SERIES_LABEL: Record<AssetHistorySeries, string> = {
-  total: '총자산',
+  total: '순자산',
   cash: '현금',
   stock: '주식',
   material: '물질',

@@ -851,6 +851,35 @@ select {
   color: var(--ink);
 }
 
+.assets-total-breakdown {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.1rem;
+  margin: 0.55rem 0 0;
+  padding: 0;
+}
+
+.assets-total-breakdown > div {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+
+.assets-total-breakdown dt {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.assets-total-breakdown dd {
+  margin: 0;
+  color: var(--ink);
+  font-size: 0.84rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
 .assets-total-note {
   margin: 0.55rem 0 0;
   color: var(--muted);

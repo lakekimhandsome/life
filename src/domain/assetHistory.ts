@@ -1,10 +1,11 @@
 import type { ValuedAsset } from './assets'
-import { ASSET_KIND_ORDER, type AssetKind } from './assets'
+import { ASSET_KIND_ORDER, summarizePortfolio, type AssetKind } from './assets'
 
 /** Known snapshot columns / chart series beyond total. */
 export type AssetHistoryKindKey = AssetKind | 'crypto'
 
 export interface AssetValueBreakdown {
+  /** 순자산 (총자산 − 부채). */
   total: number
   cash: number
   stock: number
@@ -19,7 +20,7 @@ export function isFullyValued(items: ValuedAsset[]): boolean {
   return items.length > 0 && items.every((item) => item.valueKrw !== null)
 }
 
-/** Sum valued assets into total + per-kind amounts for a daily snapshot. */
+/** Sum valued assets into net worth + per-kind amounts for a daily snapshot. */
 export function summarizeAssetValues(items: ValuedAsset[]): AssetValueBreakdown | null {
   if (!isFullyValued(items)) return null
 
@@ -27,15 +28,15 @@ export function summarizeAssetValues(items: ValuedAsset[]): AssetValueBreakdown 
   for (const kind of ASSET_KIND_ORDER) kindValues[kind] = 0
   kindValues.crypto = 0
 
-  let total = 0
   for (const item of items) {
     const value = item.valueKrw ?? 0
-    total += value
     kindValues[item.kind] = (kindValues[item.kind] ?? 0) + value
   }
 
+  const { netAssetsKrw } = summarizePortfolio(items)
+
   return {
-    total,
+    total: netAssetsKrw,
     cash: kindValues.cash ?? 0,
     stock: kindValues.stock ?? 0,
     material: kindValues.commodity ?? 0,

@@ -5,6 +5,7 @@ import {
   ASSET_KIND_LABEL,
   ASSET_KIND_ORDER,
   formatKrw,
+  isLiabilityKind,
   type AssetKind,
   type ValuedAsset,
 } from '../../domain/assets'
@@ -30,6 +31,8 @@ const KIND_COLORS: Record<AssetKind, string> = {
   cash: '#D4A84B',
   stock: '#5BA88A',
   commodity: '#C97B5A',
+  real_estate: '#6B9EC4',
+  debt: '#A67C9A',
 }
 
 /** 비슷한 명도·채도로 맞춘 구분 팔레트 (인접 슬라이스가 잘 갈라지도록 배치) */
@@ -50,6 +53,7 @@ const ITEM_PALETTE = [
 
 function buildKindSlices(items: ValuedAsset[]): Slice[] {
   return ASSET_KIND_ORDER.flatMap((kind) => {
+    if (isLiabilityKind(kind)) return []
     const value = items
       .filter((item) => item.kind === kind && item.valueKrw !== null)
       .reduce((sum, item) => sum + (item.valueKrw ?? 0), 0)
@@ -67,7 +71,10 @@ function buildKindSlices(items: ValuedAsset[]): Slice[] {
 
 function buildItemSlices(items: ValuedAsset[]): Slice[] {
   return items
-    .filter((item) => item.valueKrw !== null && item.valueKrw > 0)
+    .filter(
+      (item) =>
+        !isLiabilityKind(item.kind) && item.valueKrw !== null && item.valueKrw > 0,
+    )
     .map((item, index) => ({
       key: item.object.id,
       label: item.object.title,

@@ -7,15 +7,23 @@ import {
 } from '../lib/alphavantage'
 import { getLatestMarketQuotes, marketDayKey } from '../lib/marketQuotes'
 
-export type AssetKind = 'cash' | 'stock' | 'commodity'
+export type AssetKind = 'cash' | 'stock' | 'commodity' | 'real_estate' | 'debt'
 
 export const ASSET_KIND_LABEL: Record<AssetKind, string> = {
   cash: '현금',
   stock: '주식',
   commodity: '물질',
+  real_estate: '부동산',
+  debt: '부채',
 }
 
-export const ASSET_KIND_ORDER: AssetKind[] = ['cash', 'stock', 'commodity']
+export const ASSET_KIND_ORDER: AssetKind[] = [
+  'cash',
+  'stock',
+  'commodity',
+  'real_estate',
+  'debt',
+]
 
 export interface ValuedAsset {
   object: LifeObject
@@ -27,10 +35,55 @@ export interface ValuedAsset {
   error?: string
 }
 
+export interface PortfolioTotals {
+  /** 부채를 제외한 모든 자산 합. */
+  grossAssetsKrw: number
+  debtKrw: number
+  /** 총자산 − 부채. */
+  netAssetsKrw: number
+  pending: boolean
+}
+
+export function isLiabilityKind(kind: AssetKind): boolean {
+  return kind === 'debt'
+}
+
+/** 시세 없이 금액(수량)을 직접 입력하는 종류. */
+export function isDirectPriceKind(kind: AssetKind): boolean {
+  return kind === 'cash' || kind === 'real_estate' || kind === 'debt'
+}
+
 export function getAssetKind(object: LifeObject): AssetKind | null {
   const kind = object.meta.kind
-  if (kind === 'cash' || kind === 'stock' || kind === 'commodity') return kind
+  if (
+    kind === 'cash' ||
+    kind === 'stock' ||
+    kind === 'commodity' ||
+    kind === 'real_estate' ||
+    kind === 'debt'
+  ) {
+    return kind
+  }
   return null
+}
+
+export function summarizePortfolio(items: ValuedAsset[]): PortfolioTotals {
+  const pending = items.some((item) => item.valueKrw === null)
+  let grossAssetsKrw = 0
+  let debtKrw = 0
+
+  for (const item of items) {
+    const value = item.valueKrw ?? 0
+    if (isLiabilityKind(item.kind)) debtKrw += value
+    else grossAssetsKrw += value
+  }
+
+  return {
+    grossAssetsKrw,
+    debtKrw,
+    netAssetsKrw: grossAssetsKrw - debtKrw,
+    pending,
+  }
 }
 
 export function getAssetQuantity(object: LifeObject): number {
@@ -59,14 +112,14 @@ export function formatQuantity(kind: AssetKind, quantity: number, symbol: string
     maximumFractionDigits: 6,
   }).format(quantity)
 
-  if (kind === 'cash') return `${amount} ${symbol}`
+  if (isDirectPriceKind(kind)) return `${amount} ${symbol}`
   if (kind === 'commodity') return `${amount} g`
   return `${amount}주`
 }
 
 /** KRW 현금처럼 외부 시세/환율 없이 바로 환산 가능한지. */
 export function needsMarketPrice(kind: AssetKind, symbol: string): boolean {
-  if (kind === 'cash') {
+  if (isDirectPriceKind(kind)) {
     return (symbol || 'KRW').toUpperCase() !== 'KRW'
   }
   return true
@@ -84,7 +137,7 @@ export function quoteKeysForAsset(kind: AssetKind, symbol: string): string[] {
   const code = (symbol || '').trim().toUpperCase()
   if (!code) return []
 
-  if (kind === 'cash') {
+  if (isDirectPriceKind(kind)) {
     if (code === 'KRW') return []
     return [`fx:${code}:KRW`]
   }
@@ -180,7 +233,7 @@ function unitPriceFromQuotes(
   symbol: string,
   quotes: Map<string, number>,
 ): number | null {
-  if (kind === 'cash') {
+  if (isDirectPriceKind(kind)) {
     const code = symbol || 'KRW'
     if (code.toUpperCase() === 'KRW') return 1
     return quotes.get(`fx:${code}:KRW`) ?? null
@@ -271,7 +324,7 @@ export async function valueAssetsFromLatestCache(
 }
 
 async function unitPriceKrw(kind: AssetKind, symbol: string): Promise<number> {
-  if (kind === 'cash') {
+  if (isDirectPriceKind(kind)) {
     const code = symbol || 'KRW'
     if (code.toUpperCase() === 'KRW') return 1
     return fetchFxRate(code, 'KRW')
