@@ -6,7 +6,7 @@ import {
   type FormEvent,
   type PointerEvent as ReactPointerEvent,
 } from 'react'
-import { ChartNoAxesCombined, GripVertical, X } from 'lucide-react'
+import { ChartNoAxesCombined, GripVertical, Pencil, Plus, X } from 'lucide-react'
 import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { AssetsPieChart } from '../components/assets/AssetsPieChart'
@@ -629,13 +629,34 @@ export function AssetsPage() {
         <div className="module-heading module-heading--assets">
           <h1>자산</h1>
         </div>
-        <Link
-          to="/assets/history"
-          className="assets-history-link"
-          aria-label="자산 추이"
-        >
-          <ChartNoAxesCombined size={26} strokeWidth={1.75} aria-hidden="true" />
-        </Link>
+        <div className="assets-header-actions">
+          <Link
+            to="/assets/history"
+            className="assets-header-btn"
+            aria-label="자산 추이"
+          >
+            <ChartNoAxesCombined size={22} strokeWidth={1.75} aria-hidden="true" />
+          </Link>
+          <button
+            type="button"
+            className="assets-header-btn"
+            onClick={openComposer}
+            disabled={!ready}
+            aria-label="자산 추가"
+          >
+            <Plus size={22} strokeWidth={1.75} aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            className={`assets-header-btn${editingMode ? ' is-active' : ''}`}
+            onClick={() => setEditingMode((value) => !value)}
+            disabled={!ready}
+            aria-label={editingMode ? '편집 완료' : '자산 편집'}
+            aria-pressed={editingMode}
+          >
+            <Pencil size={20} strokeWidth={1.75} aria-hidden="true" />
+          </button>
+        </div>
       </div>
 
       {composerOpen
@@ -850,27 +871,6 @@ export function AssetsPage() {
         </div>
       )}
 
-      <div className="assets-footer-bar">
-        {editingMode ? (
-          <button
-            type="button"
-            className="btn btn-primary assets-add-btn"
-            onClick={openComposer}
-            disabled={!ready}
-          >
-            자산 추가
-          </button>
-        ) : null}
-        <button
-          type="button"
-          className={`btn ${editingMode ? 'btn-ghost' : 'btn-primary'} assets-edit-mode-btn`}
-          onClick={() => setEditingMode((value) => !value)}
-          disabled={!ready}
-          aria-pressed={editingMode}
-        >
-          {editingMode ? '편집 완료' : '자산 편집'}
-        </button>
-      </div>
     </div>
   )
 }

@@ -1218,41 +1218,48 @@ select {
   }
 }
 
-.assets-footer-bar {
-  margin-top: 1.5rem;
-  padding-top: 0.25rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.55rem;
+.assets-header-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  margin-left: auto;
 }
 
-.assets-add-btn,
-.assets-edit-mode-btn {
-  width: 100%;
-}
-
-.assets-history-link {
+.assets-header-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 2.5rem;
   height: 2.5rem;
-  margin-left: auto;
+  padding: 0;
+  border: 0;
   border-radius: 10px;
+  background: transparent;
   color: color-mix(in srgb, var(--accent-asset) 72%, var(--ink));
   line-height: 0;
   text-decoration: none;
+  cursor: pointer;
   transition: background 140ms ease, color 140ms ease;
 }
 
-.assets-history-link:hover {
+.assets-header-btn:hover:not(:disabled) {
   background: color-mix(in srgb, var(--accent-asset) 14%, transparent);
   color: var(--accent-asset);
 }
 
-.assets-history-link:focus-visible {
+.assets-header-btn:focus-visible {
   outline: 2px solid color-mix(in srgb, var(--accent-asset) 55%, white);
   outline-offset: 2px;
+}
+
+.assets-header-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.assets-header-btn.is-active {
+  background: color-mix(in srgb, var(--accent-asset) 16%, transparent);
+  color: var(--accent-asset);
 }
 
 .assets-history-page .module-header {
