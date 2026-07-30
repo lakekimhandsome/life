@@ -40,7 +40,7 @@ html[data-theme='dark'] {
   --ink: #e7efed;
   --ink-soft: #bac9c6;
   --muted: #8ea29e;
-  --paper: #101716;
+  --paper: #000;
   --paper-elevated: rgba(27, 39, 36, 0.78);
   --line: rgba(226, 239, 235, 0.1);
   --line-strong: rgba(226, 239, 235, 0.18);
@@ -122,15 +122,11 @@ select {
 }
 
 html[data-theme='dark'] .atmosphere {
-  background:
-    radial-gradient(ellipse 80% 55% at 12% -10%, rgba(58, 151, 159, 0.2), transparent 55%),
-    radial-gradient(ellipse 60% 45% at 90% 8%, rgba(177, 91, 51, 0.13), transparent 50%),
-    radial-gradient(ellipse 50% 40% at 70% 90%, rgba(104, 89, 153, 0.14), transparent 55%),
-    linear-gradient(180deg, #101918 0%, #171817 48%, #111817 100%);
+  background: #000;
 }
 
 html[data-theme='dark'] .atmosphere::after {
-  opacity: 0.18;
+  opacity: 0;
 }
 
 .topbar {
@@ -148,7 +144,7 @@ html[data-theme='dark'] .atmosphere::after {
 }
 
 html[data-theme='dark'] .topbar {
-  background: rgba(16, 23, 22, 0.72);
+  background: rgba(0, 0, 0, 0.72);
 }
 
 .brand-mark {
