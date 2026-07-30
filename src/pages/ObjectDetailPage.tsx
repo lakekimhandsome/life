@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import { BackLink } from '../components/ui/BackLink'
+import { MarkdownContent } from '../components/ui/MarkdownContent'
 import { TypeBadge } from '../components/ui/TypeBadge'
 import type { LifeObject, Relationship } from '../core/types'
 import { formatMetaValue, getSchema } from '../domain/schemas'
@@ -36,6 +37,8 @@ export function ObjectDetailPage() {
   }
 
   const schema = getSchema(object.type)
+  const supportsMarkdown =
+    object.type === 'journal' || object.type === 'goal' || object.type === 'project'
   const related = relationships
     .map((rel) => {
       const otherId = rel.sourceId === object.id ? rel.targetId : rel.sourceId
@@ -60,7 +63,11 @@ export function ObjectDetailPage() {
       {object.body ? (
         <section className="detail-body">
           <h2>{schema.bodyLabel}</h2>
-          <p>{object.body}</p>
+          {supportsMarkdown ? (
+            <MarkdownContent className="markdown-content">{object.body}</MarkdownContent>
+          ) : (
+            <p>{object.body}</p>
+          )}
         </section>
       ) : null}
 

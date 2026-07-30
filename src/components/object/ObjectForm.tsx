@@ -40,6 +40,7 @@ export function ObjectForm({
   const [error, setError] = useState<string | null>(null)
 
   const canLinkGoal = type !== 'goal' && !initial
+  const supportsMarkdown = type === 'journal' || type === 'goal' || type === 'project'
 
   const metaFields = useMemo(() => schema.fields, [schema.fields])
 
@@ -154,6 +155,11 @@ export function ObjectForm({
           onChange={(event) => setBody(event.target.value)}
           placeholder={schema.bodyPlaceholder}
         />
+        {supportsMarkdown ? (
+          <p className="field-hint">
+            마크다운을 지원합니다. 제목, 목록, 굵게, 링크 등을 사용할 수 있어요.
+          </p>
+        ) : null}
       </div>
 
       {canLinkGoal ? (

@@ -2,6 +2,7 @@ import { ChevronRight } from 'lucide-react'
 import type { CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
 import { formatDate } from '../../lib/format'
+import { stripMarkdown } from '../../lib/markdown'
 import { formatMetaValue, getSchema } from '../../domain/schemas'
 import type { LifeObject } from '../../core/types'
 import { TypeBadge } from '../ui/TypeBadge'
@@ -12,6 +13,13 @@ export function ObjectCard({ object }: { object: LifeObject }) {
     .map((field) => formatMetaValue(object.type, field.key, object.meta[field.key] ?? null))
     .filter(Boolean)
     .slice(0, 2)
+  const supportsMarkdown =
+    object.type === 'journal' || object.type === 'goal' || object.type === 'project'
+  const bodyPreview = object.body
+    ? supportsMarkdown
+      ? stripMarkdown(object.body)
+      : object.body
+    : null
 
   return (
     <Link
@@ -25,7 +33,7 @@ export function ObjectCard({ object }: { object: LifeObject }) {
           <time dateTime={object.occurredAt}>{formatDate(object.occurredAt)}</time>
         </div>
         <h3>{object.title}</h3>
-        {object.body ? <p>{object.body}</p> : null}
+        {bodyPreview ? <p>{bodyPreview}</p> : null}
         {metaBits.length > 0 ? (
           <div className="object-row-tags">
             {metaBits.map((bit) => (

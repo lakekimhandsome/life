@@ -30,7 +30,7 @@ export const OBJECT_SCHEMAS: Record<ObjectType, ObjectTypeSchema> = {
     labelKo: '일기',
     description: '하루의 기록과 감정',
     titlePlaceholder: '오늘의 한 줄',
-    bodyPlaceholder: '무엇이 있었고, 어떻게 느꼈나요?',
+    bodyPlaceholder: '무엇이 있었고, 어떻게 느꼈나요?\n\n마크다운 예: **강조**, - 목록, [링크](url)',
     bodyLabel: '본문',
     accent: 'var(--accent-journal)',
     fields: [
@@ -53,7 +53,8 @@ export const OBJECT_SCHEMAS: Record<ObjectType, ObjectTypeSchema> = {
     labelKo: '프로젝트',
     description: '만들고 있는 것들',
     titlePlaceholder: '프로젝트 이름',
-    bodyPlaceholder: '무엇을 만들고, 왜 중요한가요?',
+    bodyPlaceholder:
+      '무엇을 만들고, 왜 중요한가요?\n\n마크다운 예: **강조**, - 목록, [링크](url)',
     bodyLabel: '설명',
     accent: 'var(--accent-project)',
     fields: [
@@ -122,7 +123,7 @@ export const OBJECT_SCHEMAS: Record<ObjectType, ObjectTypeSchema> = {
     labelKo: '목표',
     description: '삶이 향하는 방향',
     titlePlaceholder: '이루고 싶은 것',
-    bodyPlaceholder: '왜 이 목표가 중요한가요?',
+    bodyPlaceholder: '왜 이 목표가 중요한가요?\n\n마크다운 예: **강조**, - 목록, [링크](url)',
     bodyLabel: '동기',
     accent: 'var(--accent-goal)',
     fields: [
