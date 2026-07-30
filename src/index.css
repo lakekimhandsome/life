@@ -37,26 +37,26 @@
 }
 
 html[data-theme='dark'] {
-  --ink: #e7efed;
-  --ink-soft: #bac9c6;
-  --muted: #8ea29e;
+  --ink: #f2f2f2;
+  --ink-soft: #c2c2c2;
+  --muted: #929292;
   --paper: #000;
-  --paper-elevated: rgba(27, 39, 36, 0.78);
-  --line: rgba(226, 239, 235, 0.1);
-  --line-strong: rgba(226, 239, 235, 0.18);
-  --accent: #69b8bd;
-  --accent-deep: #28777d;
+  --paper-elevated: rgba(24, 24, 24, 0.82);
+  --line: rgba(255, 255, 255, 0.11);
+  --line-strong: rgba(255, 255, 255, 0.2);
+  --accent: #78a9ff;
+  --accent-deep: #4c82e6;
   --danger: #ed8585;
   --shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
-  --surface: rgba(27, 39, 36, 0.72);
-  --surface-strong: rgba(31, 45, 42, 0.94);
-  --surface-solid: #21302d;
+  --surface: rgba(24, 24, 24, 0.78);
+  --surface-strong: rgba(31, 31, 31, 0.96);
+  --surface-solid: #242424;
 
   --accent-journal: #72acd0;
   --accent-project: #78ae8b;
   --accent-workout: #df8c5f;
   --accent-study: #a195d2;
-  --accent-goal: #69b8bd;
+  --accent-goal: #78a9ff;
   --accent-asset: #c5a35f;
 }
 
@@ -2421,7 +2421,7 @@ html[data-theme='dark'] .card-edit-row.is-excluded {
 }
 
 html[data-theme='dark'] .btn-primary:hover {
-  background: #31868d;
+  background: #5b8ff0;
 }
 
 html[data-theme='dark'] input,
