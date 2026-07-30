@@ -69,7 +69,7 @@ export function ObjectDetailPage() {
           <time dateTime={object.occurredAt}>{formatDateTime(object.occurredAt)}</time>
         </div>
         <h1>{object.title}</h1>
-        <p className="detail-sub">{schema.description}</p>
+        {schema.description ? <p className="detail-sub">{schema.description}</p> : null}
       </header>
 
       {object.body ? (

@@ -28,7 +28,7 @@ export function CreatePage() {
           {schema.label}
         </p>
         <h1>{schema.labelKo} 기록</h1>
-        <p className="compose-lead">{schema.description}</p>
+        {schema.description ? <p className="compose-lead">{schema.description}</p> : null}
       </div>
 
       <ObjectForm

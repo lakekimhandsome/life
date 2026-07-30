@@ -48,7 +48,7 @@ export function EditPage() {
           {schema.label}
         </p>
         <h1>{schema.labelKo} 수정</h1>
-        <p className="compose-lead">{schema.description}</p>
+        {schema.description ? <p className="compose-lead">{schema.description}</p> : null}
       </div>
 
       <ObjectForm
