@@ -10,6 +10,9 @@
   --accent-deep: #0f2a2e;
   --danger: #a33b3b;
   --shadow: 0 24px 60px rgba(15, 42, 46, 0.08);
+  --surface: rgba(255, 255, 255, 0.72);
+  --surface-strong: rgba(255, 255, 255, 0.92);
+  --surface-solid: #fff;
   --radius: 18px;
   --font-display: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont,
     system-ui, sans-serif;
@@ -31,6 +34,30 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+html[data-theme='dark'] {
+  --ink: #e7efed;
+  --ink-soft: #bac9c6;
+  --muted: #8ea29e;
+  --paper: #101716;
+  --paper-elevated: rgba(27, 39, 36, 0.78);
+  --line: rgba(226, 239, 235, 0.1);
+  --line-strong: rgba(226, 239, 235, 0.18);
+  --accent: #69b8bd;
+  --accent-deep: #28777d;
+  --danger: #ed8585;
+  --shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+  --surface: rgba(27, 39, 36, 0.72);
+  --surface-strong: rgba(31, 45, 42, 0.94);
+  --surface-solid: #21302d;
+
+  --accent-journal: #72acd0;
+  --accent-project: #78ae8b;
+  --accent-workout: #df8c5f;
+  --accent-study: #a195d2;
+  --accent-goal: #69b8bd;
+  --accent-asset: #c5a35f;
 }
 
 *,
@@ -94,6 +121,18 @@ select {
   mix-blend-mode: soft-light;
 }
 
+html[data-theme='dark'] .atmosphere {
+  background:
+    radial-gradient(ellipse 80% 55% at 12% -10%, rgba(58, 151, 159, 0.2), transparent 55%),
+    radial-gradient(ellipse 60% 45% at 90% 8%, rgba(177, 91, 51, 0.13), transparent 50%),
+    radial-gradient(ellipse 50% 40% at 70% 90%, rgba(104, 89, 153, 0.14), transparent 55%),
+    linear-gradient(180deg, #101918 0%, #171817 48%, #111817 100%);
+}
+
+html[data-theme='dark'] .atmosphere::after {
+  opacity: 0.18;
+}
+
 .topbar {
   position: sticky;
   top: 0;
@@ -106,6 +145,10 @@ select {
   backdrop-filter: blur(16px);
   background: rgba(243, 247, 246, 0.72);
   border-bottom: 1px solid var(--line);
+}
+
+html[data-theme='dark'] .topbar {
+  background: rgba(16, 23, 22, 0.72);
 }
 
 .brand-mark {
@@ -188,6 +231,10 @@ select {
 
 .user-menu-item.is-action:hover:not(:disabled) {
   background: rgba(18, 32, 39, 0.05);
+}
+
+html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
+  background: rgba(231, 239, 237, 0.07);
 }
 
 .user-menu-item.is-action:disabled {
@@ -2126,6 +2173,57 @@ button.assets-row-title:focus-visible {
   color: var(--muted);
 }
 
+.settings-theme {
+  flex-wrap: wrap;
+}
+
+.settings-theme:hover {
+  transform: none;
+  border-color: var(--line);
+}
+
+.theme-options {
+  display: inline-flex;
+  flex-shrink: 0;
+  gap: 0.2rem;
+  padding: 0.2rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
+}
+
+.theme-options button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 2.2rem;
+  padding: 0.45rem 0.65rem;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 650;
+  cursor: pointer;
+  transition: background 150ms ease, color 150ms ease, box-shadow 150ms ease;
+}
+
+.theme-options button:hover {
+  color: var(--ink);
+}
+
+.theme-options button.is-active {
+  background: var(--surface-strong);
+  color: var(--ink);
+  box-shadow: 0 1px 5px rgba(15, 42, 46, 0.1);
+}
+
+.theme-options button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
 .card-edit-section {
   margin-bottom: 1.5rem;
 }
@@ -2238,6 +2336,122 @@ button.assets-row-title:focus-visible {
   flex-shrink: 0;
   padding: 0.55rem 0.95rem;
   font-size: 0.85rem;
+}
+
+html[data-theme='dark'] .user-menu-trigger,
+html[data-theme='dark'] .day-nav-btn,
+html[data-theme='dark'] .assets-chart-toggle,
+html[data-theme='dark'] .assets-history-range,
+html[data-theme='dark'] .btn-ghost,
+html[data-theme='dark'] .card-edit-row {
+  background: var(--surface);
+}
+
+html[data-theme='dark'] .user-menu-trigger:hover,
+html[data-theme='dark'] .user-menu-trigger[aria-expanded='true'],
+html[data-theme='dark'] .day-nav-btn:hover {
+  background: var(--surface-solid);
+}
+
+html[data-theme='dark'] .user-menu-panel,
+html[data-theme='dark'] .assets-modal,
+html[data-theme='dark'] .assets-chart-tooltip,
+html[data-theme='dark'] .todo-title-input {
+  background: var(--surface-strong);
+}
+
+html[data-theme='dark'] .hub-card,
+html[data-theme='dark'] .todo-composer input,
+html[data-theme='dark'] .todo-box,
+html[data-theme='dark'] .assets-history-stat,
+html[data-theme='dark'] .assets-row,
+html[data-theme='dark'] .assets-row-inner {
+  background: var(--surface);
+  box-shadow: none;
+}
+
+html[data-theme='dark'] .hub-card:hover {
+  background: var(--surface-strong);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.2);
+}
+
+html[data-theme='dark'] .todo-item,
+html[data-theme='dark'] .todo-row,
+html[data-theme='dark'] .assets-chart {
+  background: color-mix(in srgb, var(--paper) 78%, var(--surface-solid));
+}
+
+html[data-theme='dark'] .hub-dday-item,
+html[data-theme='dark'] .assets-total,
+html[data-theme='dark'] .assets-history-chart,
+html[data-theme='dark'] .settings-menu-item {
+  background:
+    linear-gradient(
+      120deg,
+      color-mix(in srgb, var(--accent) 10%, transparent),
+      var(--surface) 48%
+    );
+}
+
+html[data-theme='dark'] .hub-dday-item.is-today {
+  background:
+    linear-gradient(
+      105deg,
+      color-mix(in srgb, var(--accent-goal) 18%, transparent),
+      var(--surface) 42%
+    );
+}
+
+html[data-theme='dark'] .hub-dday-item.is-past {
+  background:
+    linear-gradient(
+      105deg,
+      color-mix(in srgb, var(--danger) 12%, transparent),
+      var(--surface) 42%
+    );
+}
+
+html[data-theme='dark'] .assets-chart-toggle button.is-active,
+html[data-theme='dark'] .assets-history-range button.is-active {
+  background: color-mix(in srgb, var(--accent-asset) 20%, transparent);
+}
+
+html[data-theme='dark'] .type-badge {
+  background: color-mix(in srgb, var(--badge-accent) 20%, transparent);
+}
+
+html[data-theme='dark'] .card-edit-row.is-excluded {
+  background: color-mix(in srgb, var(--ink) 4%, var(--surface));
+}
+
+html[data-theme='dark'] .btn-primary:hover {
+  background: #31868d;
+}
+
+html[data-theme='dark'] input,
+html[data-theme='dark'] textarea,
+html[data-theme='dark'] select {
+  caret-color: var(--ink);
+}
+
+html[data-theme='dark'] select option {
+  background: var(--surface-solid);
+  color: var(--ink);
+}
+
+@media (max-width: 560px) {
+  .settings-theme {
+    align-items: stretch;
+  }
+
+  .settings-theme .settings-menu-copy,
+  .theme-options {
+    width: 100%;
+  }
+
+  .theme-options button {
+    flex: 1;
+  }
 }
 
 @keyframes rise {

@@ -9,6 +9,23 @@
       name="description"
       content="LIFE — Personal Life OS. 일기, 프로젝트, 운동, 공부, 목표를 하나의 시스템으로."
     />
+    <script>
+      ;(() => {
+        try {
+          const saved = localStorage.getItem('life-theme')
+          const theme =
+            saved === 'light' || saved === 'dark'
+              ? saved
+              : matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'dark'
+                : 'light'
+          document.documentElement.dataset.theme = theme
+          document.documentElement.style.colorScheme = theme
+        } catch {
+          document.documentElement.dataset.theme = 'light'
+        }
+      })()
+    </script>
     <link
       rel="stylesheet"
       as="style"
