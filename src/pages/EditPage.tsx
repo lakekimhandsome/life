@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import { Check } from 'lucide-react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { ObjectForm } from '../components/object/ObjectForm'
 import { BackLink } from '../components/ui/BackLink'
@@ -8,6 +10,7 @@ export function EditPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { ready, getObject, updateObject } = useLife()
+  const [saving, setSaving] = useState(false)
 
   const object = id ? getObject(id) : undefined
 
@@ -20,11 +23,27 @@ export function EditPage() {
   }
 
   const schema = getSchema(object.type)
+  const usesHeaderSubmit =
+    object.type === 'journal' || object.type === 'goal' || object.type === 'project'
+  const formId = usesHeaderSubmit ? 'object-edit-form' : undefined
 
   return (
     <div className="compose">
       <div className="compose-header">
-        <BackLink to={`/object/${object.id}`}>돌아가기</BackLink>
+        <div className="object-page-toolbar">
+          <BackLink to={`/object/${object.id}`}>돌아가기</BackLink>
+          {usesHeaderSubmit ? (
+            <button
+              type="submit"
+              form={formId}
+              className="object-header-action"
+              aria-label={`${schema.labelKo} 수정 저장`}
+              disabled={saving}
+            >
+              <Check size={22} strokeWidth={1.9} aria-hidden="true" />
+            </button>
+          ) : null}
+        </div>
         <p className="eyebrow" style={{ color: schema.accent }}>
           {schema.label}
         </p>
@@ -35,6 +54,9 @@ export function EditPage() {
       <ObjectForm
         type={object.type}
         initial={object}
+        formId={formId}
+        showSubmitButton={!usesHeaderSubmit}
+        onSavingChange={setSaving}
         submitLabel="수정 저장"
         onSubmit={async ({ title, body, occurredAt, meta }) => {
           await updateObject(object.id, {

@@ -1838,6 +1838,50 @@ button.assets-row-title:focus-visible {
   color: var(--ink);
 }
 
+.object-page-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.object-page-toolbar .back-link {
+  margin-bottom: 0;
+}
+
+.object-header-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--accent);
+  line-height: 0;
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease, opacity 140ms ease;
+}
+
+.object-header-action:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+.object-header-action:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 60%, white);
+  outline-offset: 2px;
+}
+
+.object-header-action:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .eyebrow {
   margin: 0 0 0.45rem;
   font-size: 0.8rem;

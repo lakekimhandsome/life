@@ -7,6 +7,9 @@ import { useLife } from '../../state/LifeContext'
 interface ObjectFormProps {
   type: ObjectType
   initial?: LifeObject
+  formId?: string
+  showSubmitButton?: boolean
+  onSavingChange?: (saving: boolean) => void
   onSubmit: (payload: {
     title: string
     body: string
@@ -20,6 +23,9 @@ interface ObjectFormProps {
 export function ObjectForm({
   type,
   initial,
+  formId,
+  showSubmitButton = true,
+  onSavingChange,
   onSubmit,
   submitLabel,
 }: ObjectFormProps) {
@@ -52,6 +58,7 @@ export function ObjectForm({
     }
 
     setSaving(true)
+    onSavingChange?.(true)
     setError(null)
     try {
       await onSubmit({
@@ -65,11 +72,12 @@ export function ObjectForm({
       setError(err instanceof Error ? err.message : '저장에 실패했습니다.')
     } finally {
       setSaving(false)
+      onSavingChange?.(false)
     }
   }
 
   return (
-    <form className="object-form" onSubmit={handleSubmit}>
+    <form id={formId} className="object-form" onSubmit={handleSubmit}>
       <div className="field">
         <label htmlFor="title">{schema.labelKo} 제목</label>
         <input
@@ -185,11 +193,13 @@ export function ObjectForm({
 
       {error ? <p className="form-error">{error}</p> : null}
 
-      <div className="form-actions">
-        <button type="submit" className="btn btn-primary" disabled={saving}>
-          {saving ? '저장 중…' : submitLabel}
-        </button>
-      </div>
+      {showSubmitButton ? (
+        <div className="form-actions">
+          <button type="submit" className="btn btn-primary" disabled={saving}>
+            {saving ? '저장 중…' : submitLabel}
+          </button>
+        </div>
+      ) : null}
     </form>
   )
 }
