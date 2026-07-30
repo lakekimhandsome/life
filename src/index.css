@@ -44,8 +44,8 @@ html[data-theme='dark'] {
   --paper-elevated: rgba(24, 24, 24, 0.82);
   --line: rgba(255, 255, 255, 0.11);
   --line-strong: rgba(255, 255, 255, 0.2);
-  --accent: #78a9ff;
-  --accent-deep: #4c82e6;
+  --accent: #b6aa96;
+  --accent-deep: #766a58;
   --danger: #ed8585;
   --shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
   --surface: rgba(24, 24, 24, 0.78);
@@ -56,7 +56,7 @@ html[data-theme='dark'] {
   --accent-project: #78ae8b;
   --accent-workout: #df8c5f;
   --accent-study: #a195d2;
-  --accent-goal: #78a9ff;
+  --accent-goal: #b6aa96;
   --accent-asset: #c5a35f;
 }
 
@@ -2421,7 +2421,7 @@ html[data-theme='dark'] .card-edit-row.is-excluded {
 }
 
 html[data-theme='dark'] .btn-primary:hover {
-  background: #5b8ff0;
+  background: #857864;
 }
 
 html[data-theme='dark'] input,
