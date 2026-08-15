@@ -5,6 +5,7 @@ import { BackLink } from '../components/ui/BackLink'
 import { MarkdownContent } from '../components/ui/MarkdownContent'
 import { TypeBadge } from '../components/ui/TypeBadge'
 import type { LifeObject, Relationship } from '../core/types'
+import { getModuleForObjectType } from '../domain/modules'
 import { formatMetaValue, getSchema } from '../domain/schemas'
 import { formatDateTime } from '../lib/format'
 import { useLife } from '../state/LifeContext'
@@ -38,6 +39,8 @@ export function ObjectDetailPage() {
   }
 
   const schema = getSchema(object.type)
+  const module = getModuleForObjectType(object.type)
+  const backTo = module?.path ?? '/'
   const supportsMarkdown =
     object.type === 'journal' || object.type === 'goal' || object.type === 'project'
   const related = relationships
@@ -51,7 +54,7 @@ export function ObjectDetailPage() {
   return (
     <article className="detail">
       <div className="object-page-toolbar">
-        <BackLink to="/" />
+        <BackLink to={backTo} />
         {supportsMarkdown ? (
           <Link
             to={`/object/${object.id}/edit`}
@@ -141,7 +144,7 @@ export function ObjectDetailPage() {
             const confirmed = window.confirm('이 기록을 삭제할까요?')
             if (!confirmed) return
             await deleteObject(object.id)
-            navigate('/')
+            navigate(backTo)
           }}
         >
           삭제

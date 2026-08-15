@@ -57,6 +57,12 @@ export const LIFE_MODULES: LifeModule[] = [
   },
 ]
 
+export function getModuleForObjectType(
+  type: LifeObject['type'],
+): LifeModule | undefined {
+  return LIFE_MODULES.find((item) => item.objectType === type)
+}
+
 function ofType(objects: LifeObject[], type: LifeObject['type']): LifeObject[] {
   return objects.filter((object) => object.type === type)
 }
