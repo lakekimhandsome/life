@@ -132,7 +132,7 @@ export function CardEditPage() {
   return (
     <div className="module-page settings-page">
       <div className="module-header">
-        <BackLink to="/settings">설정</BackLink>
+        <BackLink to="/settings" />
         <div className="module-heading">
           <h1>카드 편집</h1>
         </div>

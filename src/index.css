@@ -522,15 +522,16 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
 }
 
 .module-header {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 1rem 1.25rem;
   margin-bottom: 1.75rem;
 }
 
-.module-header .back-link {
-  flex-basis: 100%;
+.module-header > .back-link {
+  grid-column: 1 / -1;
+  justify-self: start;
   margin-bottom: 0;
 }
 
@@ -1819,23 +1820,31 @@ button.assets-row-title:focus-visible {
 .back-link {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  justify-content: center;
+  flex: 0 0 2.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  max-width: 2.5rem;
   margin-bottom: 1.25rem;
-  font-size: 0.9rem;
-  font-weight: 600;
+  padding: 0;
+  border-radius: 10px;
   color: var(--muted);
+  line-height: 0;
+  transition: background 140ms ease, color 140ms ease;
 }
 
 .back-link svg {
   flex-shrink: 0;
 }
 
-.back-link--home {
-  min-height: 2rem;
+.back-link:hover {
+  background: color-mix(in srgb, var(--muted) 14%, transparent);
+  color: var(--ink);
 }
 
-.back-link:hover {
-  color: var(--ink);
+.back-link:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 60%, white);
+  outline-offset: 2px;
 }
 
 .object-page-toolbar {

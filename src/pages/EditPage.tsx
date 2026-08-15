@@ -31,7 +31,7 @@ export function EditPage() {
     <div className="compose">
       <div className="compose-header">
         <div className="object-page-toolbar">
-          <BackLink to={`/object/${object.id}`}>돌아가기</BackLink>
+          <BackLink to={`/object/${object.id}`} />
           {usesHeaderSubmit ? (
             <button
               type="submit"
