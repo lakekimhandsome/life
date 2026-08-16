@@ -1916,9 +1916,36 @@ button.assets-row-title:focus-visible {
   gap: 1rem;
 }
 
+.field-grid > .field {
+  min-width: 0;
+}
+
 .field-grid input,
 .field-grid select {
   min-width: 0;
+  max-width: 100%;
+}
+
+.field input[type='date'] {
+  overflow: hidden;
+  appearance: none;
+}
+
+.field input[type='date']::-webkit-date-and-time-value {
+  text-align: left;
+  min-width: 0;
+}
+
+.field input[type='date']::-webkit-datetime-edit {
+  min-width: 0;
+  padding: 0;
+}
+
+.field input[type='date']::-webkit-calendar-picker-indicator {
+  margin-inline: 0 0;
+  padding: 0;
+  width: 1rem;
+  height: 1rem;
 }
 
 .field {
@@ -2503,6 +2530,11 @@ html[data-theme='dark'] select option {
   .field-grid--inline {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 0.75rem;
+  }
+
+  .field-grid--inline input,
+  .field-grid--inline select {
+    padding-inline: 0.65rem;
   }
 
   .detail-fields dl > div {
