@@ -1703,6 +1703,44 @@ button.assets-row-title:focus-visible {
   line-height: 1.55;
 }
 
+.object-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 1.65rem;
+}
+
+.object-group-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0;
+  padding: 0 0.1rem 0.55rem;
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.object-group-header h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 650;
+}
+
+.object-group-header strong {
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+}
+
+.object-group-empty {
+  margin: 0;
+  padding: 0.85rem 0.1rem 0.2rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.object-group .object-stream {
+  border-top: 0;
+}
+
 .object-stream {
   display: flex;
   flex-direction: column;

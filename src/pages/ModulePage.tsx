@@ -1,9 +1,26 @@
+import { useMemo } from 'react'
 import { Link, Navigate, useLocation } from 'react-router-dom'
 import { ObjectCard } from '../components/object/ObjectCard'
 import { BackLink } from '../components/ui/BackLink'
+import type { LifeObject } from '../core/types'
 import { LIFE_MODULES, type ModuleId } from '../domain/modules'
 import { getSchema } from '../domain/schemas'
 import { useLife } from '../state/LifeContext'
+
+const PROJECT_STATUS_GROUPS = [
+  { value: 'active', label: '진행 중' },
+  { value: 'idea', label: '아이디어' },
+  { value: 'paused', label: '보류' },
+  { value: 'done', label: '완료' },
+] as const
+
+function projectStatus(object: LifeObject): (typeof PROJECT_STATUS_GROUPS)[number]['value'] {
+  const status = object.meta.status
+  if (status === 'idea' || status === 'paused' || status === 'done' || status === 'active') {
+    return status
+  }
+  return 'active'
+}
 
 export function ModulePage() {
   const { pathname } = useLocation()
@@ -11,13 +28,23 @@ export function ModulePage() {
 
   const moduleId = pathname.replace(/^\//, '') as ModuleId
   const module = LIFE_MODULES.find((item) => item.id === moduleId)
+  const objectType = module?.objectType
+  const items = objectType ? listByType(objectType) : []
+  const isProject = objectType === 'project'
 
-  if (!module?.objectType) {
+  const projectGroups = useMemo(() => {
+    if (!isProject) return []
+    return PROJECT_STATUS_GROUPS.map((group) => ({
+      ...group,
+      items: items.filter((object) => projectStatus(object) === group.value),
+    }))
+  }, [isProject, items])
+
+  if (!module || !objectType) {
     return <Navigate to="/" replace />
   }
 
-  const schema = getSchema(module.objectType)
-  const items = listByType(module.objectType)
+  const schema = getSchema(objectType)
 
   return (
     <div className="module-page">
@@ -42,6 +69,26 @@ export function ModulePage() {
               {schema.labelKo} 추가
             </Link>
           </div>
+        </div>
+      ) : isProject ? (
+        <div className="object-groups">
+          {projectGroups.map((group) => (
+            <section key={group.value} className="object-group" aria-label={group.label}>
+              <header className="object-group-header">
+                <h2>{group.label}</h2>
+                <strong>{group.items.length}</strong>
+              </header>
+              {group.items.length === 0 ? (
+                <p className="object-group-empty">없음</p>
+              ) : (
+                <div className="object-stream">
+                  {group.items.map((object) => (
+                    <ObjectCard key={object.id} object={object} />
+                  ))}
+                </div>
+              )}
+            </section>
+          ))}
         </div>
       ) : (
         <div className="object-stream">
