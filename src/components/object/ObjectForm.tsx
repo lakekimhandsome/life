@@ -89,7 +89,7 @@ export function ObjectForm({
         />
       </div>
 
-      <div className={`field-grid${type === 'project' ? ' field-grid--inline' : ''}`}>
+      <div className={`field-grid${type === 'project' || type === 'journal' || type === 'goal' ? ' field-grid--inline' : ''}`}>
         <div className="field">
           <label htmlFor="occurredAt">날짜</label>
           <input
