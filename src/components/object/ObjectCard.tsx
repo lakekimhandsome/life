@@ -1,7 +1,7 @@
 import { ChevronRight } from 'lucide-react'
 import type { CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
-import { formatDate } from '../../lib/format'
+import { formatDate, fromDateInputValue } from '../../lib/format'
 import { stripMarkdown } from '../../lib/markdown'
 import { formatMetaValue, getSchema } from '../../domain/schemas'
 import type { LifeObject } from '../../core/types'
@@ -9,7 +9,13 @@ import { TypeBadge } from '../ui/TypeBadge'
 
 export function ObjectCard({ object }: { object: LifeObject }) {
   const schema = getSchema(object.type)
+  const goalTargetDate =
+    object.type === 'goal' && typeof object.meta.targetDate === 'string' && object.meta.targetDate
+      ? object.meta.targetDate
+      : null
+  const shownDate = object.type === 'goal' ? goalTargetDate : object.occurredAt
   const metaBits = schema.fields
+    .filter((field) => object.type !== 'goal' || field.key !== 'targetDate')
     .map((field) => formatMetaValue(object.type, field.key, object.meta[field.key] ?? null))
     .filter(Boolean)
     .slice(0, 2)
@@ -30,7 +36,13 @@ export function ObjectCard({ object }: { object: LifeObject }) {
       <div className="object-row-main">
         <div className="object-row-meta">
           <TypeBadge type={object.type} />
-          <time dateTime={object.occurredAt}>{formatDate(object.occurredAt)}</time>
+          {shownDate ? (
+            <time dateTime={shownDate}>
+              {object.type === 'goal'
+                ? formatDate(fromDateInputValue(shownDate.slice(0, 10)))
+                : formatDate(shownDate)}
+            </time>
+          ) : null}
         </div>
         <h3>{object.title}</h3>
         {bodyPreview ? <p>{bodyPreview}</p> : null}

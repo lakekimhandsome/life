@@ -7,7 +7,7 @@ import { TypeBadge } from '../components/ui/TypeBadge'
 import type { LifeObject, Relationship } from '../core/types'
 import { getModuleForObjectType } from '../domain/modules'
 import { formatMetaValue, getSchema } from '../domain/schemas'
-import { formatDateTime } from '../lib/format'
+import { formatDate, formatDateTime, fromDateInputValue } from '../lib/format'
 import { useLife } from '../state/LifeContext'
 
 export function ObjectDetailPage() {
@@ -43,6 +43,11 @@ export function ObjectDetailPage() {
   const backTo = module?.path ?? '/'
   const supportsMarkdown =
     object.type === 'journal' || object.type === 'goal' || object.type === 'project'
+  const goalTargetDate =
+    object.type === 'goal' && typeof object.meta.targetDate === 'string' && object.meta.targetDate
+      ? object.meta.targetDate
+      : null
+  const headerDate = object.type === 'goal' ? goalTargetDate : object.occurredAt
   const related = relationships
     .map((rel) => {
       const otherId = rel.sourceId === object.id ? rel.targetId : rel.sourceId
@@ -69,7 +74,13 @@ export function ObjectDetailPage() {
       <header className="detail-header">
         <div className="detail-meta">
           <TypeBadge type={object.type} />
-          <time dateTime={object.occurredAt}>{formatDateTime(object.occurredAt)}</time>
+          {headerDate ? (
+            <time dateTime={headerDate}>
+              {object.type === 'goal'
+                ? formatDate(fromDateInputValue(headerDate.slice(0, 10)))
+                : formatDateTime(object.occurredAt)}
+            </time>
+          ) : null}
         </div>
         <h1>{object.title}</h1>
         {schema.description ? <p className="detail-sub">{schema.description}</p> : null}
@@ -103,10 +114,12 @@ export function ObjectDetailPage() {
               </div>
             )
           })}
-          <div>
-            <dt>생성</dt>
-            <dd>{formatDateTime(object.createdAt)}</dd>
-          </div>
+          {object.type !== 'goal' ? (
+            <div>
+              <dt>생성</dt>
+              <dd>{formatDateTime(object.createdAt)}</dd>
+            </div>
+          ) : null}
         </dl>
       </section>
 

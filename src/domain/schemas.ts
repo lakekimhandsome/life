@@ -1,4 +1,5 @@
 import type { ObjectType } from '../core/types'
+import { formatDate, fromDateInputValue } from '../lib/format'
 
 export type FieldKind = 'text' | 'number' | 'select' | 'date'
 
@@ -225,6 +226,9 @@ export function formatMetaValue(
   if (!field) return String(value)
   if (field.kind === 'select') {
     return field.options?.find((option) => option.value === value)?.label ?? String(value)
+  }
+  if (field.kind === 'date') {
+    return formatDate(fromDateInputValue(String(value).slice(0, 10)))
   }
   if (field.kind === 'number' && key === 'durationMin') {
     return `${value}분`

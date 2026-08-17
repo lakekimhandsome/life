@@ -94,15 +94,17 @@ export function ObjectForm({
       </div>
 
       <div className={`field-grid${type === 'project' || type === 'journal' || type === 'goal' ? ' field-grid--inline' : ''}`}>
-        <div className="field">
-          <label htmlFor="occurredAt">날짜</label>
-          <input
-            id="occurredAt"
-            type="date"
-            value={occurredAt}
-            onChange={(event) => setOccurredAt(event.target.value)}
-          />
-        </div>
+        {type !== 'goal' ? (
+          <div className="field">
+            <label htmlFor="occurredAt">날짜</label>
+            <input
+              id="occurredAt"
+              type="date"
+              value={occurredAt}
+              onChange={(event) => setOccurredAt(event.target.value)}
+            />
+          </div>
+        ) : null}
 
         {metaFields.map((field) => (
           <div className="field" key={field.key}>
