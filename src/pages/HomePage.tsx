@@ -53,6 +53,7 @@ export function HomePage() {
       .filter((object) => {
         if (object.type !== 'goal') return false
         if (object.meta.status === 'achieved') return false
+        if (object.meta.showOnHome === false) return false
         const target = object.meta.targetDate
         return typeof target === 'string' && target.length > 0
       })

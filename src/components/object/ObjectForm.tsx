@@ -38,9 +38,13 @@ export function ObjectForm({
   const [occurredAt, setOccurredAt] = useState(
     toDateInputValue(initial?.occurredAt ?? new Date().toISOString()),
   )
-  const [meta, setMeta] = useState<LifeObject['meta']>(
-    initial?.meta ?? defaultMeta(type),
-  )
+  const [meta, setMeta] = useState<LifeObject['meta']>(() => {
+    const base = initial?.meta ?? defaultMeta(type)
+    if (type === 'goal' && initial) {
+      return { ...base, showOnHome: base.showOnHome !== false }
+    }
+    return base
+  })
   const [linkedGoalId, setLinkedGoalId] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -153,6 +157,23 @@ export function ObjectForm({
           </div>
         ))}
       </div>
+
+      {type === 'goal' && initial ? (
+        <label className="field-check" htmlFor="showOnHome">
+          <input
+            id="showOnHome"
+            type="checkbox"
+            checked={meta.showOnHome !== false}
+            onChange={(event) =>
+              setMeta((prev) => ({ ...prev, showOnHome: event.target.checked }))
+            }
+          />
+          <span>
+            메인에 표시
+            <em>홈 화면에 디데이로 보여줍니다. 목표일이 있을 때만 표시됩니다.</em>
+          </span>
+        </label>
+      ) : null}
 
       <div className="field">
         <label htmlFor="body">{schema.bodyLabel}</label>

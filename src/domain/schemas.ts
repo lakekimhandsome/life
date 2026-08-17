@@ -209,7 +209,7 @@ export function defaultMeta(type: ObjectType): Record<string, string | number | 
     case 'study':
       return { subject: '', done: false }
     case 'goal':
-      return { status: 'active', targetDate: null }
+      return { status: 'active', targetDate: null, showOnHome: true }
     case 'asset':
       return { kind: 'cash', symbol: 'KRW', quantity: null }
   }
