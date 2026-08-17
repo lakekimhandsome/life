@@ -661,8 +661,8 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-study) 16%, transparent);
 }
 
-.todo-composer .btn {
-  padding: 0.9rem 1.15rem;
+.todo-composer .module-header-btn {
+  align-self: center;
 }
 
 .todo-list {
@@ -1258,14 +1258,14 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
   }
 }
 
-.assets-header-actions {
+.module-header-actions {
   display: inline-flex;
   align-items: center;
   gap: 0.15rem;
   margin-left: auto;
 }
 
-.assets-header-btn {
+.module-header-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1275,24 +1275,24 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
   border: 0;
   border-radius: 10px;
   background: transparent;
-  color: color-mix(in srgb, var(--accent-asset) 72%, var(--ink));
+  color: color-mix(in srgb, var(--heading-accent, var(--accent)) 72%, var(--ink));
   line-height: 0;
   text-decoration: none;
   cursor: pointer;
   transition: background 140ms ease, color 140ms ease;
 }
 
-.assets-header-btn:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--accent-asset) 14%, transparent);
-  color: var(--accent-asset);
+.module-header-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--heading-accent, var(--accent)) 14%, transparent);
+  color: var(--heading-accent, var(--accent));
 }
 
-.assets-header-btn:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--accent-asset) 55%, white);
+.module-header-btn:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--heading-accent, var(--accent)) 55%, white);
   outline-offset: 2px;
 }
 
-.assets-header-btn:disabled {
+.module-header-btn:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }

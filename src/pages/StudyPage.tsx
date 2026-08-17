@@ -6,7 +6,7 @@ import {
   type FormEvent,
   type PointerEvent as ReactPointerEvent,
 } from 'react'
-import { Check, ChevronLeft, ChevronRight, GripVertical } from 'lucide-react'
+import { Check, ChevronLeft, ChevronRight, GripVertical, Plus } from 'lucide-react'
 import * as repository from '../core/repository'
 import type { LifeObject } from '../core/types'
 import { BackLink } from '../components/ui/BackLink'
@@ -381,8 +381,8 @@ export function StudyPage() {
   }
 
   return (
-    <div className="module-page study-page">
-      <div className="module-header">
+    <div className="module-page study-page module-heading--study">
+      <div className="module-header module-heading--study">
         <BackLink to="/" />
         <div className="module-heading module-heading--study">
           <h1>공부</h1>
@@ -438,10 +438,11 @@ export function StudyPage() {
         />
         <button
           type="submit"
-          className="btn btn-primary"
+          className="module-header-btn"
           disabled={!ready || saving || !draft.trim()}
+          aria-label="할 일 추가"
         >
-          추가
+          <Plus size={22} strokeWidth={1.75} aria-hidden="true" />
         </button>
       </form>
 

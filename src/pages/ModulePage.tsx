@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { Plus } from 'lucide-react'
 import { Link, Navigate, useLocation } from 'react-router-dom'
 import { ObjectCard } from '../components/object/ObjectCard'
 import { BackLink } from '../components/ui/BackLink'
@@ -48,14 +49,20 @@ export function ModulePage() {
 
   return (
     <div className="module-page">
-      <div className="module-header">
+      <div className={`module-header module-heading--${module.id}`}>
         <BackLink to="/" />
         <div className={`module-heading module-heading--${module.id}`}>
           <h1>{module.title}</h1>
         </div>
-        <Link to={`/create/${module.objectType}`} className="btn btn-primary">
-          {schema.labelKo} 추가
-        </Link>
+        <div className="module-header-actions">
+          <Link
+            to={`/create/${module.objectType}`}
+            className="module-header-btn"
+            aria-label={`${schema.labelKo} 추가`}
+          >
+            <Plus size={22} strokeWidth={1.75} aria-hidden="true" />
+          </Link>
+        </div>
       </div>
 
       {!ready ? (
@@ -64,11 +71,6 @@ export function ModulePage() {
         <div className="empty-panel">
           <h3>아직 기록이 없습니다</h3>
           <p>첫 {schema.labelKo}를 남겨 보세요.</p>
-          <div className="form-actions">
-            <Link to={`/create/${module.objectType}`} className="btn btn-primary">
-              {schema.labelKo} 추가
-            </Link>
-          </div>
         </div>
       ) : isProject ? (
         <div className="object-groups">

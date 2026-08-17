@@ -624,22 +624,22 @@ export function AssetsPage() {
 
   return (
     <div className="module-page assets-page">
-      <div className="module-header">
+      <div className="module-header module-heading--assets">
         <BackLink to="/" />
         <div className="module-heading module-heading--assets">
           <h1>자산</h1>
         </div>
-        <div className="assets-header-actions">
+        <div className="module-header-actions">
           <Link
             to="/assets/history"
-            className="assets-header-btn"
+            className="module-header-btn"
             aria-label="자산 추이"
           >
             <ChartNoAxesCombined size={22} strokeWidth={1.75} aria-hidden="true" />
           </Link>
           <button
             type="button"
-            className="assets-header-btn"
+            className="module-header-btn"
             onClick={openComposer}
             disabled={!ready}
             aria-label="자산 추가"
@@ -648,7 +648,7 @@ export function AssetsPage() {
           </button>
           <button
             type="button"
-            className="assets-header-btn"
+            className="module-header-btn"
             onClick={() => setEditingMode((value) => !value)}
             disabled={!ready}
             aria-label={editingMode ? '편집 완료' : '자산 편집'}
