@@ -65,6 +65,16 @@ export function AssetsHistoryChart({
     [points, series],
   )
 
+  const yDomain = useMemo((): [number, number] => {
+    if (data.length === 0) return [0, 1]
+    const values = data.map((row) => row.value)
+    const min = Math.min(...values)
+    const max = Math.max(...values)
+    const span = max - min
+    const pad = span === 0 ? Math.max(Math.abs(max) * 0.05, 1) : span * 0.12
+    return [min - pad, max + pad]
+  }, [data])
+
   if (data.length === 0) {
     return (
       <div className="assets-history-chart assets-history-chart--empty">
@@ -86,6 +96,9 @@ export function AssetsHistoryChart({
             minTickGap={28}
           />
           <YAxis
+            type="number"
+            domain={yDomain}
+            allowDataOverflow
             tick={{ fill: 'var(--muted)', fontSize: 11 }}
             tickLine={false}
             axisLine={false}
