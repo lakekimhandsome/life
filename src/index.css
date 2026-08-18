@@ -1901,6 +1901,13 @@ button.assets-row-title:focus-visible {
   margin-bottom: 0;
 }
 
+.object-header-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  flex-shrink: 0;
+}
+
 .object-header-action {
   display: inline-flex;
   align-items: center;

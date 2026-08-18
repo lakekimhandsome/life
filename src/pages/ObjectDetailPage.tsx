@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Pencil } from 'lucide-react'
+import { Pencil, Trash2 } from 'lucide-react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import { BackLink } from '../components/ui/BackLink'
 import { MarkdownContent } from '../components/ui/MarkdownContent'
@@ -61,13 +61,28 @@ export function ObjectDetailPage() {
       <div className="object-page-toolbar">
         <BackLink to={backTo} />
         {supportsMarkdown ? (
-          <Link
-            to={`/object/${object.id}/edit`}
-            className="object-header-action"
-            aria-label={`${schema.labelKo} 수정`}
-          >
-            <Pencil size={20} strokeWidth={1.75} aria-hidden="true" />
-          </Link>
+          <div className="object-header-actions">
+            <Link
+              to={`/object/${object.id}/edit`}
+              className="object-header-action"
+              aria-label={`${schema.labelKo} 수정`}
+            >
+              <Pencil size={20} strokeWidth={1.75} aria-hidden="true" />
+            </Link>
+            <button
+              type="button"
+              className="object-header-action"
+              aria-label={`${schema.labelKo} 삭제`}
+              onClick={async () => {
+                const confirmed = window.confirm('이 기록을 삭제할까요?')
+                if (!confirmed) return
+                await deleteObject(object.id)
+                navigate(backTo)
+              }}
+            >
+              <Trash2 size={20} strokeWidth={1.75} aria-hidden="true" />
+            </button>
+          </div>
         ) : null}
       </div>
 
@@ -144,25 +159,25 @@ export function ObjectDetailPage() {
         )}
       </section>
 
-      <div className="detail-actions">
-        {!supportsMarkdown ? (
+      {!supportsMarkdown ? (
+        <div className="detail-actions">
           <Link to={`/object/${object.id}/edit`} className="btn btn-ghost">
             수정
           </Link>
-        ) : null}
-        <button
-          type="button"
-          className="btn btn-danger"
-          onClick={async () => {
-            const confirmed = window.confirm('이 기록을 삭제할까요?')
-            if (!confirmed) return
-            await deleteObject(object.id)
-            navigate(backTo)
-          }}
-        >
-          삭제
-        </button>
-      </div>
+          <button
+            type="button"
+            className="btn btn-danger"
+            onClick={async () => {
+              const confirmed = window.confirm('이 기록을 삭제할까요?')
+              if (!confirmed) return
+              await deleteObject(object.id)
+              navigate(backTo)
+            }}
+          >
+            삭제
+          </button>
+        </div>
+      ) : null}
     </article>
   )
 }
