@@ -590,11 +590,6 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
 .module-heading--goals { --heading-accent: var(--accent-goal); }
 .module-heading--projects { --heading-accent: var(--accent-project); }
 
-.study-page {
-  width: min(640px, 100%);
-  margin: 0 auto;
-}
-
 .day-nav {
   display: grid;
   grid-template-columns: 2.5rem 1fr 2.5rem;
