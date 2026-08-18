@@ -594,17 +594,15 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
   justify-content: center;
   width: 2.5rem;
   height: 2.5rem;
-  border: 1px solid var(--line-strong);
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.7);
+  padding: 0;
+  border: 0;
+  background: transparent;
   color: var(--ink-soft);
   cursor: pointer;
-  transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
+  transition: color 160ms ease;
 }
 
 .day-nav-btn:hover {
-  background: #fff;
-  border-color: color-mix(in srgb, var(--accent-study) 40%, white);
   color: var(--ink);
 }
 
@@ -2489,7 +2487,6 @@ button.assets-row-title:focus-visible {
 }
 
 html[data-theme='dark'] .user-menu-trigger,
-html[data-theme='dark'] .day-nav-btn,
 html[data-theme='dark'] .assets-chart-toggle,
 html[data-theme='dark'] .assets-history-range,
 html[data-theme='dark'] .btn-ghost {
@@ -2497,8 +2494,7 @@ html[data-theme='dark'] .btn-ghost {
 }
 
 html[data-theme='dark'] .user-menu-trigger:hover,
-html[data-theme='dark'] .user-menu-trigger[aria-expanded='true'],
-html[data-theme='dark'] .day-nav-btn:hover {
+html[data-theme='dark'] .user-menu-trigger[aria-expanded='true'] {
   background: var(--surface-solid);
 }
 
