@@ -1846,9 +1846,12 @@ button.assets-row-title:focus-visible {
 
 .compose,
 .detail {
+  animation: rise 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.compose {
   width: min(680px, 100%);
   margin: 0 auto;
-  animation: rise 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .compose-header,
