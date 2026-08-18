@@ -657,7 +657,7 @@ export function AssetsPage() {
             {editingMode ? (
               <Check size={22} strokeWidth={1.75} aria-hidden="true" />
             ) : (
-              <Pencil size={20} strokeWidth={1.75} aria-hidden="true" />
+              <Pencil size={22} strokeWidth={1.75} aria-hidden="true" />
             )}
           </button>
         </div>

@@ -530,9 +530,24 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
 }
 
 .module-header > .back-link {
-  grid-column: 1 / -1;
+  grid-column: 1;
+  grid-row: 1;
   justify-self: start;
   margin-bottom: 0;
+}
+
+.module-header > .module-heading {
+  grid-column: 1 / -1;
+  grid-row: 2;
+}
+
+.module-header-actions {
+  grid-column: 2;
+  grid-row: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  margin-left: auto;
 }
 
 .module-heading {
@@ -1254,13 +1269,6 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
     width: min(180px, 58vw);
     height: min(180px, 58vw);
   }
-}
-
-.module-header-actions {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.15rem;
-  margin-left: auto;
 }
 
 .module-header-btn {
