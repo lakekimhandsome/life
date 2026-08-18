@@ -1,23 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { LogOut, Settings } from 'lucide-react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { displayEmail, displayName, resolveAvatarUrl } from '../../lib/userProfile'
 import { useAuth } from '../../state/AuthContext'
+import { Avatar } from '../ui/Avatar'
 import { LifeMark } from '../ui/LifeMark'
-
-function displayName(user: {
-  email?: string | null
-  user_metadata?: Record<string, unknown>
-}) {
-  const meta = user.user_metadata ?? {}
-  const nickname =
-    (typeof meta.full_name === 'string' && meta.full_name) ||
-    (typeof meta.name === 'string' && meta.name) ||
-    (typeof meta.nickname === 'string' && meta.nickname) ||
-    (typeof meta.preferred_username === 'string' && meta.preferred_username)
-  if (nickname) return nickname
-  if (user.email) return user.email.split('@')[0]
-  return '나'
-}
 
 export function AppShell() {
   const { user, signOut } = useAuth()
@@ -48,8 +35,9 @@ export function AppShell() {
     }
   }, [menuOpen])
 
-  const label = user ? displayName(user) : '나'
-  const triggerLabel = label.slice(0, 1)
+  const label = displayName(user)
+  const email = displayEmail(user)
+  const avatarSrc = resolveAvatarUrl(user)
 
   async function handleSignOut() {
     setAuthError(null)
@@ -81,24 +69,17 @@ export function AppShell() {
             aria-label="사용자 메뉴"
             onClick={() => setMenuOpen((open) => !open)}
           >
-            {triggerLabel}
+            <Avatar src={avatarSrc} name={label} size={36} alt="" />
           </button>
           {menuOpen ? (
             <div className="user-menu-panel" role="menu">
-              <p className="user-menu-label">{label}</p>
-
-              <button
-                type="button"
-                className="user-menu-item is-action"
-                role="menuitem"
-                disabled={authBusy}
-                onClick={() => void handleSignOut()}
-              >
-                <LogOut size={16} strokeWidth={1.75} aria-hidden="true" />
-                로그아웃
-              </button>
-
-              {authError ? <p className="user-menu-hint is-error">{authError}</p> : null}
+              <div className="user-menu-identity">
+                <Avatar src={avatarSrc} name={label} size={40} alt="" />
+                <div className="user-menu-identity-copy">
+                  <p className="user-menu-label">{label}</p>
+                  {email ? <p className="user-menu-email">{email}</p> : null}
+                </div>
+              </div>
 
               <button
                 type="button"
@@ -112,6 +93,19 @@ export function AppShell() {
                 <Settings size={16} strokeWidth={1.75} aria-hidden="true" />
                 설정
               </button>
+
+              <button
+                type="button"
+                className="user-menu-item is-action"
+                role="menuitem"
+                disabled={authBusy}
+                onClick={() => void handleSignOut()}
+              >
+                <LogOut size={16} strokeWidth={1.75} aria-hidden="true" />
+                로그아웃
+              </button>
+
+              {authError ? <p className="user-menu-hint is-error">{authError}</p> : null}
             </div>
           ) : null}
         </div>

@@ -1,5 +1,6 @@
 import { ChevronRight, Monitor, Moon, Sun } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { ProfilePhotoSection } from '../components/profile/ProfilePhotoSection'
 import { BackLink } from '../components/ui/BackLink'
 import { useTheme, type ThemePreference } from '../state/ThemeContext'
 
@@ -24,6 +25,8 @@ export function SettingsPage() {
           <h1>설정</h1>
         </div>
       </div>
+
+      <ProfilePhotoSection />
 
       <nav className="settings-menu" aria-label="설정 메뉴">
         <section className="settings-menu-item settings-theme">
