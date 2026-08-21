@@ -1335,6 +1335,7 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
 }
 
 .module-header-btn {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1364,6 +1365,51 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
 .module-header-btn:disabled {
   opacity: 0.45;
   cursor: not-allowed;
+}
+
+.module-header-btn::after,
+.object-header-action::after,
+.back-link::after {
+  content: attr(aria-label);
+  position: absolute;
+  top: calc(100% + 0.38rem);
+  left: 50%;
+  z-index: 8;
+  padding: 0.32rem 0.52rem;
+  border-radius: 8px;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--ink) 18%, transparent);
+  transition: opacity 140ms ease;
+}
+
+.module-header-actions .module-header-btn:last-child::after,
+.object-header-actions .object-header-action:last-child::after {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .module-header-btn:hover:not(:disabled)::after,
+  .object-header-action:hover:not(:disabled)::after,
+  .back-link:hover::after {
+    opacity: 1;
+  }
+}
+
+.module-header-btn:focus-visible::after,
+.object-header-action:focus-visible::after,
+.back-link:focus-visible::after {
+  opacity: 1;
 }
 
 .assets-history-page .module-header {
@@ -1952,6 +1998,7 @@ button.assets-row-title:focus-visible {
 }
 
 .back-link {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2001,6 +2048,7 @@ button.assets-row-title:focus-visible {
 }
 
 .object-header-action {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
