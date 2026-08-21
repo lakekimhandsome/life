@@ -2949,7 +2949,7 @@ html[data-theme='dark'] select option {
   }
 }
 
-@media (min-width: 900px) {
+@media (min-width: 800px) {
   .app-shell {
     display: grid;
     grid-template-columns: 15.5rem minmax(0, 1fr);
