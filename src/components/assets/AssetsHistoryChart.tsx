@@ -23,6 +23,7 @@ const SERIES_LABEL: Record<AssetHistorySeries, string> = {
 }
 
 interface ChartRow {
+  id: string
   date: string
   label: string
   value: number
@@ -51,13 +52,18 @@ function formatAxisKrw(value: number): string {
 export function AssetsHistoryChart({
   points,
   series = 'total',
+  selectedId = null,
+  onSelect,
 }: {
   points: AssetHistoryPoint[]
   series?: AssetHistorySeries
+  selectedId?: string | null
+  onSelect?: (id: string) => void
 }) {
   const data = useMemo<ChartRow[]>(
     () =>
       points.map((point) => ({
+        id: point.id,
         date: point.recordedAt,
         label: shortDateLabel(point.recordedAt),
         value: seriesValue(point, series),
@@ -75,6 +81,8 @@ export function AssetsHistoryChart({
     return [min - pad, max + pad]
   }, [data])
 
+  const showDots = data.length <= 14 || Boolean(selectedId)
+
   if (data.length === 0) {
     return (
       <div className="assets-history-chart assets-history-chart--empty">
@@ -86,7 +94,15 @@ export function AssetsHistoryChart({
   return (
     <div className="assets-history-chart" aria-label={`${SERIES_LABEL[series]} 추이`}>
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={data} margin={{ top: 12, right: 8, left: 4, bottom: 4 }}>
+        <LineChart
+          data={data}
+          margin={{ top: 12, right: 8, left: 4, bottom: 4 }}
+          onClick={(state) => {
+            const row = state?.activePayload?.[0]?.payload as ChartRow | undefined
+            if (!row?.id || !onSelect) return
+            onSelect(row.id)
+          }}
+        >
           <CartesianGrid stroke="color-mix(in srgb, var(--line) 80%, transparent)" vertical={false} />
           <XAxis
             dataKey="label"
@@ -124,8 +140,28 @@ export function AssetsHistoryChart({
             name={SERIES_LABEL[series]}
             stroke="var(--accent-asset)"
             strokeWidth={2.25}
-            dot={data.length <= 14}
-            activeDot={{ r: 5 }}
+            activeDot={{ r: 6 }}
+            dot={
+              showDots
+                ? (props) => {
+                    const { cx, cy, payload } = props
+                    if (typeof cx !== 'number' || typeof cy !== 'number') return null
+                    const row = payload as ChartRow
+                    const selected = row.id === selectedId
+                    return (
+                      <circle
+                        cx={cx}
+                        cy={cy}
+                        r={selected ? 6 : 3.5}
+                        fill={selected ? 'var(--accent-asset)' : 'var(--bg)'}
+                        stroke="var(--accent-asset)"
+                        strokeWidth={selected ? 2.5 : 2}
+                        style={{ cursor: onSelect ? 'pointer' : undefined }}
+                      />
+                    )
+                  }
+                : false
+            }
           />
         </LineChart>
       </ResponsiveContainer>

@@ -9,13 +9,20 @@ import {
   type AssetHistoryRange,
 } from '../domain/assetHistory'
 import { formatKrw } from '../domain/assets'
-import { listAssetHistory, type AssetHistoryPoint } from '../lib/assetHistory'
+import { formatDate, fromDateInputValue } from '../lib/format'
+import {
+  deleteAssetHistory,
+  listAssetHistory,
+  type AssetHistoryPoint,
+} from '../lib/assetHistory'
 
 export function AssetHistoryPage() {
   const [range, setRange] = useState<AssetHistoryRange>('1m')
   const [points, setPoints] = useState<AssetHistoryPoint[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     let active = true
@@ -23,6 +30,7 @@ export function AssetHistoryPage() {
     ;(async () => {
       setLoading(true)
       setError(null)
+      setSelectedId(null)
       try {
         const next = await listAssetHistory(range)
         if (!active) return
@@ -42,9 +50,32 @@ export function AssetHistoryPage() {
   }, [range])
 
   const change = useMemo(() => computeHistoryChange(points), [points])
+  const selected = useMemo(
+    () => points.find((point) => point.id === selectedId) ?? null,
+    [points, selectedId],
+  )
 
   const changeTone =
     change.amount === null ? '' : change.amount > 0 ? ' is-up' : change.amount < 0 ? ' is-down' : ''
+
+  async function handleDeleteSelected() {
+    if (!selected) return
+    const label = formatDate(fromDateInputValue(selected.recordedAt))
+    const confirmed = window.confirm(`${label} 기록을 삭제할까요?`)
+    if (!confirmed) return
+
+    setDeleting(true)
+    setError(null)
+    try {
+      await deleteAssetHistory(selected.id)
+      setPoints((prev) => prev.filter((point) => point.id !== selected.id))
+      setSelectedId(null)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '기록을 삭제하지 못했습니다.')
+    } finally {
+      setDeleting(false)
+    }
+  }
 
   return (
     <div className="module-page assets-page assets-history-page">
@@ -76,7 +107,35 @@ export function AssetHistoryPage() {
         <p className="empty-state">불러오는 중…</p>
       ) : (
         <>
-          <AssetsHistoryChart points={points} series="total" />
+          <AssetsHistoryChart
+            points={points}
+            series="total"
+            selectedId={selectedId}
+            onSelect={(id) => setSelectedId((prev) => (prev === id ? null : id))}
+          />
+
+          {selected ? (
+            <section className="assets-history-selected" aria-label="선택한 기록">
+              <div className="assets-history-selected-main">
+                <p className="assets-history-stat-label">
+                  {formatDate(fromDateInputValue(selected.recordedAt))}
+                </p>
+                <strong className="assets-history-stat-value">
+                  {formatKrw(selected.total)}
+                </strong>
+              </div>
+              <button
+                type="button"
+                className="btn btn-danger"
+                disabled={deleting}
+                onClick={() => void handleDeleteSelected()}
+              >
+                {deleting ? '삭제 중…' : '삭제'}
+              </button>
+            </section>
+          ) : points.length > 0 ? (
+            <p className="assets-history-hint">차트에서 기록을 선택하면 삭제할 수 있습니다.</p>
+          ) : null}
 
           <section className="assets-history-stats" aria-label="기간 요약">
             <div className="assets-history-stat">

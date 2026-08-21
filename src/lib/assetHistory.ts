@@ -127,6 +127,29 @@ async function insertAssetHistory(
   return true
 }
 
+export async function deleteAssetHistory(id: string): Promise<void> {
+  if (!isSupabaseConfigured()) {
+    throw new Error('저장소가 설정되지 않았습니다.')
+  }
+
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+  if (!session) {
+    throw new Error('로그인이 필요합니다.')
+  }
+
+  const { error } = await supabase
+    .from('asset_history')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', session.user.id)
+
+  if (error) {
+    throw new Error(error.message || '기록을 삭제하지 못했습니다.')
+  }
+}
+
 /**
  * Once per local calendar day: persist the first fully-valued portfolio snapshot.
  * No-ops if assets are incomplete, empty, or today's row already exists.

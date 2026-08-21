@@ -1415,6 +1415,30 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
   font-size: 0.92rem;
 }
 
+.assets-history-hint {
+  margin: 0 0 0.85rem;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.assets-history-selected {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 0 0.85rem;
+  padding: 0.85rem 0.1rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.assets-history-selected-main {
+  min-width: 0;
+}
+
+.assets-history-selected .btn {
+  flex-shrink: 0;
+}
+
 .assets-history-stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
