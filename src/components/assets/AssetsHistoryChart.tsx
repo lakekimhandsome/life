@@ -98,8 +98,16 @@ export function AssetsHistoryChart({
           data={data}
           margin={{ top: 12, right: 8, left: 4, bottom: 4 }}
           onClick={(state) => {
-            const row = state?.activePayload?.[0]?.payload as ChartRow | undefined
-            if (!row?.id || !onSelect) return
+            if (!onSelect) return
+            const index =
+              typeof state?.activeIndex === 'number'
+                ? state.activeIndex
+                : typeof state?.activeTooltipIndex === 'number'
+                  ? state.activeTooltipIndex
+                  : null
+            if (index === null) return
+            const row = data[index]
+            if (!row?.id) return
             onSelect(row.id)
           }}
         >
