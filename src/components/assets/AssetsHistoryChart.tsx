@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
 import {
   CartesianGrid,
   Line,
@@ -49,6 +49,61 @@ function formatAxisKrw(value: number): string {
   return new Intl.NumberFormat('ko-KR', { maximumFractionDigits: 0 }).format(value)
 }
 
+/** Recharts v3 stores tooltip index as a string (`"3"`), not a number. */
+function chartIndex(value: unknown): number | null {
+  if (typeof value === 'number' && Number.isInteger(value) && value >= 0) return value
+  if (typeof value === 'string' && value !== '') {
+    const parsed = Number(value)
+    if (Number.isInteger(parsed) && parsed >= 0) return parsed
+  }
+  return null
+}
+
+function HistoryDot({
+  cx,
+  cy,
+  selected,
+  visible,
+  id,
+  onSelect,
+}: {
+  cx: number
+  cy: number
+  selected: boolean
+  visible: boolean
+  id: string
+  onSelect?: (id: string) => void
+}) {
+  const radius = selected ? 6 : 3.5
+
+  return (
+    <g
+      style={{ cursor: onSelect ? 'pointer' : undefined }}
+      onClick={
+        onSelect
+          ? (event) => {
+              event.stopPropagation()
+              onSelect(id)
+            }
+          : undefined
+      }
+    >
+      <circle cx={cx} cy={cy} r={16} fill="transparent" />
+      {visible ? (
+        <circle
+          cx={cx}
+          cy={cy}
+          r={radius}
+          fill={selected ? 'var(--accent-asset)' : 'var(--bg)'}
+          stroke="var(--accent-asset)"
+          strokeWidth={selected ? 2.5 : 2}
+          pointerEvents="none"
+        />
+      ) : null}
+    </g>
+  )
+}
+
 export function AssetsHistoryChart({
   points,
   series = 'total',
@@ -81,7 +136,15 @@ export function AssetsHistoryChart({
     return [min - pad, max + pad]
   }, [data])
 
-  const showDots = data.length <= 14 || Boolean(selectedId)
+  const showVisualDots = Boolean(onSelect) || data.length <= 14 || Boolean(selectedId)
+  const lastDotSelectAt = useRef(0)
+
+  function selectPoint(id: string, fromDot = false) {
+    if (!onSelect) return
+    if (fromDot) lastDotSelectAt.current = performance.now()
+    else if (performance.now() - lastDotSelectAt.current < 80) return
+    onSelect(id)
+  }
 
   if (data.length === 0) {
     return (
@@ -98,17 +161,11 @@ export function AssetsHistoryChart({
           data={data}
           margin={{ top: 12, right: 8, left: 4, bottom: 4 }}
           onClick={(state) => {
-            if (!onSelect) return
-            const index =
-              typeof state?.activeIndex === 'number'
-                ? state.activeIndex
-                : typeof state?.activeTooltipIndex === 'number'
-                  ? state.activeTooltipIndex
-                  : null
+            const index = chartIndex(state?.activeIndex) ?? chartIndex(state?.activeTooltipIndex)
             if (index === null) return
             const row = data[index]
             if (!row?.id) return
-            onSelect(row.id)
+            selectPoint(row.id)
           }}
         >
           <CartesianGrid stroke="color-mix(in srgb, var(--line) 80%, transparent)" vertical={false} />
@@ -148,28 +205,31 @@ export function AssetsHistoryChart({
             name={SERIES_LABEL[series]}
             stroke="var(--accent-asset)"
             strokeWidth={2.25}
-            activeDot={{ r: 6 }}
-            dot={
-              showDots
-                ? (props) => {
-                    const { cx, cy, payload } = props
-                    if (typeof cx !== 'number' || typeof cy !== 'number') return null
-                    const row = payload as ChartRow
-                    const selected = row.id === selectedId
-                    return (
-                      <circle
-                        cx={cx}
-                        cy={cy}
-                        r={selected ? 6 : 3.5}
-                        fill={selected ? 'var(--accent-asset)' : 'var(--bg)'}
-                        stroke="var(--accent-asset)"
-                        strokeWidth={selected ? 2.5 : 2}
-                        style={{ cursor: onSelect ? 'pointer' : undefined }}
-                      />
-                    )
+            isAnimationActive={false}
+            activeDot={{ r: 6, pointerEvents: 'none' }}
+            dot={(props) => {
+              const { cx, cy, payload } = props
+              if (typeof cx !== 'number' || typeof cy !== 'number') return <g />
+              const row = payload as ChartRow
+              if (!row?.id) return <g />
+              const selected = row.id === selectedId
+              return (
+                <HistoryDot
+                  cx={cx}
+                  cy={cy}
+                  id={row.id}
+                  selected={selected}
+                  visible={showVisualDots || selected}
+                  onSelect={
+                    onSelect
+                      ? (id) => {
+                          selectPoint(id, true)
+                        }
+                      : undefined
                   }
-                : false
-            }
+                />
+              )
+            }}
           />
         </LineChart>
       </ResponsiveContainer>
