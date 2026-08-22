@@ -1,6 +1,7 @@
 export const OBJECT_TYPES = [
   'journal',
   'project',
+  'note',
   'workout',
   'study',
   'goal',

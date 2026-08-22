@@ -1,4 +1,4 @@
-import type { LifeObject } from '../core/types'
+import type { LifeObject, ObjectType } from '../core/types'
 import { formatKrw } from './assets'
 import { isSameLocalDay } from '../lib/format'
 
@@ -9,13 +9,14 @@ export type ModuleId =
   | 'journal'
   | 'goals'
   | 'projects'
+  | 'notes'
 
 export interface LifeModule {
   id: ModuleId
   title: string
   path: string
   /** Linked object type, if any. */
-  objectType?: 'study' | 'workout' | 'journal' | 'goal' | 'project' | 'asset'
+  objectType?: ObjectType
 }
 
 export const LIFE_MODULES: LifeModule[] = [
@@ -54,6 +55,12 @@ export const LIFE_MODULES: LifeModule[] = [
     title: '프로젝트',
     path: '/projects',
     objectType: 'project',
+  },
+  {
+    id: 'notes',
+    title: '노트',
+    path: '/notes',
+    objectType: 'note',
   },
 ]
 
@@ -117,6 +124,11 @@ export function getModuleStatus(
       if (active.length === 0) return '진행 중 없음'
       if (active.length === 1) return `${active[0].title} 진행 중`
       return `진행 중 ${active.length}개`
+    }
+    case 'notes': {
+      const notes = ofType(objects, 'note')
+      if (notes.length === 0) return '기록 없음'
+      return `${notes.length}개`
     }
   }
 }

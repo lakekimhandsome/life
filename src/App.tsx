@@ -36,6 +36,7 @@ export default function App() {
                     <Route path="journal" element={<ModulePage />} />
                     <Route path="goals" element={<ModulePage />} />
                     <Route path="projects" element={<ModulePage />} />
+                    <Route path="notes" element={<ModulePage />} />
                     <Route path="assets" element={<AssetsPage />} />
                     <Route path="assets/history" element={<AssetHistoryPage />} />
                     <Route path="settings" element={<SettingsPage />} />

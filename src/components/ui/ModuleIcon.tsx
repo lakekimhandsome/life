@@ -4,6 +4,7 @@ import {
   Dumbbell,
   Folder,
   Notebook,
+  StickyNote,
   Target,
   type LucideIcon,
 } from 'lucide-react'
@@ -16,6 +17,7 @@ const ICONS: Record<ModuleId, LucideIcon> = {
   journal: Notebook,
   goals: Target,
   projects: Folder,
+  notes: StickyNote,
 }
 
 export function ModuleIcon({

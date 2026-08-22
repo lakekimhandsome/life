@@ -3,7 +3,7 @@ import type { CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
 import { formatDate, fromDateInputValue } from '../../lib/format'
 import { stripMarkdown } from '../../lib/markdown'
-import { formatMetaValue, getSchema } from '../../domain/schemas'
+import { formatMetaValue, getSchema, supportsMarkdownBody } from '../../domain/schemas'
 import type { LifeObject } from '../../core/types'
 import { TypeBadge } from '../ui/TypeBadge'
 
@@ -19,8 +19,7 @@ export function ObjectCard({ object }: { object: LifeObject }) {
     .map((field) => formatMetaValue(object.type, field.key, object.meta[field.key] ?? null))
     .filter(Boolean)
     .slice(0, 2)
-  const supportsMarkdown =
-    object.type === 'journal' || object.type === 'goal' || object.type === 'project'
+  const supportsMarkdown = supportsMarkdownBody(object.type)
   const bodyPreview = object.body
     ? supportsMarkdown
       ? stripMarkdown(object.body)

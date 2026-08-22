@@ -72,6 +72,18 @@ export const OBJECT_SCHEMAS: Record<ObjectType, ObjectTypeSchema> = {
       },
     ],
   },
+  note: {
+    type: 'note',
+    label: 'Note',
+    labelKo: '노트',
+    description: '',
+    titlePlaceholder: '노트 제목',
+    bodyPlaceholder:
+      '생각을 자유롭게 남겨 보세요.\n\n마크다운 예: **강조**, - 목록, [링크](url)',
+    bodyLabel: '본문',
+    accent: 'var(--accent-note)',
+    fields: [],
+  },
   workout: {
     type: 'workout',
     label: 'Workout',
@@ -189,11 +201,16 @@ export const OBJECT_SCHEMAS: Record<ObjectType, ObjectTypeSchema> = {
 export const CREATE_ORDER: ObjectType[] = [
   'journal',
   'project',
+  'note',
   'workout',
   'study',
   'goal',
   'asset',
 ]
+
+export function supportsMarkdownBody(type: ObjectType): boolean {
+  return type === 'journal' || type === 'goal' || type === 'project' || type === 'note'
+}
 
 export function getSchema(type: ObjectType): ObjectTypeSchema {
   return OBJECT_SCHEMAS[type]
@@ -205,6 +222,8 @@ export function defaultMeta(type: ObjectType): Record<string, string | number | 
       return { mood: 'calm' }
     case 'project':
       return { status: 'active' }
+    case 'note':
+      return {}
     case 'workout':
       return { durationMin: null, intensity: 'medium' }
     case 'study':

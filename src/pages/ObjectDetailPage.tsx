@@ -6,7 +6,7 @@ import { MarkdownContent } from '../components/ui/MarkdownContent'
 import { TypeBadge } from '../components/ui/TypeBadge'
 import type { LifeObject, Relationship } from '../core/types'
 import { getModuleForObjectType } from '../domain/modules'
-import { formatMetaValue, getSchema } from '../domain/schemas'
+import { formatMetaValue, getSchema, supportsMarkdownBody } from '../domain/schemas'
 import { formatDate, formatDateTime, fromDateInputValue } from '../lib/format'
 import { useLife } from '../state/LifeContext'
 
@@ -41,8 +41,7 @@ export function ObjectDetailPage() {
   const schema = getSchema(object.type)
   const module = getModuleForObjectType(object.type)
   const backTo = module?.path ?? '/'
-  const supportsMarkdown =
-    object.type === 'journal' || object.type === 'goal' || object.type === 'project'
+  const supportsMarkdown = supportsMarkdownBody(object.type)
   const goalTargetDate =
     object.type === 'goal' && typeof object.meta.targetDate === 'string' && object.meta.targetDate
       ? object.meta.targetDate

@@ -42,6 +42,7 @@ const LifeContext = createContext<LifeContextValue | null>(null)
 const emptyCounts: Record<ObjectType, number> = {
   journal: 0,
   project: 0,
+  note: 0,
   workout: 0,
   study: 0,
   goal: 0,

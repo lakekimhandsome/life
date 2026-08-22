@@ -26,6 +26,7 @@
   --accent-study: #5a4f8c;
   --accent-goal: #1f6f78;
   --accent-asset: #8a6a2f;
+  --accent-note: #4d5f6d;
 
   font-family: var(--font-body);
   color: var(--ink);
@@ -58,6 +59,7 @@ html[data-theme='dark'] {
   --accent-study: #a195d2;
   --accent-goal: #b6aa96;
   --accent-asset: #c5a35f;
+  --accent-note: #9db0be;
 }
 
 *,
@@ -548,13 +550,15 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
 .hub-card--journal { --card-accent: var(--accent-journal); }
 .hub-card--goals { --card-accent: var(--accent-goal); }
 .hub-card--projects { --card-accent: var(--accent-project); }
+.hub-card--notes { --card-accent: var(--accent-note); }
 
 .hub-card--study .hub-card-icon,
 .hub-card--workout .hub-card-icon,
 .hub-card--assets .hub-card-icon,
 .hub-card--journal .hub-card-icon,
 .hub-card--goals .hub-card-icon,
-.hub-card--projects .hub-card-icon {
+.hub-card--projects .hub-card-icon,
+.hub-card--notes .hub-card-icon {
   color: var(--card-accent);
 }
 
@@ -657,6 +661,7 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
 .module-heading--journal { --heading-accent: var(--accent-journal); }
 .module-heading--goals { --heading-accent: var(--accent-goal); }
 .module-heading--projects { --heading-accent: var(--accent-project); }
+.module-heading--notes { --heading-accent: var(--accent-note); }
 
 .day-nav {
   display: grid;
@@ -3044,6 +3049,7 @@ html[data-theme='dark'] select option {
   .sidebar-link--journal.is-active { color: var(--accent-journal); }
   .sidebar-link--goals.is-active { color: var(--accent-goal); }
   .sidebar-link--projects.is-active { color: var(--accent-project); }
+  .sidebar-link--notes.is-active { color: var(--accent-note); }
 
   html[data-theme='dark'] .sidebar-link:hover,
   html[data-theme='dark'] .sidebar-link.is-active {

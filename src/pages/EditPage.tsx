@@ -3,7 +3,7 @@ import { Check } from 'lucide-react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { ObjectForm } from '../components/object/ObjectForm'
 import { BackLink } from '../components/ui/BackLink'
-import { getSchema } from '../domain/schemas'
+import { getSchema, supportsMarkdownBody } from '../domain/schemas'
 import { useLife } from '../state/LifeContext'
 
 export function EditPage() {
@@ -23,8 +23,7 @@ export function EditPage() {
   }
 
   const schema = getSchema(object.type)
-  const usesHeaderSubmit =
-    object.type === 'journal' || object.type === 'goal' || object.type === 'project'
+  const usesHeaderSubmit = supportsMarkdownBody(object.type)
   const formId = usesHeaderSubmit ? 'object-edit-form' : undefined
 
   return (

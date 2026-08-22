@@ -1,5 +1,5 @@
 import { useMemo, useState, type FormEvent } from 'react'
-import { defaultMeta, getSchema } from '../../domain/schemas'
+import { defaultMeta, getSchema, supportsMarkdownBody } from '../../domain/schemas'
 import { fromDateInputValue, toDateInputValue } from '../../lib/format'
 import type { LifeObject, ObjectType } from '../../core/types'
 import { useLife } from '../../state/LifeContext'
@@ -50,7 +50,7 @@ export function ObjectForm({
   const [error, setError] = useState<string | null>(null)
 
   const canLinkGoal = type !== 'goal' && !initial
-  const supportsMarkdown = type === 'journal' || type === 'goal' || type === 'project'
+  const supportsMarkdown = supportsMarkdownBody(type)
 
   const metaFields = useMemo(() => schema.fields, [schema.fields])
 
@@ -93,7 +93,7 @@ export function ObjectForm({
         />
       </div>
 
-      <div className={`field-grid${type === 'project' || type === 'journal' || type === 'goal' ? ' field-grid--inline' : ''}`}>
+      <div className={`field-grid${supportsMarkdown ? ' field-grid--inline' : ''}`}>
         {type !== 'goal' ? (
           <div className="field">
             <label htmlFor="occurredAt">날짜</label>
@@ -181,7 +181,7 @@ export function ObjectForm({
         <label htmlFor="body">{schema.bodyLabel}</label>
         <textarea
           id="body"
-          rows={7}
+          rows={type === 'note' ? 14 : 7}
           value={body}
           onChange={(event) => setBody(event.target.value)}
           placeholder={schema.bodyPlaceholder}
