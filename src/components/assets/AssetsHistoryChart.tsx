@@ -136,7 +136,6 @@ export function AssetsHistoryChart({
     return [min - pad, max + pad]
   }, [data])
 
-  const showVisualDots = Boolean(onSelect) || data.length <= 14 || Boolean(selectedId)
   const lastDotSelectAt = useRef(0)
 
   function selectPoint(id: string, fromDot = false) {
@@ -206,7 +205,13 @@ export function AssetsHistoryChart({
             stroke="var(--accent-asset)"
             strokeWidth={2.25}
             isAnimationActive={false}
-            activeDot={{ r: 6, pointerEvents: 'none' }}
+            activeDot={{
+              r: 6,
+              fill: 'var(--accent-asset)',
+              stroke: 'var(--bg)',
+              strokeWidth: 2,
+              pointerEvents: 'none',
+            }}
             dot={(props) => {
               const { cx, cy, payload } = props
               if (typeof cx !== 'number' || typeof cy !== 'number') return <g />
@@ -219,7 +224,7 @@ export function AssetsHistoryChart({
                   cy={cy}
                   id={row.id}
                   selected={selected}
-                  visible={showVisualDots || selected}
+                  visible={selected}
                   onSelect={
                     onSelect
                       ? (id) => {
