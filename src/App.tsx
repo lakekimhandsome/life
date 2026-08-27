@@ -22,9 +22,9 @@ import { ThemeProvider } from './state/ThemeContext'
 
 export default function App() {
   return (
-    <LocaleProvider>
-      <ThemeProvider>
-        <AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <LocaleProvider>
           <LifeProvider>
             <PrefsProvider>
               <BrowserRouter>
@@ -55,8 +55,8 @@ export default function App() {
               </BrowserRouter>
             </PrefsProvider>
           </LifeProvider>
-        </AuthProvider>
-      </ThemeProvider>
-    </LocaleProvider>
+        </LocaleProvider>
+      </AuthProvider>
+    </ThemeProvider>
   )
 }

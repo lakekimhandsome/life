@@ -1,8 +1,13 @@
 import { en, ko, type MessageKey } from './messages'
 
 export type Locale = 'ko' | 'en'
+export type LocalePreference = 'system' | Locale
 export type { MessageKey }
 export type MessageVars = Record<string, string | number>
+
+export function isLocalePreference(value: unknown): value is LocalePreference {
+  return value === 'system' || value === 'ko' || value === 'en'
+}
 
 const catalogs: Record<Locale, Record<MessageKey, string>> = { en, ko }
 

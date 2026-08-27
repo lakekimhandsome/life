@@ -1,9 +1,11 @@
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useLayoutEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react'
@@ -13,11 +15,15 @@ import {
   setLocale as setRuntimeLocale,
   translate,
   type Locale,
+  type LocalePreference,
   type MessageKey,
   type MessageVars,
 } from '../i18n'
+import { getLocalePreference, saveLocalePreference } from '../lib/hubPrefs'
+import { useAuth } from './AuthContext'
 
-export type LocalePreference = 'system' | Locale
+export type { LocalePreference }
+
 type Translate = (key: MessageKey, vars?: MessageVars) => string
 
 type LocaleContextValue = {
@@ -39,14 +45,25 @@ function storedPreference(): LocalePreference {
   }
 }
 
+function persistLocal(preference: LocalePreference) {
+  try {
+    localStorage.setItem(STORAGE_KEY, preference)
+  } catch {
+    // The selected language still applies when storage is unavailable.
+  }
+}
+
 export function LocaleProvider({ children }: { children: ReactNode }) {
-  const [preference, setPreference] = useState<LocalePreference>(() => {
+  const { ready: authReady, user } = useAuth()
+  const [preference, setPreferenceState] = useState<LocalePreference>(() => {
     const next = storedPreference()
     setRuntimeLocale(next === 'system' ? detectLocale() : next)
     return next
   })
   const [systemLocale, setSystemLocale] = useState<Locale>(detectLocale)
   const locale = preference === 'system' ? systemLocale : preference
+  const preferenceRef = useRef(preference)
+  preferenceRef.current = preference
 
   useLayoutEffect(() => {
     setRuntimeLocale(locale)
@@ -54,11 +71,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
   }, [locale])
 
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, preference)
-    } catch {
-      // The selected language still applies when storage is unavailable.
-    }
+    persistLocal(preference)
   }, [preference])
 
   useEffect(() => {
@@ -67,6 +80,41 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('languagechange', sync)
   }, [])
 
+  useEffect(() => {
+    if (!authReady || !user) return
+
+    let active = true
+    ;(async () => {
+      try {
+        const cloud = await getLocalePreference()
+        if (!active) return
+        if (cloud) {
+          setPreferenceState(cloud)
+          return
+        }
+        await saveLocalePreference(preferenceRef.current)
+      } catch (error) {
+        console.error('Failed to load locale preference', error)
+      }
+    })()
+
+    return () => {
+      active = false
+    }
+  }, [authReady, user])
+
+  const setPreference = useCallback(
+    (next: LocalePreference) => {
+      setPreferenceState(next)
+      persistLocal(next)
+      if (!user) return
+      void saveLocalePreference(next).catch((error) => {
+        console.error('Failed to save locale preference', error)
+      })
+    },
+    [user],
+  )
+
   const value = useMemo<LocaleContextValue>(
     () => ({
       preference,
@@ -74,7 +122,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
       setPreference,
       t: (key, vars) => translate(locale, key, vars),
     }),
-    [preference, locale],
+    [preference, locale, setPreference],
   )
 
   return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>
