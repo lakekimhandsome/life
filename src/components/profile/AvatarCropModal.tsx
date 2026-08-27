@@ -6,6 +6,8 @@ import {
 } from 'react'
 import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
+import { t as translate } from '../../i18n'
+import { useT } from '../../state/LocaleContext'
 
 const OUTPUT = 512
 const ZOOM_MIN = 1
@@ -53,7 +55,7 @@ function exportCrop(
   canvas.height = OUTPUT
   const ctx = canvas.getContext('2d')
   if (!ctx) {
-    return Promise.reject(new Error('이미지를 처리하지 못했습니다.'))
+    return Promise.reject(new Error(translate('avatar.processFailed')))
   }
 
   const ratio = OUTPUT / viewport
@@ -75,7 +77,7 @@ function exportCrop(
     canvas.toBlob(
       (blob) => {
         if (!blob) {
-          reject(new Error('이미지를 처리하지 못했습니다.'))
+          reject(new Error(translate('avatar.processFailed')))
           return
         }
         resolve(blob)
@@ -92,6 +94,7 @@ export function AvatarCropModal({
   onCancel,
   onConfirm,
 }: AvatarCropModalProps) {
+  const t = useT()
   const viewportRef = useRef<HTMLDivElement>(null)
   const dragRef = useRef<{
     pointerId: number
@@ -123,7 +126,7 @@ export function AvatarCropModal({
       setLoadError(null)
     }
     next.onerror = () => {
-      setLoadError('이 이미지 형식은 지원하지 않습니다. JPG 또는 PNG를 선택해 주세요.')
+      setLoadError(translate('avatar.unsupported'))
     }
     next.src = objectUrl
 
@@ -218,7 +221,7 @@ export function AvatarCropModal({
       const blob = await exportCrop(image, crop.x, crop.y, scale, viewport)
       await onConfirm(blob)
     } catch (error) {
-      setActionError(error instanceof Error ? error.message : '사진을 저장하지 못했습니다.')
+      setActionError(error instanceof Error ? error.message : t('avatar.saveFailed'))
     } finally {
       setExporting(false)
     }
@@ -229,7 +232,7 @@ export function AvatarCropModal({
       <button
         type="button"
         className="avatar-crop-backdrop"
-        aria-label="닫기"
+        aria-label={t('common.close')}
         disabled={saving}
         onClick={onCancel}
       />
@@ -240,19 +243,19 @@ export function AvatarCropModal({
         aria-labelledby="avatar-crop-title"
       >
         <header className="avatar-crop-header">
-          <h2 id="avatar-crop-title">사진 조정</h2>
+          <h2 id="avatar-crop-title">{t('avatar.cropTitle')}</h2>
           <button
             type="button"
             className="assets-composer-close"
             onClick={onCancel}
             disabled={saving}
-            aria-label="닫기"
+            aria-label={t('common.close')}
           >
             <X size={18} strokeWidth={2} aria-hidden="true" />
           </button>
         </header>
 
-        <p className="avatar-crop-copy">드래그해서 위치를 맞추고, 확대·축소할 수 있습니다.</p>
+        <p className="avatar-crop-copy">{t('avatar.cropCopy')}</p>
 
         {loadError ? (
           <p className="avatar-crop-error">{loadError}</p>
@@ -280,13 +283,13 @@ export function AvatarCropModal({
                   }}
                 />
               ) : (
-                <span className="avatar-crop-loading">불러오는 중…</span>
+                <span className="avatar-crop-loading">{t('common.loading')}</span>
               )}
               <span className="avatar-crop-mask" aria-hidden="true" />
             </div>
 
             <label className="avatar-crop-zoom">
-              <span>확대</span>
+              <span>{t('avatar.zoom')}</span>
               <input
                 type="range"
                 min={ZOOM_MIN}
@@ -304,7 +307,7 @@ export function AvatarCropModal({
 
         <div className="avatar-crop-actions">
           <button type="button" className="btn btn-ghost" disabled={saving} onClick={onCancel}>
-            취소
+            {t('common.cancel')}
           </button>
           <button
             type="button"
@@ -312,7 +315,7 @@ export function AvatarCropModal({
             disabled={saving || !image || Boolean(loadError)}
             onClick={() => void handleConfirm()}
           >
-            {busy || exporting ? '저장 중…' : '적용'}
+            {busy || exporting ? t('common.saving') : t('avatar.apply')}
           </button>
         </div>
       </div>

@@ -3,8 +3,9 @@ import { House } from 'lucide-react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { OBJECT_TYPES, type ObjectType } from '../../core/types'
 import { resolveExcludedModules, resolveHubModules } from '../../domain/hubLayout'
-import { getModuleForObjectType } from '../../domain/modules'
+import { getModuleForObjectType, moduleTitle } from '../../domain/modules'
 import { useLife } from '../../state/LifeContext'
+import { useT } from '../../state/LocaleContext'
 import { usePrefs } from '../../state/PrefsContext'
 import { ModuleIcon } from '../ui/ModuleIcon'
 import { LifeMark } from '../ui/LifeMark'
@@ -24,6 +25,7 @@ function createTypeFromPath(pathname: string): ObjectType | null {
 }
 
 export function Sidebar() {
+  const t = useT()
   const { pathname } = useLocation()
   const { getObject } = useLife()
   const { hubLayout } = usePrefs()
@@ -47,19 +49,19 @@ export function Sidebar() {
 
   return (
     <aside className="app-sidebar">
-      <NavLink to="/" className="sidebar-brand" aria-label="LIFE 홈" end>
+      <NavLink to="/" className="sidebar-brand" aria-label={t('nav.lifeHome')} end>
         <LifeMark size={28} />
         <span>LIFE</span>
       </NavLink>
 
-      <nav className="sidebar-nav" aria-label="주요 메뉴">
+      <nav className="sidebar-nav" aria-label={t('nav.main')}>
         <NavLink
           to="/"
           end
           className={({ isActive }) => `sidebar-link${isActive ? ' is-active' : ''}`}
         >
           <House size={20} strokeWidth={1.7} aria-hidden="true" />
-          홈
+          {t('common.home')}
         </NavLink>
         {modules.map((module) => (
           <NavLink
@@ -72,7 +74,7 @@ export function Sidebar() {
             }
           >
             <ModuleIcon id={module.id} />
-            {module.title}
+            {moduleTitle(module.id)}
           </NavLink>
         ))}
       </nav>

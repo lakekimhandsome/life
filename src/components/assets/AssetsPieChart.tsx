@@ -2,13 +2,14 @@ import { useId, useMemo, useState } from 'react'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
 import {
-  ASSET_KIND_LABEL,
   ASSET_KIND_ORDER,
+  assetKindLabel,
   formatKrw,
   isLiabilityKind,
   type AssetKind,
   type ValuedAsset,
 } from '../../domain/assets'
+import { useT } from '../../state/LocaleContext'
 
 type ChartMode = 'kind' | 'item'
 
@@ -61,7 +62,7 @@ function buildKindSlices(items: ValuedAsset[]): Slice[] {
     return [
       {
         key: kind,
-        label: ASSET_KIND_LABEL[kind],
+        label: assetKindLabel(kind),
         value,
         color: KIND_COLORS[kind],
       },
@@ -90,7 +91,11 @@ function withPercents(slices: Slice[], total: number): SliceWithPercent[] {
   }))
 }
 
-function groupMinorSlices(slices: SliceWithPercent[], total: number) {
+function groupMinorSlices(
+  slices: SliceWithPercent[],
+  total: number,
+  otherLabel: string,
+) {
   const major = slices.filter((slice) => slice.percent >= MINOR_THRESHOLD)
   const minor = slices.filter((slice) => slice.percent < MINOR_THRESHOLD)
 
@@ -101,7 +106,7 @@ function groupMinorSlices(slices: SliceWithPercent[], total: number) {
   const otherValue = minor.reduce((sum, slice) => sum + slice.value, 0)
   const other: SliceWithPercent = {
     key: OTHER_KEY,
-    label: '기타',
+    label: otherLabel,
     value: otherValue,
     color: OTHER_COLOR,
     percent: total > 0 ? (otherValue / total) * 100 : 0,
@@ -150,6 +155,7 @@ function LegendRow({ slice }: { slice: SliceWithPercent }) {
 }
 
 export function AssetsPieChart({ items }: { items: ValuedAsset[] }) {
+  const t = useT()
   const [mode, setMode] = useState<ChartMode>('kind')
   const [chartOpen, setChartOpen] = useState(true)
   const [otherOpen, setOtherOpen] = useState(false)
@@ -163,8 +169,8 @@ export function AssetsPieChart({ items }: { items: ValuedAsset[] }) {
   )
   const total = useMemo(() => slices.reduce((sum, slice) => sum + slice.value, 0), [slices])
   const { chartSlices, otherItems } = useMemo(
-    () => groupMinorSlices(withPercents(slices, total), total),
-    [slices, total],
+    () => groupMinorSlices(withPercents(slices, total), total, t('assets.other')),
+    [slices, total, t],
   )
 
   function setChartMode(next: ChartMode) {
@@ -185,7 +191,7 @@ export function AssetsPieChart({ items }: { items: ValuedAsset[] }) {
           aria-controls={bodyId}
           onClick={() => setChartOpen((open) => !open)}
         >
-          <h2 id={titleId}>자산 구성</h2>
+          <h2 id={titleId}>{t('assets.chartTitle')}</h2>
           <span className="assets-chart-collapse-caret" aria-hidden="true">
             {chartOpen ? (
               <ChevronDown size={14} strokeWidth={2} />
@@ -195,7 +201,7 @@ export function AssetsPieChart({ items }: { items: ValuedAsset[] }) {
           </span>
         </button>
         {chartOpen ? (
-          <div className="assets-chart-toggle" role="tablist" aria-label="차트 구분">
+          <div className="assets-chart-toggle" role="tablist" aria-label={t('assets.chartToggle')}>
             <button
               type="button"
               role="tab"
@@ -203,7 +209,7 @@ export function AssetsPieChart({ items }: { items: ValuedAsset[] }) {
               className={mode === 'kind' ? 'is-active' : undefined}
               onClick={() => setChartMode('kind')}
             >
-              종류별
+              {t('assets.chartByKind')}
             </button>
             <button
               type="button"
@@ -212,7 +218,7 @@ export function AssetsPieChart({ items }: { items: ValuedAsset[] }) {
               className={mode === 'item' ? 'is-active' : undefined}
               onClick={() => setChartMode('item')}
             >
-              항목별
+              {t('assets.chartByItem')}
             </button>
           </div>
         ) : null}
@@ -221,13 +227,13 @@ export function AssetsPieChart({ items }: { items: ValuedAsset[] }) {
       {chartOpen ? (
         <div id={bodyId}>
           {chartSlices.length === 0 ? (
-            <p className="assets-chart-empty">평가금이 잡히면 구성이 표시됩니다.</p>
+            <p className="assets-chart-empty">{t('assets.chartEmpty')}</p>
           ) : (
             <div className="assets-chart-body">
               <div
                 className="assets-chart-svg"
                 role="img"
-                aria-label={mode === 'kind' ? '종류별 자산 구성' : '항목별 자산 구성'}
+                aria-label={mode === 'kind' ? t('assets.chartKindAria') : t('assets.chartItemAria')}
               >
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>

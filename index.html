@@ -12,6 +12,13 @@
     <script>
       ;(() => {
         try {
+          const savedLang = localStorage.getItem('life-locale')
+          document.documentElement.lang =
+            savedLang === 'ko' || savedLang === 'en'
+              ? savedLang
+              : (navigator.language || 'en').toLowerCase().startsWith('ko')
+                ? 'ko'
+                : 'en'
           const saved = localStorage.getItem('life-theme')
           const theme =
             saved === 'light' || saved === 'dark'

@@ -3,6 +3,7 @@ import { defaultMeta, getSchema, supportsMarkdownBody } from '../../domain/schem
 import { fromDateInputValue, toDateInputValue } from '../../lib/format'
 import type { LifeObject, ObjectType } from '../../core/types'
 import { useLife } from '../../state/LifeContext'
+import { useT } from '../../state/LocaleContext'
 
 interface ObjectFormProps {
   type: ObjectType
@@ -29,6 +30,7 @@ export function ObjectForm({
   onSubmit,
   submitLabel,
 }: ObjectFormProps) {
+  const t = useT()
   const schema = getSchema(type)
   const { listByType } = useLife()
   const goals = listByType('goal')
@@ -57,7 +59,7 @@ export function ObjectForm({
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
     if (!title.trim()) {
-      setError('제목을 입력해 주세요.')
+      setError(t('form.needTitle'))
       return
     }
 
@@ -73,7 +75,7 @@ export function ObjectForm({
         linkedGoalId: canLinkGoal && linkedGoalId ? linkedGoalId : null,
       })
     } catch (err) {
-      setError(err instanceof Error ? err.message : '저장에 실패했습니다.')
+      setError(err instanceof Error ? err.message : t('form.saveFailed'))
     } finally {
       setSaving(false)
       onSavingChange?.(false)
@@ -83,7 +85,7 @@ export function ObjectForm({
   return (
     <form id={formId} className="object-form" onSubmit={handleSubmit}>
       <div className="field">
-        <label htmlFor="title">{schema.labelKo} 제목</label>
+        <label htmlFor="title">{t('form.title', { type: schema.label })}</label>
         <input
           id="title"
           value={title}
@@ -96,7 +98,7 @@ export function ObjectForm({
       <div className={`field-grid${supportsMarkdown ? ' field-grid--inline' : ''}`}>
         {type !== 'goal' ? (
           <div className="field">
-            <label htmlFor="occurredAt">날짜</label>
+            <label htmlFor="occurredAt">{t('form.date')}</label>
             <input
               id="occurredAt"
               type="date"
@@ -171,8 +173,8 @@ export function ObjectForm({
             }
           />
           <span>
-            메인에 표시
-            <em>홈 화면에 디데이로 보여줍니다. 목표일이 있을 때만 표시됩니다.</em>
+            {t('form.showOnHome')}
+            <em>{t('form.showOnHomeHint')}</em>
           </span>
         </label>
       ) : null}
@@ -188,20 +190,20 @@ export function ObjectForm({
         />
         {supportsMarkdown ? (
           <p className="field-hint">
-            마크다운을 지원합니다. 제목, 목록, 굵게, 링크 등을 사용할 수 있어요.
+            {t('form.markdownHint')}
           </p>
         ) : null}
       </div>
 
       {canLinkGoal ? (
         <div className="field">
-          <label htmlFor="linkedGoal">연결된 목표 (선택)</label>
+          <label htmlFor="linkedGoal">{t('form.linkedGoal')}</label>
           <select
             id="linkedGoal"
             value={linkedGoalId}
             onChange={(event) => setLinkedGoalId(event.target.value)}
           >
-            <option value="">연결하지 않음</option>
+            <option value="">{t('form.noLink')}</option>
             {goals.map((goal) => (
               <option key={goal.id} value={goal.id}>
                 {goal.title}
@@ -209,7 +211,7 @@ export function ObjectForm({
             ))}
           </select>
           <p className="field-hint">
-            기록은 목표와 연결될 수 있습니다. LIFE의 모든 객체는 서로 이어집니다.
+            {t('form.linkHint')}
           </p>
         </div>
       ) : null}
@@ -219,7 +221,7 @@ export function ObjectForm({
       {showSubmitButton ? (
         <div className="form-actions">
           <button type="submit" className="btn btn-primary" disabled={saving}>
-            {saving ? '저장 중…' : submitLabel}
+            {saving ? t('common.saving') : submitLabel}
           </button>
         </div>
       ) : null}

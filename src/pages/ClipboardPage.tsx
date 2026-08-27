@@ -21,7 +21,9 @@ import {
   subscribeClipboard,
   uploadClipboardImage,
 } from '../lib/clipboard'
+import { t as translate } from '../i18n'
 import { useAuth } from '../state/AuthContext'
+import { useT } from '../state/LocaleContext'
 
 const SAVE_DEBOUNCE_MS = 500
 
@@ -39,6 +41,7 @@ function persistedImages(images: DisplayImage[]): ClipboardImage[] {
 }
 
 export function ClipboardPage() {
+  const t = useT()
   const { user } = useAuth()
   const bodyRef = useRef('')
   const imagesRef = useRef<DisplayImage[]>([])
@@ -89,7 +92,7 @@ export function ClipboardPage() {
       failed = true
       dirtyRef.current = true
       setSaveState('error')
-      setError(nextError instanceof Error ? nextError.message : '저장하지 못했습니다.')
+      setError(nextError instanceof Error ? nextError.message : translate('clipboard.saveFailed'))
     } finally {
       savingRef.current = false
       if (!failed && (pendingSaveRef.current || dirtyRef.current)) {
@@ -142,7 +145,7 @@ export function ClipboardPage() {
         setSaveState('saved')
       } catch (nextError) {
         if (!active) return
-        setError(nextError instanceof Error ? nextError.message : '클립보드를 불러오지 못했습니다.')
+        setError(nextError instanceof Error ? nextError.message : translate('clipboard.loadFailed'))
       } finally {
         if (active) setReady(true)
       }
@@ -199,7 +202,7 @@ export function ClipboardPage() {
           assertClipboardImageFile(file)
         } catch (nextError) {
           setError(
-            nextError instanceof Error ? nextError.message : '이미지를 확인할 수 없습니다.',
+            nextError instanceof Error ? nextError.message : translate('clipboard.inspectFailed'),
           )
           continue
         }
@@ -235,7 +238,7 @@ export function ClipboardPage() {
           URL.revokeObjectURL(temp.url)
           setImageList(imagesRef.current.filter((image) => image.id !== temp.id))
           setError(
-            nextError instanceof Error ? nextError.message : '이미지를 올리지 못했습니다.',
+            nextError instanceof Error ? nextError.message : translate('clipboard.uploadFailed'),
           )
         }
       }
@@ -290,7 +293,7 @@ export function ClipboardPage() {
         setCopiedId((current) => (current === image.id ? null : current))
       }, 1400)
     } catch (nextError) {
-      setError(nextError instanceof Error ? nextError.message : '이미지를 복사하지 못했습니다.')
+      setError(nextError instanceof Error ? nextError.message : t('clipboard.copyFailed'))
     }
   }
 
@@ -312,7 +315,11 @@ export function ClipboardPage() {
   }
 
   const saveLabel =
-    saveState === 'saving' ? '저장 중' : saveState === 'error' ? '저장 실패' : '저장됨'
+    saveState === 'saving'
+      ? t('clipboard.saving')
+      : saveState === 'error'
+        ? t('clipboard.saveError')
+        : t('clipboard.saved')
 
   return (
     <div
@@ -324,14 +331,14 @@ export function ClipboardPage() {
       <div className="module-header module-heading--clipboard">
         <BackLink to="/" />
         <div className="module-heading module-heading--clipboard">
-          <h1>클립보드</h1>
+          <h1>{t('modules.clipboard')}</h1>
         </div>
         <div className="module-header-actions">
           <span
             className={`clipboard-save${saveState === 'error' ? ' is-error' : ''}`}
             aria-live="polite"
           >
-            {ready ? saveLabel : '불러오는 중'}
+            {ready ? saveLabel : t('clipboard.loading')}
           </span>
         </div>
       </div>
@@ -350,21 +357,21 @@ export function ClipboardPage() {
                 className="clipboard-image-copy"
                 onClick={() => void handleCopyImage(image)}
                 disabled={image.uploading || !image.url}
-                aria-label="이미지 복사"
+                aria-label={t('clipboard.copyImage')}
               >
                 {image.url ? (
                   <img src={image.url} alt="" />
                 ) : (
-                  <span className="clipboard-image-missing">이미지</span>
+                  <span className="clipboard-image-missing">{t('clipboard.image')}</span>
                 )}
                 {copiedId === image.id ? (
-                  <span className="clipboard-image-copied">복사됨</span>
+                  <span className="clipboard-image-copied">{t('clipboard.copied')}</span>
                 ) : null}
               </button>
               <button
                 type="button"
                 className="clipboard-image-remove"
-                aria-label="이미지 삭제"
+                aria-label={t('clipboard.deleteImage')}
                 onClick={() => void handleRemoveImage(image.id)}
               >
                 <X size={15} strokeWidth={2.2} aria-hidden="true" />
@@ -379,10 +386,10 @@ export function ClipboardPage() {
         value={body}
         onChange={(event) => onBodyChange(event.target.value)}
         onBlur={flushSave}
-        placeholder="텍스트를 쓰거나 이미지를 붙여넣으세요"
+        placeholder={t('clipboard.placeholder')}
         spellCheck={false}
         disabled={!ready}
-        aria-label="클립보드 텍스트"
+        aria-label={t('clipboard.textAria')}
       />
     </div>
   )

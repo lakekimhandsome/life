@@ -1,3 +1,4 @@
+import { t } from '../i18n'
 import { isSupabaseConfigured, supabase } from './supabase'
 import {
   AVATAR_BUCKET,
@@ -10,21 +11,21 @@ const OUTPUT_TYPE = 'image/jpeg'
 
 export function assertAvatarFile(file: File): void {
   if (!file.type.startsWith('image/')) {
-    throw new Error('이미지 파일만 올릴 수 있습니다.')
+    throw new Error(t('clipboard.imageOnly'))
   }
   if (file.size > MAX_SOURCE_BYTES) {
-    throw new Error('이미지는 10MB 이하만 올릴 수 있습니다.')
+    throw new Error(t('clipboard.imageTooLarge'))
   }
 }
 
 async function requireUserId(): Promise<string> {
   if (!isSupabaseConfigured()) {
-    throw new Error('Supabase가 설정되지 않았습니다.')
+    throw new Error(t('error.noSupabase'))
   }
   const { data } = await supabase.auth.getSession()
   const userId = data.session?.user.id
   if (!userId) {
-    throw new Error('로그인이 필요합니다.')
+    throw new Error(t('error.needLogin'))
   }
   return userId
 }

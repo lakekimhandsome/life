@@ -6,6 +6,7 @@ import {
   daysForRange,
 } from '../domain/assetHistory'
 import type { ValuedAsset } from '../domain/assets'
+import { t } from '../i18n'
 import { addLocalDays, startOfLocalDay, toLocalDayKey } from './format'
 import type { AssetHistoryRow } from './database'
 import { isSupabaseConfigured, supabase } from './supabase'
@@ -129,14 +130,14 @@ async function insertAssetHistory(
 
 export async function deleteAssetHistory(id: string): Promise<void> {
   if (!isSupabaseConfigured()) {
-    throw new Error('저장소가 설정되지 않았습니다.')
+    throw new Error(t('error.noStorage'))
   }
 
   const {
     data: { session },
   } = await supabase.auth.getSession()
   if (!session) {
-    throw new Error('로그인이 필요합니다.')
+    throw new Error(t('error.needLogin'))
   }
 
   const { error } = await supabase
@@ -146,7 +147,7 @@ export async function deleteAssetHistory(id: string): Promise<void> {
     .eq('user_id', session.user.id)
 
   if (error) {
-    throw new Error(error.message || '기록을 삭제하지 못했습니다.')
+    throw new Error(error.message || t('assets.historyDeleteFailed'))
   }
 }
 

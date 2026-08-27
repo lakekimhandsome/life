@@ -1,5 +1,6 @@
 import { createId } from '../core/id'
 import type { ClipboardImage, ClipboardRow } from './database'
+import { t } from '../i18n'
 import { isSupabaseConfigured, supabase } from './supabase'
 
 export const CLIPBOARD_BUCKET = 'clipboard'
@@ -25,12 +26,12 @@ const EMPTY_RECORD: ClipboardRecord = {
 
 async function requireUserId(): Promise<string> {
   if (!isSupabaseConfigured()) {
-    throw new Error('Supabase가 설정되지 않았습니다.')
+    throw new Error(t('error.noSupabase'))
   }
   const { data } = await supabase.auth.getSession()
   const userId = data.session?.user.id
   if (!userId) {
-    throw new Error('로그인이 필요합니다.')
+    throw new Error(t('error.needLogin'))
   }
   return userId
 }
@@ -61,10 +62,10 @@ function rowToRecord(row: ClipboardRow): ClipboardRecord {
 
 export function assertClipboardImageFile(file: File): void {
   if (!file.type.startsWith('image/')) {
-    throw new Error('이미지 파일만 올릴 수 있습니다.')
+    throw new Error(t('clipboard.imageOnly'))
   }
   if (file.size > MAX_IMAGE_BYTES) {
-    throw new Error('이미지는 10MB 이하만 올릴 수 있습니다.')
+    throw new Error(t('clipboard.imageTooLarge'))
   }
 }
 
@@ -172,7 +173,7 @@ export async function removeClipboardImage(path: string): Promise<void> {
 export async function downloadClipboardImage(path: string): Promise<Blob> {
   const { data, error } = await supabase.storage.from(CLIPBOARD_BUCKET).download(path)
   if (error || !data) {
-    throw new Error(error?.message ?? '이미지를 받지 못했습니다.')
+    throw new Error(error?.message ?? t('clipboard.imageFetchFailed'))
   }
   return data
 }
@@ -223,14 +224,14 @@ async function blobToPng(blob: Blob): Promise<Blob> {
   canvas.width = bitmap.width
   canvas.height = bitmap.height
   const ctx = canvas.getContext('2d')
-  if (!ctx) throw new Error('이미지를 변환하지 못했습니다.')
+  if (!ctx) throw new Error(t('clipboard.convertFailed'))
   ctx.drawImage(bitmap, 0, 0)
   bitmap.close()
   return new Promise((resolve, reject) => {
     canvas.toBlob(
       (next) => {
         if (next) resolve(next)
-        else reject(new Error('이미지를 변환하지 못했습니다.'))
+        else reject(new Error(t('clipboard.convertFailed')))
       },
       'image/png',
     )
@@ -239,7 +240,7 @@ async function blobToPng(blob: Blob): Promise<Blob> {
 
 export async function copyImageBlob(blob: Blob): Promise<void> {
   if (!navigator.clipboard?.write) {
-    throw new Error('이 브라우저에서는 이미지 복사를 지원하지 않습니다.')
+    throw new Error(t('clipboard.copyUnsupported'))
   }
   const type = blob.type || 'image/png'
   try {

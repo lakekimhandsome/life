@@ -1,4 +1,5 @@
 import type { User } from '@supabase/supabase-js'
+import { t } from '../i18n'
 
 export const LIFE_AVATAR_META_KEY = 'life_avatar'
 export const AVATAR_BUCKET = 'avatars'
@@ -15,7 +16,7 @@ function metaString(meta: Record<string, unknown>, key: string): string | null {
 }
 
 export function displayName(user: UserLike | null | undefined): string {
-  if (!user) return '나'
+  if (!user) return t('common.me')
   const meta = user.user_metadata ?? {}
   return (
     metaString(meta, 'full_name') ||
@@ -23,7 +24,7 @@ export function displayName(user: UserLike | null | undefined): string {
     metaString(meta, 'nickname') ||
     metaString(meta, 'preferred_username') ||
     (user.email ? user.email.split('@')[0] : null) ||
-    '나'
+    t('common.me')
   )
 }
 
@@ -38,7 +39,7 @@ export function initials(name: string): string {
     .trim()
     .split(/\s+/)
     .filter(Boolean)
-  if (parts.length === 0) return '나'
+  if (parts.length === 0) return t('common.me')
   if (parts.length === 1) return Array.from(parts[0]).slice(0, 1).join('')
   return `${Array.from(parts[0])[0] ?? ''}${Array.from(parts[parts.length - 1])[0] ?? ''}`
 }

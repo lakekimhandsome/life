@@ -5,6 +5,7 @@ import { ObjectForm } from '../components/object/ObjectForm'
 import { BackLink } from '../components/ui/BackLink'
 import { getSchema, supportsMarkdownBody } from '../domain/schemas'
 import { useLife } from '../state/LifeContext'
+import { useT } from '../state/LocaleContext'
 
 export function EditPage() {
   const { id } = useParams()
@@ -12,6 +13,7 @@ export function EditPage() {
   const { ready, getObject, updateObject } = useLife()
   const [saving, setSaving] = useState(false)
 
+  const t = useT()
   const object = id ? getObject(id) : undefined
 
   if (ready && id && !object) {
@@ -19,7 +21,7 @@ export function EditPage() {
   }
 
   if (!object) {
-    return <p className="empty-state">불러오는 중…</p>
+    return <p className="empty-state">{t('common.loading')}</p>
   }
 
   const schema = getSchema(object.type)
@@ -36,7 +38,7 @@ export function EditPage() {
               type="submit"
               form={formId}
               className="object-header-action"
-              aria-label={`${schema.labelKo} 수정 저장`}
+              aria-label={t('edit.saveAria', { type: schema.label })}
               disabled={saving}
             >
               <Check size={22} strokeWidth={1.9} aria-hidden="true" />
@@ -44,9 +46,9 @@ export function EditPage() {
           ) : null}
         </div>
         <p className="eyebrow" style={{ color: schema.accent }}>
-          {schema.label}
+          {schema.enLabel}
         </p>
-        <h1>{schema.labelKo} 수정</h1>
+        <h1>{t('edit.heading', { type: schema.label })}</h1>
         {schema.description ? <p className="compose-lead">{schema.description}</p> : null}
       </div>
 
@@ -56,7 +58,7 @@ export function EditPage() {
         formId={formId}
         showSubmitButton={!usesHeaderSubmit}
         onSavingChange={setSaving}
-        submitLabel="수정 저장"
+        submitLabel={t('edit.save')}
         onSubmit={async ({ title, body, occurredAt, meta }) => {
           await updateObject(object.id, {
             title,

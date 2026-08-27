@@ -1,3 +1,4 @@
+import { intlLocale, t, type MessageKey } from '../i18n'
 import type { ValuedAsset } from './assets'
 import { ASSET_KIND_ORDER, summarizePortfolio, type AssetKind } from './assets'
 
@@ -47,13 +48,19 @@ export function summarizeAssetValues(items: ValuedAsset[]): AssetValueBreakdown 
 
 export type AssetHistoryRange = '1w' | '1m' | '3m' | '1y' | 'all'
 
-export const ASSET_HISTORY_RANGE_OPTIONS: { value: AssetHistoryRange; label: string }[] = [
-  { value: '1w', label: '1주' },
-  { value: '1m', label: '1개월' },
-  { value: '3m', label: '3개월' },
-  { value: '1y', label: '1년' },
-  { value: 'all', label: '전체' },
-]
+export const ASSET_HISTORY_RANGES: AssetHistoryRange[] = ['1w', '1m', '3m', '1y', 'all']
+
+const RANGE_LABEL_KEY: Record<AssetHistoryRange, MessageKey> = {
+  '1w': 'assets.range.1w',
+  '1m': 'assets.range.1m',
+  '3m': 'assets.range.3m',
+  '1y': 'assets.range.1y',
+  all: 'assets.range.all',
+}
+
+export function assetHistoryRangeLabel(range: AssetHistoryRange): string {
+  return t(RANGE_LABEL_KEY[range])
+}
 
 export function daysForRange(range: AssetHistoryRange): number | null {
   if (range === '1w') return 7
@@ -90,7 +97,7 @@ export function computeHistoryChange(
 }
 
 export function formatSignedKrw(value: number): string {
-  const abs = new Intl.NumberFormat('ko-KR', {
+  const abs = new Intl.NumberFormat(intlLocale(), {
     style: 'currency',
     currency: 'KRW',
     maximumFractionDigits: 0,

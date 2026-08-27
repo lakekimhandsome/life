@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
+import { t } from '../i18n'
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
 
 type AuthContextValue = {
@@ -61,7 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithKakao = useCallback(async () => {
     if (!configured) {
-      return { error: new Error('Supabase가 설정되지 않았습니다.') }
+      return { error: new Error(t('error.noSupabase')) }
     }
 
     const { error } = await supabase.auth.signInWithOAuth({
@@ -76,7 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithGoogle = useCallback(async () => {
     if (!configured) {
-      return { error: new Error('Supabase가 설정되지 않았습니다.') }
+      return { error: new Error(t('error.noSupabase')) }
     }
 
     const { error } = await supabase.auth.signInWithOAuth({
@@ -91,7 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = useCallback(async () => {
     if (!configured) {
-      return { error: new Error('Supabase가 설정되지 않았습니다.') }
+      return { error: new Error(t('error.noSupabase')) }
     }
 
     const { error } = await supabase.auth.signOut()

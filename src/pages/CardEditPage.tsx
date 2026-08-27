@@ -14,11 +14,13 @@ import {
   resolveExcludedModules,
   resolveHubModules,
 } from '../domain/hubLayout'
-import type { ModuleId } from '../domain/modules'
+import { moduleTitle, type ModuleId } from '../domain/modules'
 import { useLife } from '../state/LifeContext'
+import { useT } from '../state/LocaleContext'
 import { usePrefs } from '../state/PrefsContext'
 
 export function CardEditPage() {
+  const t = useT()
   const { ready, hubLayout, setHubLayout } = usePrefs()
   const { counts } = useLife()
   const [order, setOrder] = useState<ModuleId[]>(hubLayout.order)
@@ -134,25 +136,25 @@ export function CardEditPage() {
       <div className="module-header">
         <BackLink to="/settings" />
         <div className="module-heading">
-          <h1>카드 편집</h1>
+          <h1>{t('cards.title')}</h1>
         </div>
       </div>
 
       <p className="settings-lead">
-        홈에 보여줄 카드를 고르고, 손잡이로 순서를 바꾸세요.
+        {t('cards.lead')}
       </p>
 
       {!ready ? (
-        <p className="empty-state">불러오는 중…</p>
+        <p className="empty-state">{t('common.loading')}</p>
       ) : (
         <>
-          <section className="card-edit-section" aria-label="포함된 카드">
+          <section className="card-edit-section" aria-label={t('cards.includedAria')}>
             <header className="card-edit-section-header">
-              <h2>포함</h2>
-              <p>{visibleModules.length}개</p>
+              <h2>{t('cards.included')}</h2>
+              <p>{t('cards.count', { count: visibleModules.length })}</p>
             </header>
             {visibleModules.length === 0 ? (
-              <p className="card-edit-empty">홈에 표시할 카드가 없습니다.</p>
+              <p className="card-edit-empty">{t('cards.emptyIncluded')}</p>
             ) : (
               <ul className="card-edit-list" ref={listRef}>
                 {visibleModules.map((module) => (
@@ -164,7 +166,7 @@ export function CardEditPage() {
                     <button
                       type="button"
                       className="todo-handle"
-                      aria-label={`${module.title} 순서 변경`}
+                      aria-label={t('cards.reorder', { title: moduleTitle(module.id) })}
                       onPointerDown={(event) => onReorderStart(module.id, event)}
                     >
                       <GripVertical size={16} strokeWidth={2} aria-hidden="true" />
@@ -176,10 +178,10 @@ export function CardEditPage() {
                       <ModuleIcon id={module.id} />
                     </span>
                     <span className="card-edit-copy">
-                      <span className="card-edit-title">{module.title}</span>
+                      <span className="card-edit-title">{moduleTitle(module.id)}</span>
                       {module.objectType ? (
                         <span className="card-edit-count">
-                          {contentCount(module)}개
+                          {t('cards.count', { count: contentCount(module) })}
                         </span>
                       ) : null}
                     </span>
@@ -189,7 +191,7 @@ export function CardEditPage() {
                       onClick={() => void handleRemove(module.id)}
                       disabled={visibleModules.length <= 1}
                     >
-                      제거
+                      {t('cards.remove')}
                     </button>
                   </li>
                 ))}
@@ -197,13 +199,13 @@ export function CardEditPage() {
             )}
           </section>
 
-          <section className="card-edit-section" aria-label="포함하지 않은 카드">
+          <section className="card-edit-section" aria-label={t('cards.excludedAria')}>
             <header className="card-edit-section-header">
-              <h2>포함하지 않음</h2>
-              <p>{excludedModules.length}개</p>
+              <h2>{t('cards.excluded')}</h2>
+              <p>{t('cards.count', { count: excludedModules.length })}</p>
             </header>
             {excludedModules.length === 0 ? (
-              <p className="card-edit-empty">제거한 카드가 여기 모입니다.</p>
+              <p className="card-edit-empty">{t('cards.emptyExcluded')}</p>
             ) : (
               <ul className="card-edit-list">
                 {excludedModules.map((module) => (
@@ -216,10 +218,10 @@ export function CardEditPage() {
                       <ModuleIcon id={module.id} />
                     </span>
                     <span className="card-edit-copy">
-                      <span className="card-edit-title">{module.title}</span>
+                      <span className="card-edit-title">{moduleTitle(module.id)}</span>
                       {module.objectType ? (
                         <span className="card-edit-count">
-                          {contentCount(module)}개
+                          {t('cards.count', { count: contentCount(module) })}
                         </span>
                       ) : null}
                     </span>
@@ -228,7 +230,7 @@ export function CardEditPage() {
                       className="btn btn-primary card-edit-action"
                       onClick={() => void handleAdd(module.id)}
                     >
-                      추가
+                      {t('common.add')}
                     </button>
                   </li>
                 ))}

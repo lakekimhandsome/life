@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../state/AuthContext'
+import { useT } from '../state/LocaleContext'
 
 export function LoginPage() {
+  const t = useT()
   const { ready, configured, user, signInWithGoogle, signInWithKakao } = useAuth()
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -10,7 +12,7 @@ export function LoginPage() {
   if (!ready) {
     return (
       <div className="auth-gate">
-        <p>세션 확인 중…</p>
+        <p>{t('login.checking')}</p>
       </div>
     )
   }
@@ -45,10 +47,10 @@ export function LoginPage() {
       <div className="login-card">
         <p className="login-brand">LIFE</p>
         <h1 className="login-title">Personal Life OS</h1>
-        <p className="login-copy">로그인 후 삶의 데이터를 이어서 관리하세요.</p>
+        <p className="login-copy">{t('login.copy')}</p>
 
         {!configured ? (
-          <p className="login-hint is-error">Supabase 환경 변수를 설정하세요.</p>
+          <p className="login-hint is-error">{t('login.needSupabase')}</p>
         ) : (
           <div className="login-actions">
             <button
@@ -57,7 +59,7 @@ export function LoginPage() {
               disabled={busy}
               onClick={() => void handleGoogle()}
             >
-              Google로 로그인
+              {t('login.google')}
             </button>
             <button
               type="button"
@@ -65,7 +67,7 @@ export function LoginPage() {
               disabled={busy}
               onClick={() => void handleKakao()}
             >
-              카카오로 로그인
+              {t('login.kakao')}
             </button>
           </div>
         )}

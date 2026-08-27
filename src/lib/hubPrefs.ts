@@ -3,16 +3,17 @@ import {
   normalizeHubLayout,
   type HubLayout,
 } from '../domain/hubLayout'
+import { t } from '../i18n'
 import { isSupabaseConfigured, supabase } from './supabase'
 
 async function requireUserId(): Promise<string> {
   if (!isSupabaseConfigured()) {
-    throw new Error('Supabase가 설정되지 않았습니다.')
+    throw new Error(t('error.noSupabase'))
   }
   const { data } = await supabase.auth.getSession()
   const userId = data.session?.user.id
   if (!userId) {
-    throw new Error('로그인이 필요합니다.')
+    throw new Error(t('error.needLogin'))
   }
   return userId
 }

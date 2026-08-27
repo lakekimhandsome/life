@@ -1,5 +1,6 @@
 import type { LifeObject, ObjectType } from '../core/types'
 import { formatKrw } from './assets'
+import { t, type MessageKey } from '../i18n'
 import { isSameLocalDay } from '../lib/format'
 
 export type ModuleId =
@@ -14,61 +15,67 @@ export type ModuleId =
 
 export interface LifeModule {
   id: ModuleId
-  title: string
   path: string
   /** Linked object type, if any. */
   objectType?: ObjectType
 }
 
+const MODULE_TITLE_KEY: Record<ModuleId, MessageKey> = {
+  study: 'modules.study',
+  workout: 'modules.workout',
+  assets: 'modules.assets',
+  journal: 'modules.journal',
+  goals: 'modules.goals',
+  projects: 'modules.projects',
+  notes: 'modules.notes',
+  clipboard: 'modules.clipboard',
+}
+
 export const LIFE_MODULES: LifeModule[] = [
   {
     id: 'study',
-    title: '공부',
     path: '/study',
     objectType: 'study',
   },
   {
     id: 'workout',
-    title: '운동',
     path: '/workout',
     objectType: 'workout',
   },
   {
     id: 'assets',
-    title: '자산',
     path: '/assets',
     objectType: 'asset',
   },
   {
     id: 'journal',
-    title: '일기',
     path: '/journal',
     objectType: 'journal',
   },
   {
     id: 'goals',
-    title: '목표',
     path: '/goals',
     objectType: 'goal',
   },
   {
     id: 'projects',
-    title: '프로젝트',
     path: '/projects',
     objectType: 'project',
   },
   {
     id: 'notes',
-    title: '노트',
     path: '/notes',
     objectType: 'note',
   },
   {
     id: 'clipboard',
-    title: '클립보드',
     path: '/clipboard',
   },
 ]
+
+export function moduleTitle(id: ModuleId): string {
+  return t(MODULE_TITLE_KEY[id])
+}
 
 export function getModuleForObjectType(
   type: LifeObject['type'],
@@ -95,60 +102,64 @@ export function getModuleStatus(
       const today = ofType(objects, 'study').filter((object) =>
         isSameLocalDay(object.occurredAt, now),
       )
-      if (today.length === 0) return '오늘 할 일 없음'
+      if (today.length === 0) return t('hub.study.none')
       const remaining = today.filter((object) => object.meta.done !== true)
-      if (remaining.length === 0) return '오늘 할 일 완료'
-      return `오늘 해야 할 일 ${remaining.length}개`
+      if (remaining.length === 0) return t('hub.study.done')
+      return t('hub.study.remaining', { count: remaining.length })
     }
     case 'workout': {
       const today = ofType(objects, 'workout').filter((object) =>
         isSameLocalDay(object.occurredAt, now),
       )
-      if (today.length === 0) return '오늘 미기록'
+      if (today.length === 0) return t('hub.workout.none')
       return today[0].title
     }
     case 'assets': {
       const assets = ofType(objects, 'asset')
-      if (assets.length === 0) return '기록 없음'
+      if (assets.length === 0) return t('hub.assets.none')
       if (extras?.assetsTotalKrw == null) return '…'
-      return `순자산 ${formatKrw(extras.assetsTotalKrw)}`
+      return t('hub.assets.net', { value: formatKrw(extras.assetsTotalKrw) })
     }
     case 'journal': {
       const today = ofType(objects, 'journal').some((object) =>
         isSameLocalDay(object.occurredAt, now),
       )
-      return today ? '오늘 작성됨' : '오늘 미작성'
+      return today ? t('hub.journal.written') : t('hub.journal.none')
     }
     case 'goals': {
       const active = ofType(objects, 'goal').filter(
         (object) => object.meta.status === 'active' || !object.meta.status,
       )
-      if (active.length === 0) return '진행 중 없음'
-      return `진행 중 ${active.length}개`
+      if (active.length === 0) return t('hub.progress.none')
+      return t('hub.progress.count', { count: active.length })
     }
     case 'projects': {
       const active = ofType(objects, 'project').filter(
         (object) => object.meta.status === 'active' || !object.meta.status,
       )
-      if (active.length === 0) return '진행 중 없음'
-      if (active.length === 1) return `${active[0].title} 진행 중`
-      return `진행 중 ${active.length}개`
+      if (active.length === 0) return t('hub.progress.none')
+      if (active.length === 1) return t('hub.progress.one', { title: active[0].title })
+      return t('hub.progress.count', { count: active.length })
     }
     case 'notes': {
       const notes = ofType(objects, 'note')
-      if (notes.length === 0) return '기록 없음'
-      return `${notes.length}개`
+      if (notes.length === 0) return t('hub.notes.none')
+      return t('hub.notes.count', { count: notes.length })
     }
     case 'clipboard': {
       if (extras?.clipboard == null) return '…'
       const text = extras.clipboard.body.trim()
       const imageCount = extras.clipboard.imageCount
-      if (!text && imageCount === 0) return '비어 있음'
-      if (!text) return imageCount === 1 ? '이미지 1장' : `이미지 ${imageCount}장`
+      if (!text && imageCount === 0) return t('hub.clipboard.empty')
+      if (!text) {
+        return imageCount === 1
+          ? t('hub.clipboard.imageOne')
+          : t('hub.clipboard.imageMany', { count: imageCount })
+      }
       const firstLine = text.split('\n')[0] ?? ''
       const preview = firstLine.length > 16 ? `${firstLine.slice(0, 16)}…` : firstLine
       if (imageCount === 0) return preview
-      return `${preview} · 이미지 ${imageCount}장`
+      return t('hub.clipboard.previewWithImages', { preview, count: imageCount })
     }
   }
 }

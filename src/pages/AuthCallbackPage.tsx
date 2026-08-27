@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
+import { t } from '../i18n'
+import { useT } from '../state/LocaleContext'
 
 function safeNextPath(raw: string | null) {
   if (!raw || !raw.startsWith('/') || raw.startsWith('//')) return '/'
@@ -8,15 +10,18 @@ function safeNextPath(raw: string | null) {
 }
 
 export function AuthCallbackPage() {
+  const ui = useT()
   const navigate = useNavigate()
-  const [message, setMessage] = useState('로그인 처리 중…')
+  const [failed, setFailed] = useState(false)
+  const [message, setMessage] = useState(() => t('auth.processing'))
 
   useEffect(() => {
     let cancelled = false
 
     async function finish() {
       if (!isSupabaseConfigured()) {
-        setMessage('Supabase 환경 변수가 없습니다.')
+        setFailed(true)
+        setMessage(t('auth.noSupabase'))
         return
       }
 
@@ -28,12 +33,18 @@ export function AuthCallbackPage() {
         url.searchParams.get('error')
 
       if (oauthError) {
-        if (!cancelled) setMessage(oauthError)
+        if (!cancelled) {
+          setFailed(true)
+          setMessage(oauthError)
+        }
         return
       }
 
       if (!code) {
-        if (!cancelled) setMessage('인증 코드가 없습니다.')
+        if (!cancelled) {
+          setFailed(true)
+          setMessage(t('auth.noCode'))
+        }
         return
       }
 
@@ -41,6 +52,7 @@ export function AuthCallbackPage() {
       if (cancelled) return
 
       if (error) {
+        setFailed(true)
         setMessage(error.message)
         return
       }
@@ -57,13 +69,13 @@ export function AuthCallbackPage() {
   return (
     <div className="auth-callback">
       <p>{message}</p>
-      {message !== '로그인 처리 중…' ? (
+      {failed ? (
         <button
           type="button"
           className="btn btn-ghost"
           onClick={() => navigate('/login', { replace: true })}
         >
-          로그인으로
+          {ui('auth.backToLogin')}
         </button>
       ) : null}
     </div>

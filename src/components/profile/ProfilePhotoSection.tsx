@@ -10,10 +10,12 @@ import {
   resolveAvatarUrl,
 } from '../../lib/userProfile'
 import { useAuth } from '../../state/AuthContext'
+import { useT } from '../../state/LocaleContext'
 import { Avatar } from '../ui/Avatar'
 import { AvatarCropModal } from './AvatarCropModal'
 
 export function ProfilePhotoSection() {
+  const t = useT()
   const { user } = useAuth()
   const fileRef = useRef<HTMLInputElement>(null)
   const [cropFile, setCropFile] = useState<File | null>(null)
@@ -47,7 +49,7 @@ export function ProfilePhotoSection() {
       setCropFile(file)
       setError(null)
     } catch (nextError) {
-      setError(nextError instanceof Error ? nextError.message : '이미지를 확인할 수 없습니다.')
+      setError(nextError instanceof Error ? nextError.message : t('avatar.inspectFailed'))
     } finally {
       if (fileRef.current) fileRef.current.value = ''
     }
@@ -71,7 +73,7 @@ export function ProfilePhotoSection() {
       await removeAvatar()
       setOptimisticUrl(null)
     } catch (nextError) {
-      setError(nextError instanceof Error ? nextError.message : '사진을 삭제하지 못했습니다.')
+      setError(nextError instanceof Error ? nextError.message : t('avatar.deleteFailed'))
     } finally {
       setBusy(false)
     }
@@ -84,9 +86,9 @@ export function ProfilePhotoSection() {
         className="settings-profile-photo"
         onClick={openPicker}
         disabled={busy}
-        aria-label="프로필 사진 변경"
+        aria-label={t('settings.photoAria')}
       >
-        <Avatar src={avatarSrc} name={name} size={96} alt={`${name} 프로필 사진`} />
+        <Avatar src={avatarSrc} name={name} size={96} alt={t('settings.photoAlt', { name })} />
         <span className="settings-profile-badge" aria-hidden="true">
           <Camera size={15} strokeWidth={2} />
         </span>
@@ -99,7 +101,7 @@ export function ProfilePhotoSection() {
 
       <div className="settings-profile-actions">
         <button type="button" className="btn btn-ghost" disabled={busy} onClick={openPicker}>
-          사진 변경
+          {t('settings.photoChange')}
         </button>
         {canRemove ? (
           <button
@@ -108,7 +110,7 @@ export function ProfilePhotoSection() {
             disabled={busy}
             onClick={() => void handleRemove()}
           >
-            삭제
+            {t('common.delete')}
           </button>
         ) : null}
       </div>

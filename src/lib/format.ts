@@ -1,23 +1,21 @@
-const dateFormatter = new Intl.DateTimeFormat('ko-KR', {
-  year: 'numeric',
-  month: 'short',
-  day: 'numeric',
-})
-
-const dateTimeFormatter = new Intl.DateTimeFormat('ko-KR', {
-  year: 'numeric',
-  month: 'short',
-  day: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-})
+import { getLocale, intlLocale, t } from '../i18n'
 
 export function formatDate(iso: string): string {
-  return dateFormatter.format(new Date(iso))
+  return new Intl.DateTimeFormat(intlLocale(), {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  }).format(new Date(iso))
 }
 
 export function formatDateTime(iso: string): string {
-  return dateTimeFormatter.format(new Date(iso))
+  return new Intl.DateTimeFormat(intlLocale(), {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(iso))
 }
 
 export function toDateInputValue(iso: string): string {
@@ -61,17 +59,15 @@ export function noonOnLocalDay(date: Date): string {
   return local.toISOString()
 }
 
-const dayHeadingFormatter = new Intl.DateTimeFormat('ko-KR', {
-  month: 'long',
-  day: 'numeric',
-  weekday: 'short',
-})
-
 export function formatDayHeading(date: Date, today = new Date()): string {
-  const label = dayHeadingFormatter.format(date)
-  if (isSameLocalDay(date, today)) return `오늘 · ${label}`
-  if (isSameLocalDay(date, addLocalDays(today, -1))) return `어제 · ${label}`
-  if (isSameLocalDay(date, addLocalDays(today, 1))) return `내일 · ${label}`
+  const label = new Intl.DateTimeFormat(intlLocale(), {
+    month: 'long',
+    day: 'numeric',
+    weekday: 'short',
+  }).format(date)
+  if (isSameLocalDay(date, today)) return t('format.today', { label })
+  if (isSameLocalDay(date, addLocalDays(today, -1))) return t('format.yesterday', { label })
+  if (isSameLocalDay(date, addLocalDays(today, 1))) return t('format.tomorrow', { label })
   return label
 }
 
@@ -90,4 +86,16 @@ export function formatDday(days: number): string {
   if (days === 0) return 'D-Day'
   if (days > 0) return `D-${days}`
   return `D+${Math.abs(days)}`
+}
+
+export function formatCompactNumber(value: number): string {
+  const abs = Math.abs(value)
+  if (getLocale() === 'ko') {
+    if (abs >= 100_000_000) return `${(value / 100_000_000).toFixed(1)}억`
+    if (abs >= 10_000) return `${Math.round(value / 10_000)}만`
+  }
+  return new Intl.NumberFormat(intlLocale(), {
+    notation: 'compact',
+    maximumFractionDigits: 1,
+  }).format(value)
 }

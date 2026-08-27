@@ -4,12 +4,14 @@ import { BackLink } from '../components/ui/BackLink'
 import { OBJECT_TYPES, type ObjectType } from '../core/types'
 import { getSchema } from '../domain/schemas'
 import { useLife } from '../state/LifeContext'
+import { useT } from '../state/LocaleContext'
 
 function isObjectType(value: string | undefined): value is ObjectType {
   return !!value && (OBJECT_TYPES as readonly string[]).includes(value)
 }
 
 export function CreatePage() {
+  const t = useT()
   const { type } = useParams()
   const navigate = useNavigate()
   const { createObject, linkObjects } = useLife()
@@ -25,15 +27,15 @@ export function CreatePage() {
       <div className="compose-header">
         <BackLink to="/" />
         <p className="eyebrow" style={{ color: schema.accent }}>
-          {schema.label}
+          {schema.enLabel}
         </p>
-        <h1>{schema.labelKo} 기록</h1>
+        <h1>{t('create.heading', { type: schema.label })}</h1>
         {schema.description ? <p className="compose-lead">{schema.description}</p> : null}
       </div>
 
       <ObjectForm
         type={type}
-        submitLabel="저장"
+        submitLabel={t('common.save')}
         onSubmit={async ({ title, body, occurredAt, meta, linkedGoalId }) => {
           const created = await createObject({
             type,

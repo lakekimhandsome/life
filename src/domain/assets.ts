@@ -6,15 +6,20 @@ import {
   seedQuoteCache,
 } from '../lib/alphavantage'
 import { getLatestMarketQuotes, marketDayKey } from '../lib/marketQuotes'
+import { intlLocale, t, type MessageKey } from '../i18n'
 
 export type AssetKind = 'cash' | 'stock' | 'commodity' | 'real_estate' | 'debt'
 
-export const ASSET_KIND_LABEL: Record<AssetKind, string> = {
-  cash: '현금',
-  stock: '주식',
-  commodity: '물질',
-  real_estate: '부동산',
-  debt: '부채',
+const ASSET_KIND_LABEL_KEY: Record<AssetKind, MessageKey> = {
+  cash: 'assets.kind.cash',
+  stock: 'assets.kind.stock',
+  commodity: 'assets.kind.commodity',
+  real_estate: 'assets.kind.real_estate',
+  debt: 'assets.kind.debt',
+}
+
+export function assetKindLabel(kind: AssetKind): string {
+  return t(ASSET_KIND_LABEL_KEY[kind])
 }
 
 export const ASSET_KIND_ORDER: AssetKind[] = [
@@ -97,7 +102,7 @@ export function getAssetSymbol(object: LifeObject): string {
 }
 
 export function formatKrw(value: number): string {
-  return new Intl.NumberFormat('ko-KR', {
+  return new Intl.NumberFormat(intlLocale(), {
     style: 'currency',
     currency: 'KRW',
     maximumFractionDigits: 0,
@@ -108,13 +113,13 @@ export function formatKrw(value: number): string {
 const GRAMS_PER_TROY_OUNCE = 31.1034768
 
 export function formatQuantity(kind: AssetKind, quantity: number, symbol: string): string {
-  const amount = new Intl.NumberFormat('ko-KR', {
+  const amount = new Intl.NumberFormat(intlLocale(), {
     maximumFractionDigits: 6,
   }).format(quantity)
 
   if (isDirectPriceKind(kind)) return `${amount} ${symbol}`
   if (kind === 'commodity') return `${amount} g`
-  return `${amount}주`
+  return t('assets.shares', { amount })
 }
 
 /** KRW 현금처럼 외부 시세/환율 없이 바로 환산 가능한지. */
@@ -175,7 +180,7 @@ function incompleteAsset(
     quantity,
     unitPriceKrw: null,
     valueKrw: null,
-    error: '자산 정보가 불완전합니다.',
+    error: t('assets.incomplete'),
   }
 }
 
@@ -383,7 +388,7 @@ export async function valueAssets(objects: LifeObject[]): Promise<ValuedAsset[]>
         quantity,
         unitPriceKrw: null,
         valueKrw: null,
-        error: error instanceof Error ? error.message : '시세 조회 실패',
+        error: error instanceof Error ? error.message : t('assets.quoteFailed'),
       })
     }
   }

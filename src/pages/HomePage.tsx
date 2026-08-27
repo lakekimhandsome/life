@@ -7,13 +7,15 @@ import {
   valueAssetsFromLatestCache,
 } from '../domain/assets'
 import { resolveHubModules } from '../domain/hubLayout'
-import { getModuleStatus } from '../domain/modules'
+import { getModuleStatus, moduleTitle } from '../domain/modules'
 import { getClipboardSummary } from '../lib/clipboard'
 import { daysUntilLocalDay, formatDday } from '../lib/format'
 import { useLife } from '../state/LifeContext'
+import { useT } from '../state/LocaleContext'
 import { usePrefs } from '../state/PrefsContext'
 
 export function HomePage() {
+  const t = useT()
   const { ready, objects } = useLife()
   const { hubLayout } = usePrefs()
   const [assetsTotalKrw, setAssetsTotalKrw] = useState<number | null>(null)
@@ -86,7 +88,7 @@ export function HomePage() {
   return (
     <div className="hub">
       {ready && ddayGoals.length > 0 ? (
-        <section className="hub-dday" aria-label="디데이">
+        <section className="hub-dday" aria-label={t('hub.dday')}>
           {ddayGoals.map(({ object, days }) => (
             <Link
               key={object.id}
@@ -111,7 +113,7 @@ export function HomePage() {
               <ModuleIcon id={module.id} />
             </span>
             <div className="hub-card-copy">
-              <h2>{module.title}</h2>
+              <h2>{moduleTitle(module.id)}</h2>
               <p>
                 {ready
                   ? getModuleStatus(module.id, objects, {

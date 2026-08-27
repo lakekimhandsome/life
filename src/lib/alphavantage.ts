@@ -1,3 +1,4 @@
+import { t } from '../i18n'
 import { getMarketQuote, marketDayKey, saveMarketQuote } from './marketQuotes'
 
 const API_BASE = 'https://www.alphavantage.co/query'
@@ -13,7 +14,7 @@ let queue: Promise<void> = Promise.resolve()
 function getApiKey(): string {
   const key = import.meta.env.VITE_ALPHA_VANTAGE_API_KEY
   if (!key || typeof key !== 'string') {
-    throw new Error('Alpha Vantage API 키가 없습니다. VITE_ALPHA_VANTAGE_API_KEY를 설정하세요.')
+    throw new Error(t('error.alphaKey'))
   }
   return key
 }
@@ -60,7 +61,7 @@ async function requestJson(params: Record<string, string>): Promise<unknown> {
 
     const response = await fetch(url.toString())
     if (!response.ok) {
-      throw new Error(`시세 조회 실패 (${response.status})`)
+      throw new Error(t('error.quoteStatus', { status: response.status }))
     }
     return response.json() as Promise<unknown>
   })
@@ -126,7 +127,7 @@ export async function fetchStockPriceUsd(symbol: string): Promise<number> {
     if (price === null) {
       const note = typeof data?.Note === 'string' ? data.Note : null
       const info = typeof data?.Information === 'string' ? data.Information : null
-      throw new Error(note ?? info ?? `${ticker} 주식 시세를 가져오지 못했습니다.`)
+      throw new Error(note ?? info ?? t('error.stockQuote', { ticker }))
     }
     return price
   })
@@ -140,7 +141,7 @@ export async function fetchMetalPriceUsd(symbol: 'GOLD' | 'SILVER'): Promise<num
     const price = parseNumber(data?.price)
     if (price === null) {
       const note = typeof data?.Note === 'string' ? data.Note : null
-      throw new Error(note ?? `${symbol} 시세를 가져오지 못했습니다.`)
+      throw new Error(note ?? t('error.metalQuote', { symbol }))
     }
     return price
   })
@@ -165,7 +166,7 @@ export async function fetchFxRate(from: string, to: string): Promise<number> {
     const rate = parseNumber(rateBlock?.['5. Exchange Rate'])
     if (rate === null) {
       const note = typeof data?.Note === 'string' ? data.Note : null
-      throw new Error(note ?? `${fromCode}/${toCode} 환율을 가져오지 못했습니다.`)
+      throw new Error(note ?? t('error.fxQuote', { from: fromCode, to: toCode }))
     }
     return rate
   })

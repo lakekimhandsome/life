@@ -3,6 +3,7 @@ import { LogOut, Settings } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { displayEmail, displayName, resolveAvatarUrl } from '../../lib/userProfile'
 import { useAuth } from '../../state/AuthContext'
+import { useT } from '../../state/LocaleContext'
 import { Avatar } from '../ui/Avatar'
 
 export function UserMenu({
@@ -11,6 +12,7 @@ export function UserMenu({
   variant?: 'compact' | 'sidebar'
 }) {
   const { user, signOut } = useAuth()
+  const t = useT()
   const navigate = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
   const [authBusy, setAuthBusy] = useState(false)
@@ -62,7 +64,7 @@ export function UserMenu({
         className="user-menu-trigger"
         aria-haspopup="menu"
         aria-expanded={menuOpen}
-        aria-label="사용자 메뉴"
+        aria-label={t('nav.userMenu')}
         onClick={() => setMenuOpen((open) => !open)}
       >
         <Avatar src={avatarSrc} name={label} size={variant === 'sidebar' ? 34 : 36} alt="" />
@@ -93,7 +95,7 @@ export function UserMenu({
             }}
           >
             <Settings size={16} strokeWidth={1.75} aria-hidden="true" />
-            설정
+            {t('common.settings')}
           </button>
 
           <button
@@ -104,7 +106,7 @@ export function UserMenu({
             onClick={() => void handleSignOut()}
           >
             <LogOut size={16} strokeWidth={1.75} aria-hidden="true" />
-            로그아웃
+            {t('common.signOut')}
           </button>
 
           {authError ? <p className="user-menu-hint is-error">{authError}</p> : null}

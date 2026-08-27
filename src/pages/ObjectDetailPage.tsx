@@ -9,11 +9,13 @@ import { getModuleForObjectType } from '../domain/modules'
 import { formatMetaValue, getSchema, supportsMarkdownBody } from '../domain/schemas'
 import { formatDate, formatDateTime, fromDateInputValue } from '../lib/format'
 import { useLife } from '../state/LifeContext'
+import { useT } from '../state/LocaleContext'
 
 export function ObjectDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { ready, getObject, deleteObject, getRelationships } = useLife()
+  const t = useT()
   const [relationships, setRelationships] = useState<Relationship[]>([])
 
   const object = id ? getObject(id) : undefined
@@ -35,7 +37,7 @@ export function ObjectDetailPage() {
   }
 
   if (!object) {
-    return <p className="empty-state">불러오는 중…</p>
+    return <p className="empty-state">{t('common.loading')}</p>
   }
 
   const schema = getSchema(object.type)
@@ -64,16 +66,16 @@ export function ObjectDetailPage() {
             <Link
               to={`/object/${object.id}/edit`}
               className="object-header-action"
-              aria-label={`${schema.labelKo} 수정`}
+              aria-label={t('detail.editAria', { type: schema.label })}
             >
               <Pencil size={20} strokeWidth={1.75} aria-hidden="true" />
             </Link>
             <button
               type="button"
               className="object-header-action"
-              aria-label={`${schema.labelKo} 삭제`}
+              aria-label={t('detail.deleteAria', { type: schema.label })}
               onClick={async () => {
-                const confirmed = window.confirm('이 기록을 삭제할까요?')
+                const confirmed = window.confirm(t('detail.deleteConfirm'))
                 if (!confirmed) return
                 await deleteObject(object.id)
                 navigate(backTo)
@@ -112,7 +114,7 @@ export function ObjectDetailPage() {
       ) : null}
 
       <section className="detail-fields">
-        <h2>세부 정보</h2>
+        <h2>{t('detail.fields')}</h2>
         <dl>
           {schema.fields.map((field) => {
             const formatted = formatMetaValue(
@@ -130,7 +132,7 @@ export function ObjectDetailPage() {
           })}
           {object.type !== 'goal' ? (
             <div>
-              <dt>생성</dt>
+              <dt>{t('detail.created')}</dt>
               <dd>{formatDateTime(object.createdAt)}</dd>
             </div>
           ) : null}
@@ -138,10 +140,10 @@ export function ObjectDetailPage() {
       </section>
 
       <section className="detail-relations">
-        <h2>연결</h2>
+        <h2>{t('detail.links')}</h2>
         {related.length === 0 ? (
           <p className="muted">
-            연결된 객체가 없습니다. 생성 시 목표와 연결할 수 있습니다.
+            {t('detail.noLinks')}
           </p>
         ) : (
           <ul className="relation-list">
@@ -161,19 +163,19 @@ export function ObjectDetailPage() {
       {!supportsMarkdown ? (
         <div className="detail-actions">
           <Link to={`/object/${object.id}/edit`} className="btn btn-ghost">
-            수정
+            {t('common.edit')}
           </Link>
           <button
             type="button"
             className="btn btn-danger"
             onClick={async () => {
-              const confirmed = window.confirm('이 기록을 삭제할까요?')
+              const confirmed = window.confirm(t('detail.deleteConfirm'))
               if (!confirmed) return
               await deleteObject(object.id)
               navigate(backTo)
             }}
           >
-            삭제
+            {t('common.delete')}
           </button>
         </div>
       ) : null}

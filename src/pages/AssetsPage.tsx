@@ -14,8 +14,8 @@ import { BackLink } from '../components/ui/BackLink'
 import * as repository from '../core/repository'
 import type { LifeObject } from '../core/types'
 import {
-  ASSET_KIND_LABEL,
   ASSET_KIND_ORDER,
+  assetKindLabel,
   assetsSnapshot,
   formatKrw,
   formatQuantity,
@@ -26,35 +26,38 @@ import {
   type AssetKind,
   type ValuedAsset,
 } from '../domain/assets'
+import { t as translate } from '../i18n'
 import { ensureDailyAssetSnapshot } from '../lib/assetHistory'
 import { useLife } from '../state/LifeContext'
+import { useT } from '../state/LocaleContext'
 
 const COMMODITY_OPTIONS = [
-  { value: 'GOLD', label: '금 (GOLD)' },
-  { value: 'SILVER', label: '은 (SILVER)' },
+  { value: 'GOLD', labelKey: 'assets.goldOption' },
+  { value: 'SILVER', labelKey: 'assets.silverOption' },
 ] as const
 
-const COMMODITY_TITLE: Record<string, string> = {
-  GOLD: '금',
-  SILVER: '은',
+function commodityTitle(symbol: string): string {
+  if (symbol === 'GOLD') return translate('assets.gold')
+  if (symbol === 'SILVER') return translate('assets.silver')
+  return symbol
 }
 
 function kindHint(kind: AssetKind): string {
-  if (isDirectPriceKind(kind)) return '통화 코드 (예: KRW, USD, EUR)'
-  if (kind === 'stock') return '티커 (예: AAPL, TSLA, 005930.KS)'
-  return '금/은 중 선택'
+  if (isDirectPriceKind(kind)) return translate('assets.hint.currency')
+  if (kind === 'stock') return translate('assets.hint.ticker')
+  return translate('assets.hint.commodity')
 }
 
 function titlePlaceholder(kind: AssetKind): string {
-  if (kind === 'cash') return '예: 비상금'
-  if (kind === 'real_estate') return '예: 집'
-  if (kind === 'debt') return '예: 학자금 대출'
-  return '티커/물질과 동일'
+  if (kind === 'cash') return translate('assets.placeholder.cash')
+  if (kind === 'real_estate') return translate('assets.placeholder.realEstate')
+  if (kind === 'debt') return translate('assets.placeholder.debt')
+  return translate('assets.placeholder.other')
 }
 
 function titleFromSymbol(kind: AssetKind, nextSymbol: string): string {
   const normalized = nextSymbol.trim().toUpperCase()
-  if (kind === 'commodity') return COMMODITY_TITLE[normalized] ?? normalized
+  if (kind === 'commodity') return commodityTitle(normalized)
   return normalized
 }
 
@@ -101,6 +104,7 @@ function AssetRow({
   onDelete: () => void
   onReorderStart: (event: ReactPointerEvent<HTMLButtonElement>) => void
 }) {
+  const t = useT()
   const startX = useRef(0)
   const startY = useRef(0)
   const axis = useRef<'none' | 'x' | 'y'>('none')
@@ -116,7 +120,7 @@ function AssetRow({
   }
 
   function requestDelete() {
-    const confirmed = window.confirm(`「${item.object.title}」 자산을 삭제할까요?`)
+    const confirmed = window.confirm(t('assets.deleteConfirm', { title: item.object.title }))
     if (!confirmed) {
       setAnimating(true)
       updateOffset(0)
@@ -242,7 +246,7 @@ function AssetRow({
                     onEdit()
                   }}
                 >
-                  수정
+                  {t('common.edit')}
                 </button>
                 <button
                   type="button"
@@ -253,12 +257,12 @@ function AssetRow({
                     requestDelete()
                   }}
                 >
-                  삭제
+                  {t('common.delete')}
                 </button>
                 <button
                   type="button"
                   className="assets-handle"
-                  aria-label={`${item.object.title} 순서 변경`}
+                  aria-label={t('assets.reorder', { title: item.object.title })}
                   disabled={reorderDisabled}
                   onPointerDown={(event) => {
                     event.stopPropagation()
@@ -272,7 +276,7 @@ function AssetRow({
           </div>
         </div>
         <div className="assets-swipe-action" aria-hidden="true">
-          삭제
+          {t('common.delete')}
         </div>
       </div>
     </li>
@@ -280,6 +284,7 @@ function AssetRow({
 }
 
 export function AssetsPage() {
+  const t = useT()
   const { ready, objects, createObject, updateObject, deleteObject, refresh } = useLife()
   const assets = useMemo(
     () => sortAssets(objects.filter((object) => object.type === 'asset')),
@@ -386,13 +391,13 @@ export function AssetsPage() {
         setValued(sorted)
         const failed = next.filter((item) => item.error)
         if (failed.length > 0 && failed.length === next.length) {
-          setPriceError(failed[0].error ?? '시세를 불러오지 못했습니다.')
+          setPriceError(failed[0].error ?? translate('assets.priceFailed'))
         } else {
           void ensureDailyAssetSnapshot(sorted)
         }
       } catch (error) {
         if (!active) return
-        setPriceError(error instanceof Error ? error.message : '시세를 불러오지 못했습니다.')
+        setPriceError(error instanceof Error ? error.message : translate('assets.priceFailed'))
         // 전일 캐시가 있으면 그대로 두고, 없을 때만 스냅샷으로 되돌림.
         if (!cached) {
           setValued(sortValued(assetsSnapshot(assets)))
@@ -562,7 +567,7 @@ export function AssetsPage() {
     const nextQuantity = Number(quantity)
 
     if (isDirectPriceKind(kind) && !nextTitle) {
-      setFormError('이름을 입력해 주세요.')
+      setFormError(t('assets.needName'))
       return
     }
     if (!nextSymbol) {
@@ -570,7 +575,7 @@ export function AssetsPage() {
       return
     }
     if (!Number.isFinite(nextQuantity) || nextQuantity <= 0) {
-      setFormError(isDirectPriceKind(kind) ? '금액을 확인해 주세요.' : '수량을 확인해 주세요.')
+      setFormError(isDirectPriceKind(kind) ? t('assets.needAmount') : t('assets.needQuantity'))
       return
     }
 
@@ -616,7 +621,7 @@ export function AssetsPage() {
       resetComposer()
       setComposerOpen(false)
     } catch (error) {
-      setFormError(error instanceof Error ? error.message : '저장에 실패했습니다.')
+      setFormError(error instanceof Error ? error.message : t('form.saveFailed'))
     } finally {
       setSaving(false)
     }
@@ -627,13 +632,13 @@ export function AssetsPage() {
       <div className="module-header module-heading--assets">
         <BackLink to="/" />
         <div className="module-heading module-heading--assets">
-          <h1>자산</h1>
+          <h1>{t('modules.assets')}</h1>
         </div>
         <div className="module-header-actions">
           <Link
             to="/assets/history"
             className="module-header-btn"
-            aria-label="자산 추이"
+            aria-label={t('assets.history')}
           >
             <ChartNoAxesCombined size={22} strokeWidth={1.75} aria-hidden="true" />
           </Link>
@@ -642,7 +647,7 @@ export function AssetsPage() {
             className="module-header-btn"
             onClick={openComposer}
             disabled={!ready}
-            aria-label="자산 추가"
+            aria-label={t('assets.add')}
           >
             <Plus size={22} strokeWidth={1.75} aria-hidden="true" />
           </button>
@@ -651,7 +656,7 @@ export function AssetsPage() {
             className="module-header-btn"
             onClick={() => setEditingMode((value) => !value)}
             disabled={!ready}
-            aria-label={editingMode ? '편집 완료' : '자산 편집'}
+            aria-label={editingMode ? t('assets.editDone') : t('assets.edit')}
             aria-pressed={editingMode}
           >
             {editingMode ? (
@@ -669,7 +674,7 @@ export function AssetsPage() {
               <button
                 type="button"
                 className="assets-modal-backdrop"
-                aria-label="닫기"
+                aria-label={t('common.close')}
                 onClick={closeComposer}
                 disabled={saving}
               />
@@ -680,13 +685,13 @@ export function AssetsPage() {
                 aria-labelledby="assets-modal-title"
               >
                 <header className="assets-composer-header">
-                  <h2 id="assets-modal-title">{editingId ? '자산 수정' : '자산 추가'}</h2>
+                  <h2 id="assets-modal-title">{editingId ? t('assets.editItem') : t('assets.add')}</h2>
                   <button
                     type="button"
                     className="assets-composer-close"
                     onClick={closeComposer}
                     disabled={saving}
-                    aria-label="닫기"
+                    aria-label={t('common.close')}
                   >
                     <X size={18} strokeWidth={2} aria-hidden="true" />
                   </button>
@@ -694,7 +699,7 @@ export function AssetsPage() {
                 <form onSubmit={handleSave}>
                   <div className="assets-composer-grid">
                     <div className="field">
-                      <label htmlFor="asset-title">이름</label>
+                      <label htmlFor="asset-title">{t('assets.name')}</label>
                       <input
                         ref={titleInputRef}
                         id="asset-title"
@@ -705,7 +710,7 @@ export function AssetsPage() {
                       />
                     </div>
                     <div className="field">
-                      <label htmlFor="asset-kind">종류</label>
+                      <label htmlFor="asset-kind">{t('assets.kind')}</label>
                       <select
                         id="asset-kind"
                         value={kind}
@@ -714,7 +719,7 @@ export function AssetsPage() {
                       >
                         {ASSET_KIND_ORDER.map((item) => (
                           <option key={item} value={item}>
-                            {ASSET_KIND_LABEL[item]}
+                            {assetKindLabel(item)}
                           </option>
                         ))}
                       </select>
@@ -722,10 +727,10 @@ export function AssetsPage() {
                     <div className="field">
                       <label htmlFor="asset-symbol">
                         {isDirectPriceKind(kind)
-                          ? '통화'
+                          ? t('assets.currency')
                           : kind === 'stock'
-                            ? '티커'
-                            : '물질'}
+                            ? t('assets.ticker')
+                            : t('assets.commodity')}
                       </label>
                       {kind === 'commodity' ? (
                         <select
@@ -737,7 +742,7 @@ export function AssetsPage() {
                         >
                           {COMMODITY_OPTIONS.map((option) => (
                             <option key={option.value} value={option.value}>
-                              {option.label}
+                              {t(option.labelKey)}
                             </option>
                           ))}
                         </select>
@@ -756,10 +761,10 @@ export function AssetsPage() {
                     <div className="field">
                       <label htmlFor="asset-quantity">
                         {isDirectPriceKind(kind)
-                          ? '금액'
+                          ? t('assets.amount')
                           : kind === 'commodity'
-                            ? '수량 (g)'
-                            : '수량 (주)'}
+                            ? t('assets.qtyGrams')
+                            : t('assets.qtyShares')}
                       </label>
                       <input
                         id="asset-quantity"
@@ -781,14 +786,14 @@ export function AssetsPage() {
                       onClick={closeComposer}
                       disabled={saving}
                     >
-                      취소
+                      {t('common.cancel')}
                     </button>
                     <button
                       type="submit"
                       className="btn btn-primary"
                       disabled={!ready || saving}
                     >
-                      {saving ? '저장 중…' : '저장'}
+                      {saving ? t('common.saving') : t('common.save')}
                     </button>
                   </div>
                 </form>
@@ -801,50 +806,50 @@ export function AssetsPage() {
       <div
         className={`assets-summary${ready && assets.length > 0 ? ' has-chart' : ''}`}
       >
-        <section className="assets-total" aria-label="순자산">
-          <p className="assets-total-label">순자산</p>
+        <section className="assets-total" aria-label={t('assets.netWorth')}>
+          <p className="assets-total-label">{t('assets.netWorth')}</p>
           <strong className="assets-total-value">
             {!ready
-              ? '계산 중…'
+              ? t('assets.calculating')
               : portfolio.pending
                 ? pricing
-                  ? '계산 중…'
+                  ? t('assets.calculating')
                   : '—'
                 : formatKrw(portfolio.netAssetsKrw)}
           </strong>
           {ready && !portfolio.pending ? (
             <dl className="assets-total-breakdown">
               <div>
-                <dt>총자산</dt>
+                <dt>{t('assets.gross')}</dt>
                 <dd>{formatKrw(portfolio.grossAssetsKrw)}</dd>
               </div>
               <div>
-                <dt>부채</dt>
+                <dt>{t('assets.kind.debt')}</dt>
                 <dd>{formatKrw(portfolio.debtKrw)}</dd>
               </div>
             </dl>
           ) : null}
           {priceError ? <p className="assets-total-note">{priceError}</p> : null}
           {!priceError && pricing ? (
-            <p className="assets-total-note">새로고침 중…</p>
+            <p className="assets-total-note">{t('assets.refreshing')}</p>
           ) : null}
         </section>
         {ready && assets.length > 0 ? <AssetsPieChart items={items} /> : null}
       </div>
 
       {!ready ? (
-        <p className="empty-state">불러오는 중…</p>
+        <p className="empty-state">{t('common.loading')}</p>
       ) : assets.length === 0 ? (
         <div className="empty-panel">
-          <h3>자산 현황</h3>
-          <p>현금, 주식, 금/은, 부동산, 부채를 추가하면 순자산이 여기에 모입니다.</p>
+          <h3>{t('assets.emptyTitle')}</h3>
+          <p>{t('assets.emptyBody')}</p>
         </div>
       ) : (
         <div className="assets-groups">
           {grouped.map((group) => (
             <section key={group.kind} className="assets-group">
               <header className="assets-group-header">
-                <h2>{ASSET_KIND_LABEL[group.kind]}</h2>
+                <h2>{assetKindLabel(group.kind)}</h2>
                 <strong>
                   {group.pending ? '—' : formatAssetValue(group.kind, group.subtotal)}
                 </strong>

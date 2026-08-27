@@ -18,6 +18,7 @@ import {
   startOfLocalDay,
 } from '../lib/format'
 import { useLife } from '../state/LifeContext'
+import { useT } from '../state/LocaleContext'
 
 const SWIPE_DELETE_THRESHOLD = 88
 
@@ -52,6 +53,7 @@ function StudyTodoItem({
   onRename: (title: string) => void
   onReorderStart: (event: ReactPointerEvent<HTMLButtonElement>) => void
 }) {
+  const t = useT()
   const done = isDone(todo)
   const startX = useRef(0)
   const startY = useRef(0)
@@ -114,7 +116,7 @@ function StudyTodoItem({
     if (axis.current === 'x' && nextOffset <= -SWIPE_DELETE_THRESHOLD) {
       setOffset(-140)
       window.setTimeout(() => {
-        const confirmed = window.confirm(`「${todo.title}」 할 일을 삭제할까요?`)
+        const confirmed = window.confirm(t('study.deleteConfirm', { title: todo.title }))
         if (!confirmed) {
           setAnimating(true)
           setOffset(0)
@@ -172,7 +174,7 @@ function StudyTodoItem({
             type="button"
             className="todo-toggle"
             aria-pressed={done}
-            aria-label={done ? `${todo.title} 완료 취소` : `${todo.title} 완료`}
+            aria-label={done ? t('study.uncomplete', { title: todo.title }) : t('study.complete', { title: todo.title })}
             onPointerDown={(event) => event.stopPropagation()}
             onClick={(event) => {
               event.stopPropagation()
@@ -189,7 +191,7 @@ function StudyTodoItem({
               ref={inputRef}
               className="todo-title-input"
               value={draftTitle}
-              aria-label="할 일 수정"
+              aria-label={t('study.editTodo')}
               onPointerDown={(event) => event.stopPropagation()}
               onChange={(event) => setDraftTitle(event.target.value)}
               onBlur={commitEdit}
@@ -220,7 +222,7 @@ function StudyTodoItem({
           <button
             type="button"
             className="todo-handle"
-            aria-label={`${todo.title} 순서 변경`}
+            aria-label={t('study.reorder', { title: todo.title })}
             onPointerDown={(event) => {
               event.stopPropagation()
               onReorderStart(event)
@@ -230,7 +232,7 @@ function StudyTodoItem({
           </button>
         </div>
         <div className="todo-swipe-action" aria-hidden="true">
-          삭제
+          {t('common.delete')}
         </div>
       </div>
     </li>
@@ -238,6 +240,7 @@ function StudyTodoItem({
 }
 
 export function StudyPage() {
+  const t = useT()
   const { ready, listByType, createObject, updateObject, deleteObject, refresh } = useLife()
   const [selectedDay, setSelectedDay] = useState(() => startOfLocalDay())
   const [draft, setDraft] = useState('')
@@ -385,15 +388,15 @@ export function StudyPage() {
       <div className="module-header module-heading--study">
         <BackLink to="/" />
         <div className="module-heading module-heading--study">
-          <h1>공부</h1>
+          <h1>{t('modules.study')}</h1>
         </div>
       </div>
 
-      <div className="day-nav" aria-label="날짜 선택">
+      <div className="day-nav" aria-label={t('study.pickDate')}>
         <button
           type="button"
           className="day-nav-btn"
-          aria-label="이전 날짜"
+          aria-label={t('study.prevDate')}
           onClick={() => setSelectedDay((day) => addLocalDays(day, -1))}
         >
           <ChevronLeft size={18} strokeWidth={2} aria-hidden="true" />
@@ -402,14 +405,14 @@ export function StudyPage() {
           <strong>{formatDayHeading(selectedDay)}</strong>
           {ready && items.length > 0 ? (
             <span>
-              {remaining === 0 ? '모두 완료' : `${remaining}개 남음`}
+              {remaining === 0 ? t('study.allDone') : t('study.remaining', { count: remaining })}
             </span>
           ) : null}
         </div>
         <button
           type="button"
           className="day-nav-btn"
-          aria-label="다음 날짜"
+          aria-label={t('study.nextDate')}
           onClick={() => setSelectedDay((day) => addLocalDays(day, 1))}
         >
           <ChevronRight size={18} strokeWidth={2} aria-hidden="true" />
@@ -422,7 +425,7 @@ export function StudyPage() {
           className="day-today-link"
           onClick={() => setSelectedDay(startOfLocalDay())}
         >
-          오늘로 이동
+          {t('study.goToday')}
         </button>
       ) : null}
 
@@ -431,8 +434,8 @@ export function StudyPage() {
           type="text"
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
-          placeholder="할 일 추가"
-          aria-label="할 일 추가"
+          placeholder={t('study.add')}
+          aria-label={t('study.add')}
           disabled={!ready || saving}
           autoComplete="off"
         />
@@ -440,18 +443,18 @@ export function StudyPage() {
           type="submit"
           className="module-header-btn"
           disabled={!ready || saving || !draft.trim()}
-          aria-label="할 일 추가"
+          aria-label={t('study.add')}
         >
           <Plus size={22} strokeWidth={1.75} aria-hidden="true" />
         </button>
       </form>
 
       {!ready ? (
-        <p className="empty-state">불러오는 중…</p>
+        <p className="empty-state">{t('common.loading')}</p>
       ) : items.length === 0 ? (
         <div className="empty-panel todo-empty">
-          <h3>할 일이 없습니다</h3>
-          <p>위에서 오늘의 공부를 추가해 보세요.</p>
+          <h3>{t('study.emptyTitle')}</h3>
+          <p>{t('study.emptyBody')}</p>
         </div>
       ) : (
         <ul className="todo-list" ref={listRef}>

@@ -9,17 +9,20 @@ import {
   YAxis,
 } from 'recharts'
 import { formatKrw } from '../../domain/assets'
+import { formatCompactNumber } from '../../lib/format'
 import type { AssetHistoryPoint } from '../../lib/assetHistory'
+import { type MessageKey } from '../../i18n'
+import { useT } from '../../state/LocaleContext'
 
 /** Which series to plot — total now; kind keys later (cash / stock / …). */
 export type AssetHistorySeries = 'total' | 'cash' | 'stock' | 'material' | 'crypto'
 
-const SERIES_LABEL: Record<AssetHistorySeries, string> = {
-  total: '순자산',
-  cash: '현금',
-  stock: '주식',
-  material: '물질',
-  crypto: '암호화폐',
+const SERIES_LABEL_KEY: Record<AssetHistorySeries, MessageKey> = {
+  total: 'assets.series.total',
+  cash: 'assets.series.cash',
+  stock: 'assets.series.stock',
+  material: 'assets.series.material',
+  crypto: 'assets.series.crypto',
 }
 
 interface ChartRow {
@@ -42,14 +45,6 @@ function seriesValue(point: AssetHistoryPoint, series: AssetHistorySeries): numb
   return point.crypto
 }
 
-function formatAxisKrw(value: number): string {
-  const abs = Math.abs(value)
-  if (abs >= 100_000_000) return `${(value / 100_000_000).toFixed(1)}억`
-  if (abs >= 10_000) return `${Math.round(value / 10_000)}만`
-  return new Intl.NumberFormat('ko-KR', { maximumFractionDigits: 0 }).format(value)
-}
-
-/** Recharts v3 stores tooltip index as a string (`"3"`), not a number. */
 function chartIndex(value: unknown): number | null {
   if (typeof value === 'number' && Number.isInteger(value) && value >= 0) return value
   if (typeof value === 'string' && value !== '') {
@@ -115,6 +110,8 @@ export function AssetsHistoryChart({
   selectedId?: string | null
   onSelect?: (id: string) => void
 }) {
+  const t = useT()
+  const seriesLabel = t(SERIES_LABEL_KEY[series])
   const data = useMemo<ChartRow[]>(
     () =>
       points.map((point) => ({
@@ -148,13 +145,13 @@ export function AssetsHistoryChart({
   if (data.length === 0) {
     return (
       <div className="assets-history-chart assets-history-chart--empty">
-        <p>선택한 기간의 기록이 없습니다.</p>
+        <p>{t('assets.historyEmpty')}</p>
       </div>
     )
   }
 
   return (
-    <div className="assets-history-chart" aria-label={`${SERIES_LABEL[series]} 추이`}>
+    <div className="assets-history-chart" aria-label={t('assets.historySeries', { label: seriesLabel })}>
       <ResponsiveContainer width="100%" height="100%">
         <LineChart
           data={data}
@@ -183,7 +180,7 @@ export function AssetsHistoryChart({
             tickLine={false}
             axisLine={false}
             width={52}
-            tickFormatter={formatAxisKrw}
+            tickFormatter={formatCompactNumber}
           />
           <Tooltip
             content={({ active, payload }) => {
@@ -201,7 +198,7 @@ export function AssetsHistoryChart({
           <Line
             type="monotone"
             dataKey="value"
-            name={SERIES_LABEL[series]}
+            name={seriesLabel}
             stroke="var(--accent-asset)"
             strokeWidth={2.25}
             isAnimationActive={false}

@@ -1,4 +1,5 @@
 import type { ObjectType } from '../core/types'
+import { t, type MessageKey } from '../i18n'
 import { formatDate, fromDateInputValue } from '../lib/format'
 
 export type FieldKind = 'text' | 'number' | 'select' | 'date'
@@ -14,8 +15,8 @@ export interface MetaFieldSchema {
 
 export interface ObjectTypeSchema {
   type: ObjectType
+  enLabel: string
   label: string
-  labelKo: string
   description: string
   titlePlaceholder: string
   bodyPlaceholder: string
@@ -24,178 +25,202 @@ export interface ObjectTypeSchema {
   fields: MetaFieldSchema[]
 }
 
-export const OBJECT_SCHEMAS: Record<ObjectType, ObjectTypeSchema> = {
+type FieldDef = {
+  key: string
+  kind: FieldKind
+  labelKey: MessageKey
+  placeholderKey?: MessageKey
+  placeholder?: string
+  optionKeys?: Record<string, MessageKey>
+  required?: boolean
+}
+
+type SchemaDef = {
+  type: ObjectType
+  enLabel: string
+  descriptionKey?: MessageKey
+  titlePlaceholderKey: MessageKey
+  bodyPlaceholderKey: MessageKey
+  bodyLabelKey: MessageKey
+  accent: string
+  fields: FieldDef[]
+}
+
+const SCHEMA_DEFS: Record<ObjectType, SchemaDef> = {
   journal: {
     type: 'journal',
-    label: 'Journal',
-    labelKo: '일기',
-    description: '',
-    titlePlaceholder: '오늘의 한 줄',
-    bodyPlaceholder: '무엇이 있었고, 어떻게 느꼈나요?\n\n마크다운 예: **강조**, - 목록, [링크](url)',
-    bodyLabel: '본문',
+    enLabel: 'Journal',
+    titlePlaceholderKey: 'schema.journal.titlePlaceholder',
+    bodyPlaceholderKey: 'schema.journal.bodyPlaceholder',
+    bodyLabelKey: 'schema.journal.bodyLabel',
     accent: 'var(--accent-journal)',
     fields: [
       {
         key: 'mood',
-        label: '기분',
         kind: 'select',
-        options: [
-          { value: 'calm', label: '평온' },
-          { value: 'good', label: '좋음' },
-          { value: 'hard', label: '힘듦' },
-          { value: 'grateful', label: '감사' },
-        ],
+        labelKey: 'mood.label',
+        optionKeys: {
+          calm: 'mood.calm',
+          good: 'mood.good',
+          hard: 'mood.hard',
+          grateful: 'mood.grateful',
+        },
       },
     ],
   },
   project: {
     type: 'project',
-    label: 'Project',
-    labelKo: '프로젝트',
-    description: '',
-    titlePlaceholder: '프로젝트 이름',
-    bodyPlaceholder:
-      '무엇을 만들고, 왜 중요한가요?\n\n마크다운 예: **강조**, - 목록, [링크](url)',
-    bodyLabel: '설명',
+    enLabel: 'Project',
+    titlePlaceholderKey: 'schema.project.titlePlaceholder',
+    bodyPlaceholderKey: 'schema.project.bodyPlaceholder',
+    bodyLabelKey: 'schema.project.bodyLabel',
     accent: 'var(--accent-project)',
     fields: [
       {
         key: 'status',
-        label: '상태',
         kind: 'select',
-        options: [
-          { value: 'idea', label: '아이디어' },
-          { value: 'active', label: '진행 중' },
-          { value: 'paused', label: '보류' },
-          { value: 'done', label: '완료' },
-        ],
+        labelKey: 'schema.status',
+        optionKeys: {
+          idea: 'status.idea',
+          active: 'status.active',
+          paused: 'status.paused',
+          done: 'status.done',
+        },
       },
     ],
   },
   note: {
     type: 'note',
-    label: 'Note',
-    labelKo: '노트',
-    description: '',
-    titlePlaceholder: '노트 제목',
-    bodyPlaceholder:
-      '생각을 자유롭게 남겨 보세요.\n\n마크다운 예: **강조**, - 목록, [링크](url)',
-    bodyLabel: '본문',
+    enLabel: 'Note',
+    titlePlaceholderKey: 'schema.note.titlePlaceholder',
+    bodyPlaceholderKey: 'schema.note.bodyPlaceholder',
+    bodyLabelKey: 'schema.note.bodyLabel',
     accent: 'var(--accent-note)',
     fields: [],
   },
   workout: {
     type: 'workout',
-    label: 'Workout',
-    labelKo: '운동',
-    description: '몸에 남긴 흔적',
-    titlePlaceholder: '예: 하체 근력, 러닝 5km',
-    bodyPlaceholder: '세트, 느낌, 특이사항',
-    bodyLabel: '메모',
+    enLabel: 'Workout',
+    descriptionKey: 'schema.workout.description',
+    titlePlaceholderKey: 'schema.workout.titlePlaceholder',
+    bodyPlaceholderKey: 'schema.workout.bodyPlaceholder',
+    bodyLabelKey: 'schema.workout.bodyLabel',
     accent: 'var(--accent-workout)',
     fields: [
       {
         key: 'durationMin',
-        label: '시간 (분)',
         kind: 'number',
+        labelKey: 'schema.workout.duration',
         placeholder: '45',
       },
       {
         key: 'intensity',
-        label: '강도',
         kind: 'select',
-        options: [
-          { value: 'low', label: '낮음' },
-          { value: 'medium', label: '보통' },
-          { value: 'high', label: '높음' },
-        ],
+        labelKey: 'intensity.label',
+        optionKeys: {
+          low: 'intensity.low',
+          medium: 'intensity.medium',
+          high: 'intensity.high',
+        },
       },
     ],
   },
   study: {
     type: 'study',
-    label: 'Study',
-    labelKo: '공부',
-    description: '그날 해야 할 공부',
-    titlePlaceholder: '예: 수학 문제집 10쪽',
-    bodyPlaceholder: '메모 (선택)',
-    bodyLabel: '메모',
+    enLabel: 'Study',
+    descriptionKey: 'schema.study.description',
+    titlePlaceholderKey: 'schema.study.titlePlaceholder',
+    bodyPlaceholderKey: 'schema.study.bodyPlaceholder',
+    bodyLabelKey: 'schema.study.bodyLabel',
     accent: 'var(--accent-study)',
     fields: [
       {
         key: 'subject',
-        label: '과목',
         kind: 'text',
-        placeholder: '과목 또는 주제',
+        labelKey: 'schema.study.subject',
+        placeholderKey: 'schema.study.subjectPlaceholder',
       },
     ],
   },
   goal: {
     type: 'goal',
-    label: 'Goal',
-    labelKo: '목표',
-    description: '',
-    titlePlaceholder: '이루고 싶은 것',
-    bodyPlaceholder: '왜 이 목표가 중요한가요?\n\n마크다운 예: **강조**, - 목록, [링크](url)',
-    bodyLabel: '동기',
+    enLabel: 'Goal',
+    titlePlaceholderKey: 'schema.goal.titlePlaceholder',
+    bodyPlaceholderKey: 'schema.goal.bodyPlaceholder',
+    bodyLabelKey: 'schema.goal.bodyLabel',
     accent: 'var(--accent-goal)',
     fields: [
       {
         key: 'status',
-        label: '상태',
         kind: 'select',
-        options: [
-          { value: 'active', label: '진행 중' },
-          { value: 'achieved', label: '달성' },
-          { value: 'paused', label: '보류' },
-        ],
+        labelKey: 'schema.status',
+        optionKeys: {
+          active: 'status.active',
+          achieved: 'status.achieved',
+          paused: 'status.paused',
+        },
       },
       {
         key: 'targetDate',
-        label: '목표일',
         kind: 'date',
+        labelKey: 'schema.goal.targetDate',
       },
     ],
   },
   asset: {
     type: 'asset',
-    label: 'Asset',
-    labelKo: '자산',
-    description: '현금, 주식, 물질, 부동산, 부채로 남긴 가치',
-    titlePlaceholder: '예: 비상금, 애플, 금',
-    bodyPlaceholder: '메모 (선택)',
-    bodyLabel: '메모',
+    enLabel: 'Asset',
+    descriptionKey: 'schema.asset.description',
+    titlePlaceholderKey: 'schema.asset.titlePlaceholder',
+    bodyPlaceholderKey: 'schema.asset.bodyPlaceholder',
+    bodyLabelKey: 'schema.asset.bodyLabel',
     accent: 'var(--accent-asset)',
     fields: [
       {
         key: 'kind',
-        label: '종류',
         kind: 'select',
-        options: [
-          { value: 'cash', label: '현금' },
-          { value: 'stock', label: '주식' },
-          { value: 'commodity', label: '물질' },
-          { value: 'real_estate', label: '부동산' },
-          { value: 'debt', label: '부채' },
-        ],
+        labelKey: 'schema.asset.kind',
+        optionKeys: {
+          cash: 'assets.kind.cash',
+          stock: 'assets.kind.stock',
+          commodity: 'assets.kind.commodity',
+          real_estate: 'assets.kind.real_estate',
+          debt: 'assets.kind.debt',
+        },
         required: true,
       },
       {
         key: 'symbol',
-        label: '심볼 / 통화',
         kind: 'text',
+        labelKey: 'schema.asset.symbol',
         placeholder: 'KRW, AAPL, GOLD…',
         required: true,
       },
       {
         key: 'quantity',
-        label: '수량',
         kind: 'number',
+        labelKey: 'schema.asset.quantity',
         placeholder: '1',
         required: true,
       },
     ],
   },
+}
+
+function localizeField(field: FieldDef): MetaFieldSchema {
+  return {
+    key: field.key,
+    kind: field.kind,
+    label: t(field.labelKey),
+    placeholder: field.placeholderKey ? t(field.placeholderKey) : field.placeholder,
+    options: field.optionKeys
+      ? Object.entries(field.optionKeys).map(([value, key]) => ({
+          value,
+          label: t(key),
+        }))
+      : undefined,
+    required: field.required,
+  }
 }
 
 export const CREATE_ORDER: ObjectType[] = [
@@ -212,8 +237,29 @@ export function supportsMarkdownBody(type: ObjectType): boolean {
   return type === 'journal' || type === 'goal' || type === 'project' || type === 'note'
 }
 
+const OBJECT_LABEL_KEY: Record<ObjectType, MessageKey> = {
+  journal: 'object.journal',
+  project: 'object.project',
+  note: 'object.note',
+  workout: 'object.workout',
+  study: 'object.study',
+  goal: 'object.goal',
+  asset: 'object.asset',
+}
+
 export function getSchema(type: ObjectType): ObjectTypeSchema {
-  return OBJECT_SCHEMAS[type]
+  const def = SCHEMA_DEFS[type]
+  return {
+    type: def.type,
+    enLabel: def.enLabel,
+    label: t(OBJECT_LABEL_KEY[type]),
+    description: def.descriptionKey ? t(def.descriptionKey) : '',
+    titlePlaceholder: t(def.titlePlaceholderKey),
+    bodyPlaceholder: t(def.bodyPlaceholderKey),
+    bodyLabel: t(def.bodyLabelKey),
+    accent: def.accent,
+    fields: def.fields.map(localizeField),
+  }
 }
 
 export function defaultMeta(type: ObjectType): Record<string, string | number | boolean | null> {
@@ -241,7 +287,7 @@ export function formatMetaValue(
   value: string | number | boolean | null,
 ): string | null {
   if (value === null || value === undefined || value === '') return null
-  const field = OBJECT_SCHEMAS[type].fields.find((item) => item.key === key)
+  const field = getSchema(type).fields.find((item) => item.key === key)
   if (!field) return String(value)
   if (field.kind === 'select') {
     return field.options?.find((option) => option.value === value)?.label ?? String(value)
@@ -250,7 +296,7 @@ export function formatMetaValue(
     return formatDate(fromDateInputValue(String(value).slice(0, 10)))
   }
   if (field.kind === 'number' && key === 'durationMin') {
-    return `${value}분`
+    return t('form.minutes', { value: String(value) })
   }
   if (type === 'asset' && key === 'quantity') {
     return String(value)

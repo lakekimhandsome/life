@@ -5,9 +5,11 @@ import { formatDate, fromDateInputValue } from '../../lib/format'
 import { stripMarkdown } from '../../lib/markdown'
 import { formatMetaValue, getSchema, supportsMarkdownBody } from '../../domain/schemas'
 import type { LifeObject } from '../../core/types'
+import { useT } from '../../state/LocaleContext'
 import { TypeBadge } from '../ui/TypeBadge'
 
 export function ObjectCard({ object }: { object: LifeObject }) {
+  useT()
   const schema = getSchema(object.type)
   const goalTargetDate =
     object.type === 'goal' && typeof object.meta.targetDate === 'string' && object.meta.targetDate
