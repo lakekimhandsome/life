@@ -27,6 +27,7 @@
   --accent-goal: #1f6f78;
   --accent-asset: #8a6a2f;
   --accent-note: #4d5f6d;
+  --accent-clipboard: #3d6d66;
 
   font-family: var(--font-body);
   color: var(--ink);
@@ -60,6 +61,7 @@ html[data-theme='dark'] {
   --accent-goal: #b6aa96;
   --accent-asset: #c5a35f;
   --accent-note: #9db0be;
+  --accent-clipboard: #8fbfb6;
 }
 
 *,
@@ -520,6 +522,8 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
 .hub-card:nth-child(4) { animation-delay: 160ms; }
 .hub-card:nth-child(5) { animation-delay: 200ms; }
 .hub-card:nth-child(6) { animation-delay: 240ms; }
+.hub-card:nth-child(7) { animation-delay: 280ms; }
+.hub-card:nth-child(8) { animation-delay: 320ms; }
 
 .hub-card:hover {
   background: color-mix(in srgb, var(--ink) 3%, transparent);
@@ -551,6 +555,7 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
 .hub-card--goals { --card-accent: var(--accent-goal); }
 .hub-card--projects { --card-accent: var(--accent-project); }
 .hub-card--notes { --card-accent: var(--accent-note); }
+.hub-card--clipboard { --card-accent: var(--accent-clipboard); }
 
 .hub-card--study .hub-card-icon,
 .hub-card--workout .hub-card-icon,
@@ -558,7 +563,8 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
 .hub-card--journal .hub-card-icon,
 .hub-card--goals .hub-card-icon,
 .hub-card--projects .hub-card-icon,
-.hub-card--notes .hub-card-icon {
+.hub-card--notes .hub-card-icon,
+.hub-card--clipboard .hub-card-icon {
   color: var(--card-accent);
 }
 
@@ -662,6 +668,7 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
 .module-heading--goals { --heading-accent: var(--accent-goal); }
 .module-heading--projects { --heading-accent: var(--accent-project); }
 .module-heading--notes { --heading-accent: var(--accent-note); }
+.module-heading--clipboard { --heading-accent: var(--accent-clipboard); }
 
 .day-nav {
   display: grid;
@@ -2943,6 +2950,148 @@ html[data-theme='dark'] select option {
   }
 }
 
+.clipboard-page {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100dvh - 8.5rem);
+}
+
+.clipboard-page.is-dragging {
+  border-radius: 18px;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-clipboard) 45%, transparent);
+}
+
+.clipboard-save {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.clipboard-save.is-error {
+  color: var(--danger);
+}
+
+.clipboard-error {
+  margin: 0 0 1rem;
+  color: var(--danger);
+  font-size: 0.9rem;
+}
+
+.clipboard-images {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 0 0 1.1rem;
+  padding: 0;
+  list-style: none;
+}
+
+.clipboard-image {
+  position: relative;
+  width: min(100%, 17rem);
+}
+
+.clipboard-image.is-uploading {
+  opacity: 0.62;
+}
+
+.clipboard-image-copy {
+  display: block;
+  width: 100%;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.clipboard-image-copy:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent-clipboard) 55%, white);
+  outline-offset: 2px;
+}
+
+.clipboard-image-copy img {
+  display: block;
+  width: 100%;
+  max-height: 16rem;
+  object-fit: contain;
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
+}
+
+.clipboard-image-missing {
+  display: grid;
+  place-items: center;
+  min-height: 8rem;
+  color: var(--muted);
+}
+
+.clipboard-image-copied {
+  position: absolute;
+  inset: auto 0.7rem 0.7rem auto;
+  padding: 0.28rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(18, 32, 39, 0.72);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  pointer-events: none;
+}
+
+.clipboard-image-remove {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.45rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(18, 32, 39, 0.62);
+  color: #fff;
+  cursor: pointer;
+}
+
+.clipboard-image-remove:hover {
+  background: rgba(18, 32, 39, 0.82);
+}
+
+.clipboard-image-remove:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent-clipboard) 55%, white);
+  outline-offset: 2px;
+}
+
+.clipboard-input {
+  flex: 1;
+  width: 100%;
+  min-height: 18rem;
+  margin: 0;
+  padding: 0.15rem 0.1rem 2rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  resize: none;
+  outline: none;
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.clipboard-input::placeholder {
+  color: var(--muted);
+}
+
+html[data-theme='dark'] .clipboard-image-copied,
+html[data-theme='dark'] .clipboard-image-remove {
+  background: rgba(0, 0, 0, 0.72);
+}
+
+html[data-theme='dark'] .clipboard-image-remove:hover {
+  background: rgba(0, 0, 0, 0.88);
+}
+
 @keyframes rise {
   from {
     opacity: 0;
@@ -3050,6 +3199,7 @@ html[data-theme='dark'] select option {
   .sidebar-link--goals.is-active { color: var(--accent-goal); }
   .sidebar-link--projects.is-active { color: var(--accent-project); }
   .sidebar-link--notes.is-active { color: var(--accent-note); }
+  .sidebar-link--clipboard.is-active { color: var(--accent-clipboard); }
 
   html[data-theme='dark'] .sidebar-link:hover,
   html[data-theme='dark'] .sidebar-link.is-active {
@@ -3063,6 +3213,10 @@ html[data-theme='dark'] select option {
   .page {
     width: min(var(--max), calc(100% - 3rem));
     padding: 2rem 0 4rem;
+  }
+
+  .clipboard-page {
+    min-height: calc(100vh - 6.5rem);
   }
 
   .user-menu--sidebar {

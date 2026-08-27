@@ -5,6 +5,7 @@ import { AssetHistoryPage } from './pages/AssetHistoryPage'
 import { AssetsPage } from './pages/AssetsPage'
 import { AuthCallbackPage } from './pages/AuthCallbackPage'
 import { CardEditPage } from './pages/CardEditPage'
+import { ClipboardPage } from './pages/ClipboardPage'
 import { CreatePage } from './pages/CreatePage'
 import { EditPage } from './pages/EditPage'
 import { HomePage } from './pages/HomePage'
@@ -37,6 +38,7 @@ export default function App() {
                     <Route path="goals" element={<ModulePage />} />
                     <Route path="projects" element={<ModulePage />} />
                     <Route path="notes" element={<ModulePage />} />
+                    <Route path="clipboard" element={<ClipboardPage />} />
                     <Route path="assets" element={<AssetsPage />} />
                     <Route path="assets/history" element={<AssetHistoryPage />} />
                     <Route path="settings" element={<SettingsPage />} />

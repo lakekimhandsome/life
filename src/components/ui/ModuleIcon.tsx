@@ -1,5 +1,6 @@
 import {
   BookOpen,
+  Clipboard,
   Wallet,
   Dumbbell,
   Folder,
@@ -18,6 +19,7 @@ const ICONS: Record<ModuleId, LucideIcon> = {
   goals: Target,
   projects: Folder,
   notes: StickyNote,
+  clipboard: Clipboard,
 }
 
 export function ModuleIcon({

@@ -10,6 +10,7 @@ export type ModuleId =
   | 'goals'
   | 'projects'
   | 'notes'
+  | 'clipboard'
 
 export interface LifeModule {
   id: ModuleId
@@ -62,6 +63,11 @@ export const LIFE_MODULES: LifeModule[] = [
     path: '/notes',
     objectType: 'note',
   },
+  {
+    id: 'clipboard',
+    title: '클립보드',
+    path: '/clipboard',
+  },
 ]
 
 export function getModuleForObjectType(
@@ -77,7 +83,10 @@ function ofType(objects: LifeObject[], type: LifeObject['type']): LifeObject[] {
 export function getModuleStatus(
   moduleId: ModuleId,
   objects: LifeObject[],
-  extras?: { assetsTotalKrw?: number | null },
+  extras?: {
+    assetsTotalKrw?: number | null
+    clipboard?: { body: string; imageCount: number } | null
+  },
 ): string {
   const now = new Date()
 
@@ -129,6 +138,17 @@ export function getModuleStatus(
       const notes = ofType(objects, 'note')
       if (notes.length === 0) return '기록 없음'
       return `${notes.length}개`
+    }
+    case 'clipboard': {
+      if (extras?.clipboard == null) return '…'
+      const text = extras.clipboard.body.trim()
+      const imageCount = extras.clipboard.imageCount
+      if (!text && imageCount === 0) return '비어 있음'
+      if (!text) return imageCount === 1 ? '이미지 1장' : `이미지 ${imageCount}장`
+      const firstLine = text.split('\n')[0] ?? ''
+      const preview = firstLine.length > 16 ? `${firstLine.slice(0, 16)}…` : firstLine
+      if (imageCount === 0) return preview
+      return `${preview} · 이미지 ${imageCount}장`
     }
   }
 }

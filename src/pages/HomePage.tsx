@@ -8,6 +8,7 @@ import {
 } from '../domain/assets'
 import { resolveHubModules } from '../domain/hubLayout'
 import { getModuleStatus } from '../domain/modules'
+import { getClipboardSummary } from '../lib/clipboard'
 import { daysUntilLocalDay, formatDday } from '../lib/format'
 import { useLife } from '../state/LifeContext'
 import { usePrefs } from '../state/PrefsContext'
@@ -16,6 +17,10 @@ export function HomePage() {
   const { ready, objects } = useLife()
   const { hubLayout } = usePrefs()
   const [assetsTotalKrw, setAssetsTotalKrw] = useState<number | null>(null)
+  const [clipboard, setClipboard] = useState<{
+    body: string
+    imageCount: number
+  } | null>(null)
 
   const modules = useMemo(() => resolveHubModules(hubLayout), [hubLayout])
 
@@ -47,6 +52,20 @@ export function HomePage() {
       active = false
     }
   }, [ready, assets])
+
+  useEffect(() => {
+    let active = true
+    void getClipboardSummary()
+      .then((summary) => {
+        if (active) setClipboard(summary)
+      })
+      .catch(() => {
+        if (active) setClipboard({ body: '', imageCount: 0 })
+      })
+    return () => {
+      active = false
+    }
+  }, [])
 
   const ddayGoals = useMemo(() => {
     return objects
@@ -95,7 +114,10 @@ export function HomePage() {
               <h2>{module.title}</h2>
               <p>
                 {ready
-                  ? getModuleStatus(module.id, objects, { assetsTotalKrw })
+                  ? getModuleStatus(module.id, objects, {
+                      assetsTotalKrw,
+                      clipboard,
+                    })
                   : '…'}
               </p>
             </div>

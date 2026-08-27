@@ -47,6 +47,19 @@ export type UserPrefsRow = {
   updated_at: string
 }
 
+export type ClipboardImage = {
+  id: string
+  path: string
+  mime: string
+}
+
+export type ClipboardRow = {
+  user_id: string
+  body: string
+  images: ClipboardImage[]
+  updated_at: string
+}
+
 export type Database = {
   public: {
     Tables: {
@@ -78,6 +91,12 @@ export type Database = {
         Row: UserPrefsRow
         Insert: UserPrefsRow
         Update: Partial<UserPrefsRow>
+        Relationships: []
+      }
+      life_clipboard: {
+        Row: ClipboardRow
+        Insert: ClipboardRow
+        Update: Partial<ClipboardRow>
         Relationships: []
       }
     }

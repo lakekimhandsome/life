@@ -177,9 +177,11 @@ export function CardEditPage() {
                     </span>
                     <span className="card-edit-copy">
                       <span className="card-edit-title">{module.title}</span>
-                      <span className="card-edit-count">
-                        {contentCount(module)}개
-                      </span>
+                      {module.objectType ? (
+                        <span className="card-edit-count">
+                          {contentCount(module)}개
+                        </span>
+                      ) : null}
                     </span>
                     <button
                       type="button"
@@ -215,9 +217,11 @@ export function CardEditPage() {
                     </span>
                     <span className="card-edit-copy">
                       <span className="card-edit-title">{module.title}</span>
-                      <span className="card-edit-count">
-                        {contentCount(module)}개
-                      </span>
+                      {module.objectType ? (
+                        <span className="card-edit-count">
+                          {contentCount(module)}개
+                        </span>
+                      ) : null}
                     </span>
                     <button
                       type="button"
