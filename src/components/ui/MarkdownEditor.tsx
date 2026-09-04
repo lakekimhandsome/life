@@ -17,6 +17,8 @@ import {
 import { $isListItemNode } from '@lexical/list'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import {
+  $getNearestNodeFromDOMNode,
+  $getNodeByKey,
   $getSelection,
   $isRangeSelection,
   COMMAND_PRIORITY_HIGH,
@@ -29,31 +31,91 @@ import { useEffect, useMemo } from 'react'
 function ListTabAnywherePlugin() {
   const [editor] = useLexicalComposerContext()
 
-  useEffect(
-    () =>
-      editor.registerCommand(
-        KEY_TAB_COMMAND,
-        (event) => {
-          const selection = $getSelection()
-          if (!$isRangeSelection(selection)) return false
+  useEffect(() => {
+    const unregisterTab = editor.registerCommand(
+      KEY_TAB_COMMAND,
+      (event) => {
+        const selection = $getSelection()
+        if (!$isRangeSelection(selection)) return false
 
-          let node = selection.anchor.getNode()
-          while (node && !$isListItemNode(node)) {
-            const parent = node.getParent()
-            if (!parent) return false
-            node = parent
-          }
+        let node = selection.anchor.getNode()
+        while (node && !$isListItemNode(node)) {
+          const parent = node.getParent()
+          if (!parent) return false
+          node = parent
+        }
 
-          event.preventDefault()
-          return editor.dispatchCommand(
-            event.shiftKey ? OUTDENT_CONTENT_COMMAND : INDENT_CONTENT_COMMAND,
-            undefined,
-          )
-        },
-        COMMAND_PRIORITY_HIGH,
-      ),
-    [editor],
-  )
+        event.preventDefault()
+        return editor.dispatchCommand(
+          event.shiftKey ? OUTDENT_CONTENT_COMMAND : INDENT_CONTENT_COMMAND,
+          undefined,
+        )
+      },
+      COMMAND_PRIORITY_HIGH,
+    )
+
+    const root = editor.getRootElement()
+    if (!root) return unregisterTab
+
+    let gesture: { x: number; y: number; itemKey: string } | null = null
+
+    function onTouchStart(event: TouchEvent) {
+      gesture = null
+      if (event.touches.length !== 1) return
+      const target = event.target
+      if (!(target instanceof Element)) return
+      const listItem = target.closest('li')
+      if (!listItem || !root?.contains(listItem)) return
+
+      let itemKey: string | null = null
+      editor.getEditorState().read(() => {
+        let node = $getNearestNodeFromDOMNode(listItem)
+        while (node && !$isListItemNode(node)) node = node.getParent()
+        if ($isListItemNode(node)) itemKey = node.getKey()
+      })
+      if (!itemKey) return
+
+      const touch = event.touches[0]
+      gesture = { x: touch.clientX, y: touch.clientY, itemKey }
+    }
+
+    function onTouchEnd(event: TouchEvent) {
+      const start = gesture
+      gesture = null
+      if (!start || event.changedTouches.length !== 1) return
+
+      const touch = event.changedTouches[0]
+      const deltaX = touch.clientX - start.x
+      const deltaY = touch.clientY - start.y
+      if (Math.abs(deltaX) < 44 || Math.abs(deltaX) < Math.abs(deltaY) * 1.25) return
+
+      event.preventDefault()
+      editor.update(() => {
+        const item = $getNodeByKey(start.itemKey)
+        if (!$isListItemNode(item)) return
+        item.selectEnd()
+        editor.dispatchCommand(
+          deltaX > 0 ? INDENT_CONTENT_COMMAND : OUTDENT_CONTENT_COMMAND,
+          undefined,
+        )
+      })
+    }
+
+    function cancelTouch() {
+      gesture = null
+    }
+
+    root.addEventListener('touchstart', onTouchStart, { passive: true })
+    root.addEventListener('touchend', onTouchEnd, { passive: false })
+    root.addEventListener('touchcancel', cancelTouch)
+
+    return () => {
+      unregisterTab()
+      root.removeEventListener('touchstart', onTouchStart)
+      root.removeEventListener('touchend', onTouchEnd)
+      root.removeEventListener('touchcancel', cancelTouch)
+    }
+  }, [editor])
 
   return null
 }

@@ -2333,6 +2333,10 @@ select.inline-meta-control {
   outline: none;
 }
 
+.inline-markdown-content.markdown-content li {
+  touch-action: pan-y;
+}
+
 .inline-markdown-editor [class*='placeholder'] {
   padding: 0;
   color: var(--muted);
