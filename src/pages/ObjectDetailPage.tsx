@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react'
-import { Check, Trash2 } from 'lucide-react'
+import { Trash2 } from 'lucide-react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
-import { ObjectForm } from '../components/object/ObjectForm'
+import {
+  InlineMarkdownObject,
+  type ObjectSaveState,
+} from '../components/object/InlineMarkdownObject'
 import { BackLink } from '../components/ui/BackLink'
 import { TypeBadge } from '../components/ui/TypeBadge'
 import type { LifeObject, Relationship } from '../core/types'
@@ -14,16 +17,18 @@ import { useT } from '../state/LocaleContext'
 export function ObjectDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { ready, getObject, updateObject, deleteObject, getRelationships } = useLife()
+  const { ready, getObject, deleteObject, getRelationships } = useLife()
   const t = useT()
   const [relationships, setRelationships] = useState<Relationship[]>([])
-  const [saving, setSaving] = useState(false)
+  const [saveState, setSaveState] = useState<ObjectSaveState>('saved')
 
   const object = id ? getObject(id) : undefined
 
   useEffect(() => {
     if (!id) return
     let active = true
+    setRelationships([])
+    setSaveState('saved')
     ;(async () => {
       const next = await getRelationships(id)
       if (active) setRelationships(next)
@@ -45,7 +50,6 @@ export function ObjectDetailPage() {
   const module = getModuleForObjectType(object.type)
   const backTo = module?.path ?? '/'
   const supportsMarkdown = supportsMarkdownBody(object.type)
-  const formId = supportsMarkdown ? 'object-detail-form' : undefined
   const goalTargetDate =
     object.type === 'goal' && typeof object.meta.targetDate === 'string' && object.meta.targetDate
       ? object.meta.targetDate
@@ -58,6 +62,12 @@ export function ObjectDetailPage() {
       return other ? { rel, other } : null
     })
     .filter((item): item is { rel: Relationship; other: LifeObject } => !!item)
+  const saveLabel =
+    saveState === 'saving'
+      ? t('clipboard.saving')
+      : saveState === 'error'
+        ? t('clipboard.saveError')
+        : t('clipboard.saved')
 
   return (
     <article className="detail">
@@ -65,15 +75,12 @@ export function ObjectDetailPage() {
         <BackLink to={backTo} />
         {supportsMarkdown ? (
           <div className="object-header-actions">
-            <button
-              type="submit"
-              form={formId}
-              className="object-header-action"
-              aria-label={t('edit.saveAria', { type: schema.label })}
-              disabled={saving}
+            <span
+              className={`clipboard-save${saveState === 'error' ? ' is-error' : ''}`}
+              aria-live="polite"
             >
-              <Check size={22} strokeWidth={1.9} aria-hidden="true" />
-            </button>
+              {saveLabel}
+            </span>
             <button
               type="button"
               className="object-header-action"
@@ -91,70 +98,63 @@ export function ObjectDetailPage() {
         ) : null}
       </div>
 
-      <header className="detail-header">
-        <div className="detail-meta">
-          <TypeBadge type={object.type} />
-          {headerDate ? (
-            <time dateTime={headerDate}>
-              {object.type === 'goal'
-                ? formatDate(fromDateInputValue(headerDate.slice(0, 10)))
-                : formatDateTime(object.occurredAt)}
-            </time>
-          ) : null}
-        </div>
-        {!supportsMarkdown ? <h1>{object.title}</h1> : null}
-        {!supportsMarkdown && schema.description ? (
-          <p className="detail-sub">{schema.description}</p>
-        ) : null}
-      </header>
-
       {supportsMarkdown ? (
-        <ObjectForm
-          key={object.updatedAt}
-          type={object.type}
-          initial={object}
-          formId={formId}
-          showSubmitButton={false}
-          onSavingChange={setSaving}
-          submitLabel={t('edit.save')}
-          onSubmit={async ({ title, body, occurredAt, meta }) => {
-            await updateObject(object.id, { title, body, occurredAt, meta })
-          }}
+        <InlineMarkdownObject
+          key={object.id}
+          object={object}
+          onSaveStateChange={setSaveState}
         />
-      ) : object.body ? (
-        <section className="detail-body">
-          <h2>{schema.bodyLabel}</h2>
-          <p>{object.body}</p>
-        </section>
-      ) : null}
+      ) : (
+        <>
+          <header className="detail-header">
+            <div className="detail-meta">
+              <TypeBadge type={object.type} />
+              {headerDate ? (
+                <time dateTime={headerDate}>
+                  {object.type === 'goal'
+                    ? formatDate(fromDateInputValue(headerDate.slice(0, 10)))
+                    : formatDateTime(object.occurredAt)}
+                </time>
+              ) : null}
+            </div>
+            <h1>{object.title}</h1>
+            {schema.description ? <p className="detail-sub">{schema.description}</p> : null}
+          </header>
 
-      {!supportsMarkdown ? (
-        <section className="detail-fields">
-          <h2>{t('detail.fields')}</h2>
-          <dl>
-            {schema.fields.map((field) => {
-              const formatted = formatMetaValue(
-                object.type,
-                field.key,
-                object.meta[field.key] ?? null,
-              )
-              if (!formatted) return null
-              return (
-                <div key={field.key}>
-                  <dt>{field.label}</dt>
-                  <dd>{formatted}</dd>
+          {object.body ? (
+            <section className="detail-body">
+              <h2>{schema.bodyLabel}</h2>
+              <p>{object.body}</p>
+            </section>
+          ) : null}
+
+          <section className="detail-fields">
+            <h2>{t('detail.fields')}</h2>
+            <dl>
+              {schema.fields.map((field) => {
+                const formatted = formatMetaValue(
+                  object.type,
+                  field.key,
+                  object.meta[field.key] ?? null,
+                )
+                if (!formatted) return null
+                return (
+                  <div key={field.key}>
+                    <dt>{field.label}</dt>
+                    <dd>{formatted}</dd>
+                  </div>
+                )
+              })}
+              {object.type !== 'goal' ? (
+                <div>
+                  <dt>{t('detail.created')}</dt>
+                  <dd>{formatDateTime(object.createdAt)}</dd>
                 </div>
-              )
-            })}
-            {object.type !== 'goal' ? (
-              <div>
-                <dt>{t('detail.created')}</dt>
-                <dd>{formatDateTime(object.createdAt)}</dd>
-              </div>
-            ) : null}
-          </dl>
-        </section>
-      ) : null}
+              ) : null}
+            </dl>
+          </section>
+        </>
+      )}
 
       <section className="detail-relations">
         <h2>{t('detail.links')}</h2>

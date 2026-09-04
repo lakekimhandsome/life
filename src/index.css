@@ -2111,10 +2111,6 @@ button.assets-row-title:focus-visible {
   gap: 1.1rem;
 }
 
-.detail > .object-form {
-  margin-bottom: 1.4rem;
-}
-
 .field-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -2180,36 +2176,6 @@ button.assets-row-title:focus-visible {
 .field textarea {
   resize: vertical;
   min-height: 160px;
-  line-height: 1.6;
-}
-
-.markdown-editor {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 1rem;
-}
-
-.markdown-editor textarea,
-.markdown-editor-preview {
-  min-height: 260px;
-}
-
-.markdown-editor-preview {
-  min-width: 0;
-  overflow-wrap: anywhere;
-  padding: 0.85rem 0.95rem;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  background: var(--paper-elevated);
-}
-
-.markdown-editor-preview .markdown-content {
-  margin-top: 0;
-}
-
-.markdown-editor-placeholder {
-  margin: 0;
-  color: var(--muted);
   line-height: 1.6;
 }
 
@@ -2297,6 +2263,95 @@ button.assets-row-title:focus-visible {
   margin: 0.8rem 0 0;
   line-height: 1.7;
   font-size: 1.05rem;
+}
+
+.inline-title-input {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  outline: none;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 2.6rem);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.inline-title-input::placeholder {
+  color: var(--muted);
+}
+
+.inline-meta-control {
+  width: auto;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  outline: none;
+  font: inherit;
+}
+
+select.inline-meta-control {
+  appearance: none;
+  cursor: pointer;
+}
+
+.inline-date-picker {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.inline-date-picker input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.inline-markdown-editor {
+  --basePageBg: transparent;
+  color: var(--ink);
+}
+
+.inline-markdown-content.markdown-content {
+  min-height: 7rem;
+  margin-top: 0.8rem;
+  padding: 0;
+  color: var(--ink);
+  font-family: inherit;
+}
+
+.inline-markdown-content.markdown-content:focus {
+  outline: none;
+}
+
+.inline-markdown-editor [class*='placeholder'] {
+  padding: 0;
+  color: var(--muted);
+}
+
+.inline-code-editor {
+  display: block;
+  width: 100%;
+  min-height: 7rem;
+  resize: vertical;
+  padding: 0.9rem 1rem;
+  border: 0;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--ink) 7%, transparent);
+  color: var(--ink);
+  outline: none;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.9em;
+  line-height: 1.55;
 }
 
 .markdown-content > :first-child {
@@ -3349,10 +3404,6 @@ html[data-theme='dark'] .clipboard-image-remove:hover {
   }
 
   .field-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .markdown-editor {
     grid-template-columns: 1fr;
   }
 
