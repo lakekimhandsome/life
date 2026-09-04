@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
-import { Pencil, Trash2 } from 'lucide-react'
+import { Check, Trash2 } from 'lucide-react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
+import { ObjectForm } from '../components/object/ObjectForm'
 import { BackLink } from '../components/ui/BackLink'
-import { MarkdownContent } from '../components/ui/MarkdownContent'
 import { TypeBadge } from '../components/ui/TypeBadge'
 import type { LifeObject, Relationship } from '../core/types'
 import { getModuleForObjectType } from '../domain/modules'
@@ -14,9 +14,10 @@ import { useT } from '../state/LocaleContext'
 export function ObjectDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { ready, getObject, deleteObject, getRelationships } = useLife()
+  const { ready, getObject, updateObject, deleteObject, getRelationships } = useLife()
   const t = useT()
   const [relationships, setRelationships] = useState<Relationship[]>([])
+  const [saving, setSaving] = useState(false)
 
   const object = id ? getObject(id) : undefined
 
@@ -44,6 +45,7 @@ export function ObjectDetailPage() {
   const module = getModuleForObjectType(object.type)
   const backTo = module?.path ?? '/'
   const supportsMarkdown = supportsMarkdownBody(object.type)
+  const formId = supportsMarkdown ? 'object-detail-form' : undefined
   const goalTargetDate =
     object.type === 'goal' && typeof object.meta.targetDate === 'string' && object.meta.targetDate
       ? object.meta.targetDate
@@ -63,13 +65,15 @@ export function ObjectDetailPage() {
         <BackLink to={backTo} />
         {supportsMarkdown ? (
           <div className="object-header-actions">
-            <Link
-              to={`/object/${object.id}/edit`}
+            <button
+              type="submit"
+              form={formId}
               className="object-header-action"
-              aria-label={t('detail.editAria', { type: schema.label })}
+              aria-label={t('edit.saveAria', { type: schema.label })}
+              disabled={saving}
             >
-              <Pencil size={20} strokeWidth={1.75} aria-hidden="true" />
-            </Link>
+              <Check size={22} strokeWidth={1.9} aria-hidden="true" />
+            </button>
             <button
               type="button"
               className="object-header-action"
@@ -98,46 +102,59 @@ export function ObjectDetailPage() {
             </time>
           ) : null}
         </div>
-        <h1>{object.title}</h1>
-        {schema.description ? <p className="detail-sub">{schema.description}</p> : null}
+        {!supportsMarkdown ? <h1>{object.title}</h1> : null}
+        {!supportsMarkdown && schema.description ? (
+          <p className="detail-sub">{schema.description}</p>
+        ) : null}
       </header>
 
-      {object.body ? (
+      {supportsMarkdown ? (
+        <ObjectForm
+          key={object.updatedAt}
+          type={object.type}
+          initial={object}
+          formId={formId}
+          showSubmitButton={false}
+          onSavingChange={setSaving}
+          submitLabel={t('edit.save')}
+          onSubmit={async ({ title, body, occurredAt, meta }) => {
+            await updateObject(object.id, { title, body, occurredAt, meta })
+          }}
+        />
+      ) : object.body ? (
         <section className="detail-body">
           <h2>{schema.bodyLabel}</h2>
-          {supportsMarkdown ? (
-            <MarkdownContent className="markdown-content">{object.body}</MarkdownContent>
-          ) : (
-            <p>{object.body}</p>
-          )}
+          <p>{object.body}</p>
         </section>
       ) : null}
 
-      <section className="detail-fields">
-        <h2>{t('detail.fields')}</h2>
-        <dl>
-          {schema.fields.map((field) => {
-            const formatted = formatMetaValue(
-              object.type,
-              field.key,
-              object.meta[field.key] ?? null,
-            )
-            if (!formatted) return null
-            return (
-              <div key={field.key}>
-                <dt>{field.label}</dt>
-                <dd>{formatted}</dd>
+      {!supportsMarkdown ? (
+        <section className="detail-fields">
+          <h2>{t('detail.fields')}</h2>
+          <dl>
+            {schema.fields.map((field) => {
+              const formatted = formatMetaValue(
+                object.type,
+                field.key,
+                object.meta[field.key] ?? null,
+              )
+              if (!formatted) return null
+              return (
+                <div key={field.key}>
+                  <dt>{field.label}</dt>
+                  <dd>{formatted}</dd>
+                </div>
+              )
+            })}
+            {object.type !== 'goal' ? (
+              <div>
+                <dt>{t('detail.created')}</dt>
+                <dd>{formatDateTime(object.createdAt)}</dd>
               </div>
-            )
-          })}
-          {object.type !== 'goal' ? (
-            <div>
-              <dt>{t('detail.created')}</dt>
-              <dd>{formatDateTime(object.createdAt)}</dd>
-            </div>
-          ) : null}
-        </dl>
-      </section>
+            ) : null}
+          </dl>
+        </section>
+      ) : null}
 
       <section className="detail-relations">
         <h2>{t('detail.links')}</h2>

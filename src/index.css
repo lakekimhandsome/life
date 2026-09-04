@@ -2111,6 +2111,10 @@ button.assets-row-title:focus-visible {
   gap: 1.1rem;
 }
 
+.detail > .object-form {
+  margin-bottom: 1.4rem;
+}
+
 .field-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -2176,6 +2180,36 @@ button.assets-row-title:focus-visible {
 .field textarea {
   resize: vertical;
   min-height: 160px;
+  line-height: 1.6;
+}
+
+.markdown-editor {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 1rem;
+}
+
+.markdown-editor textarea,
+.markdown-editor-preview {
+  min-height: 260px;
+}
+
+.markdown-editor-preview {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  padding: 0.85rem 0.95rem;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--paper-elevated);
+}
+
+.markdown-editor-preview .markdown-content {
+  margin-top: 0;
+}
+
+.markdown-editor-placeholder {
+  margin: 0;
+  color: var(--muted);
   line-height: 1.6;
 }
 
@@ -3315,6 +3349,10 @@ html[data-theme='dark'] .clipboard-image-remove:hover {
   }
 
   .field-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .markdown-editor {
     grid-template-columns: 1fr;
   }
 

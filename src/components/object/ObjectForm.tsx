@@ -4,6 +4,7 @@ import { fromDateInputValue, toDateInputValue } from '../../lib/format'
 import type { LifeObject, ObjectType } from '../../core/types'
 import { useLife } from '../../state/LifeContext'
 import { useT } from '../../state/LocaleContext'
+import { MarkdownContent } from '../ui/MarkdownContent'
 
 interface ObjectFormProps {
   type: ObjectType
@@ -181,13 +182,24 @@ export function ObjectForm({
 
       <div className="field">
         <label htmlFor="body">{schema.bodyLabel}</label>
-        <textarea
-          id="body"
-          rows={type === 'note' ? 14 : 7}
-          value={body}
-          onChange={(event) => setBody(event.target.value)}
-          placeholder={schema.bodyPlaceholder}
-        />
+        <div className={supportsMarkdown ? 'markdown-editor' : undefined}>
+          <textarea
+            id="body"
+            rows={type === 'note' ? 14 : 7}
+            value={body}
+            onChange={(event) => setBody(event.target.value)}
+            placeholder={schema.bodyPlaceholder}
+          />
+          {supportsMarkdown ? (
+            <div className="markdown-editor-preview">
+              {body ? (
+                <MarkdownContent className="markdown-content">{body}</MarkdownContent>
+              ) : (
+                <p className="markdown-editor-placeholder">{schema.bodyPlaceholder}</p>
+              )}
+            </div>
+          ) : null}
+        </div>
         {supportsMarkdown ? (
           <p className="field-hint">
             {t('form.markdownHint')}
