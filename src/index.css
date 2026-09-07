@@ -2351,7 +2351,7 @@ select.inline-meta-control {
   width: 100%;
   min-height: 7rem;
   resize: vertical;
-  padding: 0.9rem 3rem 0.9rem 1rem;
+  padding: 0.9rem 4rem 0.9rem 1rem;
   border: 0;
   border-radius: 10px;
   background: color-mix(in srgb, var(--ink) 7%, transparent);
@@ -2365,7 +2365,7 @@ select.inline-meta-control {
 .inline-code-copy {
   position: absolute;
   top: 0.55rem;
-  right: 0.55rem;
+  right: 1.35rem;
   display: grid;
   width: 2rem;
   height: 2rem;
