@@ -54,11 +54,11 @@ function ListTabAnywherePlugin() {
       COMMAND_PRIORITY_HIGH,
     )
 
-    let gesture: { x: number; y: number; itemKey: string } | null = null
+    let gesture: { pointerId: number; x: number; y: number; itemKey: string } | null = null
 
-    function onTouchStart(event: TouchEvent) {
+    function onPointerDown(event: PointerEvent) {
       gesture = null
-      if (event.touches.length !== 1) return
+      if (!event.isPrimary || event.pointerType === 'mouse') return
       const target = event.target
       if (!(target instanceof Element)) return
       const listItem = target.closest('li')
@@ -73,46 +73,40 @@ function ListTabAnywherePlugin() {
       })
       if (!itemKey) return
 
-      const touch = event.touches[0]
-      gesture = { x: touch.clientX, y: touch.clientY, itemKey }
+      gesture = { pointerId: event.pointerId, x: event.clientX, y: event.clientY, itemKey }
     }
 
-    function onTouchEnd(event: TouchEvent) {
+    function onPointerUp(event: PointerEvent) {
       const start = gesture
       gesture = null
-      if (!start || event.changedTouches.length !== 1) return
+      if (!start || event.pointerId !== start.pointerId) return
 
-      const touch = event.changedTouches[0]
-      const deltaX = touch.clientX - start.x
-      const deltaY = touch.clientY - start.y
+      const deltaX = event.clientX - start.x
+      const deltaY = event.clientY - start.y
       if (Math.abs(deltaX) < 44 || Math.abs(deltaX) < Math.abs(deltaY) * 1.25) return
 
       event.preventDefault()
       editor.update(() => {
         const item = $getNodeByKey(start.itemKey)
         if (!$isListItemNode(item)) return
-        item.selectEnd()
-        editor.dispatchCommand(
-          deltaX > 0 ? INDENT_CONTENT_COMMAND : OUTDENT_CONTENT_COMMAND,
-          undefined,
-        )
+        item.setIndent(Math.max(0, item.getIndent() + (deltaX > 0 ? 1 : -1)))
       })
     }
 
-    function cancelTouch() {
+    function cancelPointer() {
       gesture = null
     }
 
     const unregisterRoot = editor.registerRootListener((root) => {
       gesture = null
       if (!root) return
-      root.addEventListener('touchstart', onTouchStart, { passive: true })
-      root.addEventListener('touchend', onTouchEnd, { passive: false })
-      root.addEventListener('touchcancel', cancelTouch)
+      root.addEventListener('pointerdown', onPointerDown, { capture: true, passive: true })
+      root.addEventListener('pointerup', onPointerUp, { capture: true, passive: false })
+      root.addEventListener('pointercancel', cancelPointer, true)
       return () => {
-        root.removeEventListener('touchstart', onTouchStart)
-        root.removeEventListener('touchend', onTouchEnd)
-        root.removeEventListener('touchcancel', cancelTouch)
+        root.removeEventListener('pointerdown', onPointerDown, true)
+        root.removeEventListener('pointerup', onPointerUp, true)
+        root.removeEventListener('pointercancel', cancelPointer, true)
       }
     })
 
