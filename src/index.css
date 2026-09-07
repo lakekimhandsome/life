@@ -2786,6 +2786,14 @@ select.inline-meta-control {
   color: var(--muted);
 }
 
+.settings-commit {
+  margin-top: 2.5rem;
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.72rem;
+  text-align: center;
+}
+
 .settings-theme {
   flex-wrap: wrap;
 }

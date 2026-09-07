@@ -86,6 +86,10 @@ export function SettingsPage() {
           />
         </Link>
       </nav>
+
+      <footer className="settings-commit" title={`Commit ${__COMMIT_HASH__}`}>
+        {__COMMIT_HASH__}
+      </footer>
     </div>
   )
 }
