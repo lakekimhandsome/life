@@ -28,6 +28,8 @@ import {
 } from 'lexical'
 import { useEffect, useMemo } from 'react'
 
+const MAX_SWIPE_DURATION_MS = 500
+
 function ListTabAnywherePlugin() {
   const [editor] = useLexicalComposerContext()
 
@@ -54,7 +56,18 @@ function ListTabAnywherePlugin() {
       COMMAND_PRIORITY_HIGH,
     )
 
-    let gesture: { pointerId: number; x: number; y: number; itemKey: string } | null = null
+    let gesture: {
+      pointerId: number
+      x: number
+      y: number
+      startedAt: number
+      itemKey: string
+    } | null = null
+
+    function hasTextSelection(root: Element) {
+      const selection = root.ownerDocument.getSelection()
+      return !!selection && !selection.isCollapsed && !!selection.anchorNode && root.contains(selection.anchorNode)
+    }
 
     function onPointerDown(event: PointerEvent) {
       gesture = null
@@ -64,6 +77,7 @@ function ListTabAnywherePlugin() {
       const listItem = target.closest('li')
       const root = event.currentTarget
       if (!(root instanceof Element) || !listItem || !root.contains(listItem)) return
+      if (hasTextSelection(root)) return
 
       let itemKey: string | null = null
       editor.read(() => {
@@ -73,12 +87,27 @@ function ListTabAnywherePlugin() {
       })
       if (!itemKey) return
 
-      gesture = { pointerId: event.pointerId, x: event.clientX, y: event.clientY, itemKey }
+      gesture = {
+        pointerId: event.pointerId,
+        x: event.clientX,
+        y: event.clientY,
+        startedAt: event.timeStamp,
+        itemKey,
+      }
     }
 
     function onPointerMove(event: PointerEvent) {
       const start = gesture
       if (!start || event.pointerId !== start.pointerId) return
+      const root = event.currentTarget
+      if (
+        !(root instanceof Element) ||
+        event.timeStamp - start.startedAt > MAX_SWIPE_DURATION_MS ||
+        hasTextSelection(root)
+      ) {
+        gesture = null
+        return
+      }
 
       const deltaX = event.clientX - start.x
       const deltaY = event.clientY - start.y
@@ -104,11 +133,16 @@ function ListTabAnywherePlugin() {
       root.addEventListener('pointermove', onPointerMove, { capture: true, passive: false })
       root.addEventListener('pointerup', cancelPointer, true)
       root.addEventListener('pointercancel', cancelPointer, true)
+      const cancelOnSelection = () => {
+        if (hasTextSelection(root)) gesture = null
+      }
+      root.ownerDocument.addEventListener('selectionchange', cancelOnSelection)
       return () => {
         root.removeEventListener('pointerdown', onPointerDown, true)
         root.removeEventListener('pointermove', onPointerMove, true)
         root.removeEventListener('pointerup', cancelPointer, true)
         root.removeEventListener('pointercancel', cancelPointer, true)
+        root.ownerDocument.removeEventListener('selectionchange', cancelOnSelection)
       }
     })
 
