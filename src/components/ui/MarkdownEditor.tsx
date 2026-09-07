@@ -54,9 +54,6 @@ function ListTabAnywherePlugin() {
       COMMAND_PRIORITY_HIGH,
     )
 
-    const root = editor.getRootElement()
-    if (!root) return unregisterTab
-
     let gesture: { x: number; y: number; itemKey: string } | null = null
 
     function onTouchStart(event: TouchEvent) {
@@ -65,7 +62,8 @@ function ListTabAnywherePlugin() {
       const target = event.target
       if (!(target instanceof Element)) return
       const listItem = target.closest('li')
-      if (!listItem || !root?.contains(listItem)) return
+      const root = event.currentTarget
+      if (!(root instanceof Element) || !listItem || !root.contains(listItem)) return
 
       let itemKey: string | null = null
       editor.getEditorState().read(() => {
@@ -105,15 +103,22 @@ function ListTabAnywherePlugin() {
       gesture = null
     }
 
-    root.addEventListener('touchstart', onTouchStart, { passive: true })
-    root.addEventListener('touchend', onTouchEnd, { passive: false })
-    root.addEventListener('touchcancel', cancelTouch)
+    const unregisterRoot = editor.registerRootListener((root) => {
+      gesture = null
+      if (!root) return
+      root.addEventListener('touchstart', onTouchStart, { passive: true })
+      root.addEventListener('touchend', onTouchEnd, { passive: false })
+      root.addEventListener('touchcancel', cancelTouch)
+      return () => {
+        root.removeEventListener('touchstart', onTouchStart)
+        root.removeEventListener('touchend', onTouchEnd)
+        root.removeEventListener('touchcancel', cancelTouch)
+      }
+    })
 
     return () => {
       unregisterTab()
-      root.removeEventListener('touchstart', onTouchStart)
-      root.removeEventListener('touchend', onTouchEnd)
-      root.removeEventListener('touchcancel', cancelTouch)
+      unregisterRoot()
     }
   }, [editor])
 
