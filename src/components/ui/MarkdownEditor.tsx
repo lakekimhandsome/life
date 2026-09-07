@@ -16,6 +16,7 @@ import {
 } from '@mdxeditor/editor'
 import { $isListItemNode } from '@lexical/list'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { Check, Copy } from 'lucide-react'
 import {
   $getNearestNodeFromDOMNode,
   $getNodeByKey,
@@ -26,7 +27,8 @@ import {
   KEY_TAB_COMMAND,
   OUTDENT_CONTENT_COMMAND,
 } from 'lexical'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useT } from '../../state/LocaleContext'
 
 const MAX_SWIPE_DURATION_MS = 500
 
@@ -162,14 +164,38 @@ const listTabPlugin = realmPlugin({
 })
 
 function PlainTextCodeEditor({ code }: CodeBlockEditorProps) {
+  const t = useT()
   const { setCode } = useCodeBlockEditorContext()
+  const [copied, setCopied] = useState(false)
+
+  async function copyCode() {
+    try {
+      await navigator.clipboard.writeText(code)
+      setCopied(true)
+      window.setTimeout(() => setCopied(false), 1500)
+    } catch {
+      // Keep the copy button available when clipboard permission is denied.
+    }
+  }
+
   return (
-    <textarea
-      className="inline-code-editor"
-      value={code}
-      onChange={(event) => setCode(event.target.value)}
-      spellCheck={false}
-    />
+    <div className="inline-code-editor-wrap">
+      <textarea
+        className="inline-code-editor"
+        value={code}
+        onChange={(event) => setCode(event.target.value)}
+        spellCheck={false}
+      />
+      <button
+        type="button"
+        className="inline-code-copy"
+        onClick={() => void copyCode()}
+        aria-label={copied ? t('clipboard.copied') : t('clipboard.copyCode')}
+        title={copied ? t('clipboard.copied') : t('clipboard.copyCode')}
+      >
+        {copied ? <Check size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}
+      </button>
+    </div>
   )
 }
 

@@ -2342,12 +2342,16 @@ select.inline-meta-control {
   color: var(--muted);
 }
 
+.inline-code-editor-wrap {
+  position: relative;
+}
+
 .inline-code-editor {
   display: block;
   width: 100%;
   min-height: 7rem;
   resize: vertical;
-  padding: 0.9rem 1rem;
+  padding: 0.9rem 3rem 0.9rem 1rem;
   border: 0;
   border-radius: 10px;
   background: color-mix(in srgb, var(--ink) 7%, transparent);
@@ -2356,6 +2360,26 @@ select.inline-meta-control {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.9em;
   line-height: 1.55;
+}
+
+.inline-code-copy {
+  position: absolute;
+  top: 0.55rem;
+  right: 0.55rem;
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper-elevated);
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.inline-code-copy:hover {
+  color: var(--ink);
 }
 
 .markdown-content > :first-child {
