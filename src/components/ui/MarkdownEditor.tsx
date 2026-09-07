@@ -66,7 +66,7 @@ function ListTabAnywherePlugin() {
       if (!(root instanceof Element) || !listItem || !root.contains(listItem)) return
 
       let itemKey: string | null = null
-      editor.getEditorState().read(() => {
+      editor.read(() => {
         let node = $getNearestNodeFromDOMNode(listItem)
         while (node && !$isListItemNode(node)) node = node.getParent()
         if ($isListItemNode(node)) itemKey = node.getKey()
@@ -76,15 +76,15 @@ function ListTabAnywherePlugin() {
       gesture = { pointerId: event.pointerId, x: event.clientX, y: event.clientY, itemKey }
     }
 
-    function onPointerUp(event: PointerEvent) {
+    function onPointerMove(event: PointerEvent) {
       const start = gesture
-      gesture = null
       if (!start || event.pointerId !== start.pointerId) return
 
       const deltaX = event.clientX - start.x
       const deltaY = event.clientY - start.y
       if (Math.abs(deltaX) < 44 || Math.abs(deltaX) < Math.abs(deltaY) * 1.25) return
 
+      gesture = null
       event.preventDefault()
       editor.update(() => {
         const item = $getNodeByKey(start.itemKey)
@@ -101,11 +101,13 @@ function ListTabAnywherePlugin() {
       gesture = null
       if (!root) return
       root.addEventListener('pointerdown', onPointerDown, { capture: true, passive: true })
-      root.addEventListener('pointerup', onPointerUp, { capture: true, passive: false })
+      root.addEventListener('pointermove', onPointerMove, { capture: true, passive: false })
+      root.addEventListener('pointerup', cancelPointer, true)
       root.addEventListener('pointercancel', cancelPointer, true)
       return () => {
         root.removeEventListener('pointerdown', onPointerDown, true)
-        root.removeEventListener('pointerup', onPointerUp, true)
+        root.removeEventListener('pointermove', onPointerMove, true)
+        root.removeEventListener('pointerup', cancelPointer, true)
         root.removeEventListener('pointercancel', cancelPointer, true)
       }
     })
