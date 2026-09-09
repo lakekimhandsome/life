@@ -2427,6 +2427,26 @@ select.inline-meta-control {
   padding-left: 1.35rem;
 }
 
+.markdown-content ul:not(li ul),
+.markdown-content ul:not(li ul) > li > ul > li > ul > li > ul > li > ul {
+  list-style-type: disc;
+}
+
+.markdown-content ul:not(li ul) > li > ul,
+.markdown-content ul:not(li ul) > li > ul > li > ul > li > ul > li > ul > li > ul {
+  list-style-type: circle;
+}
+
+.markdown-content ul:not(li ul) > li > ul > li > ul,
+.markdown-content ul:not(li ul) > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul {
+  list-style-type: square;
+}
+
+.markdown-content ul:not(li ul) > li > ul > li > ul > li > ul,
+.markdown-content ul:not(li ul) > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul {
+  list-style-type: "□  ";
+}
+
 .markdown-content li + li {
   margin-top: 0.25rem;
 }
