@@ -2318,6 +2318,7 @@ select.inline-meta-control {
 
 .inline-markdown-editor {
   --basePageBg: transparent;
+  --baseBg: color-mix(in srgb, var(--ink) 6%, var(--paper-elevated));
   color: var(--ink);
 }
 
