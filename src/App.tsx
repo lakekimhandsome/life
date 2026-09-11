@@ -12,6 +12,7 @@ import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
 import { ModulePage } from './pages/ModulePage'
 import { ObjectDetailPage } from './pages/ObjectDetailPage'
+import { OAuthConsentPage } from './pages/OAuthConsentPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { StudyPage } from './pages/StudyPage'
 import { AuthProvider } from './state/AuthContext'
@@ -31,6 +32,7 @@ export default function App() {
                 <Routes>
                   <Route path="login" element={<LoginPage />} />
                   <Route path="auth/callback" element={<AuthCallbackPage />} />
+                  <Route path="oauth/consent" element={<OAuthConsentPage />} />
                   <Route element={<RequireAuth />}>
                     <Route element={<AppShell />}>
                       <Route index element={<HomePage />} />

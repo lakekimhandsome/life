@@ -16,8 +16,8 @@ type AuthContextValue = {
   configured: boolean
   session: Session | null
   user: User | null
-  signInWithKakao: () => Promise<{ error: Error | null }>
-  signInWithGoogle: () => Promise<{ error: Error | null }>
+  signInWithKakao: (next?: string) => Promise<{ error: Error | null }>
+  signInWithGoogle: (next?: string) => Promise<{ error: Error | null }>
   signOut: () => Promise<{ error: Error | null }>
 }
 
@@ -60,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [configured])
 
-  const signInWithKakao = useCallback(async () => {
+  const signInWithKakao = useCallback(async (next = '/') => {
     if (!configured) {
       return { error: new Error(t('error.noSupabase')) }
     }
@@ -68,14 +68,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'kakao',
       options: {
-        redirectTo: authRedirectTo('/'),
+        redirectTo: authRedirectTo(next),
       },
     })
 
     return { error: error ? new Error(error.message) : null }
   }, [configured])
 
-  const signInWithGoogle = useCallback(async () => {
+  const signInWithGoogle = useCallback(async (next = '/') => {
     if (!configured) {
       return { error: new Error(t('error.noSupabase')) }
     }
@@ -83,7 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: authRedirectTo('/'),
+        redirectTo: authRedirectTo(next),
       },
     })
 

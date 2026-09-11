@@ -427,6 +427,29 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
   color: var(--danger);
 }
 
+.oauth-permissions {
+  margin-top: 1.25rem;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  text-align: left;
+  color: var(--ink-soft);
+  font-size: 0.86rem;
+}
+
+.oauth-permissions ul {
+  margin: 0.65rem 0 0;
+  padding-left: 1.2rem;
+  line-height: 1.6;
+}
+
+.oauth-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  margin-top: 1.25rem;
+}
+
 .page {
   width: min(var(--max), calc(100% - 2rem));
   margin: 0 auto;

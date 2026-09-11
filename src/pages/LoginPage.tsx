@@ -1,13 +1,15 @@
 import { useState } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Navigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../state/AuthContext'
 import { useT } from '../state/LocaleContext'
 
 export function LoginPage() {
   const t = useT()
+  const [searchParams] = useSearchParams()
   const { ready, configured, user, signInWithGoogle, signInWithKakao } = useAuth()
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const next = searchParams.get('next') ?? '/'
 
   if (!ready) {
     return (
@@ -24,7 +26,7 @@ export function LoginPage() {
   async function handleGoogle() {
     setError(null)
     setBusy(true)
-    const { error: nextError } = await signInWithGoogle()
+    const { error: nextError } = await signInWithGoogle(next)
     if (nextError) {
       setError(nextError.message)
       setBusy(false)
@@ -34,7 +36,7 @@ export function LoginPage() {
   async function handleKakao() {
     setError(null)
     setBusy(true)
-    const { error: nextError } = await signInWithKakao()
+    const { error: nextError } = await signInWithKakao(next)
     if (nextError) {
       setError(nextError.message)
       setBusy(false)
