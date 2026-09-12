@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { LifeMark } from '../components/ui/LifeMark'
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
 import { useAuth } from '../state/AuthContext'
 import { useT } from '../state/LocaleContext'
@@ -10,6 +11,66 @@ type AuthorizationDetails = {
   redirect_uri?: string
   scope?: string
   client?: { name?: string }
+}
+
+function ConnectionView({
+  client,
+  busy = false,
+  demo = false,
+  onDecide,
+}: {
+  client: string
+  busy?: boolean
+  demo?: boolean
+  onDecide: (approve: boolean) => void
+}) {
+  const t = useT()
+
+  return (
+    <div className="oauth-page">
+      <div className="atmosphere" aria-hidden="true" />
+      {demo ? (
+        <nav className="oauth-demo-nav" aria-label="Connection preview">
+          <a className={client === 'ChatGPT' ? 'is-active' : undefined} href="?client=ChatGPT">
+            ChatGPT
+          </a>
+          <a className={client === 'Codex' ? 'is-active' : undefined} href="?client=Codex">
+            Codex
+          </a>
+        </nav>
+      ) : null}
+      <main className="oauth-sheet">
+        <header className="oauth-brand">
+          <LifeMark size={28} />
+          <span>LIFE</span>
+        </header>
+
+        <div className="oauth-heading">
+          <p>{t('oauth.eyebrow')}</p>
+          <h1>{t('oauth.title', { client })}</h1>
+          <span>{t('oauth.request', { client })}</span>
+        </div>
+
+        <section className="oauth-permissions" aria-labelledby="oauth-permissions-title">
+          <h2 id="oauth-permissions-title">{t('oauth.permissions', { client })}</h2>
+          <ul>
+            <li>{t('oauth.read')}</li>
+            <li>{t('oauth.write')}</li>
+          </ul>
+        </section>
+
+        <p className="oauth-safety">{t('oauth.safety')}</p>
+        <div className="oauth-actions">
+          <button className="btn btn-ghost" type="button" disabled={busy} onClick={() => onDecide(false)}>
+            {t('oauth.deny')}
+          </button>
+          <button className="btn btn-primary" type="button" disabled={busy} onClick={() => onDecide(true)}>
+            {busy ? t('common.saving') : t('oauth.approve')}
+          </button>
+        </div>
+      </main>
+    </div>
+  )
 }
 
 export function OAuthConsentPage() {
@@ -63,38 +124,25 @@ export function OAuthConsentPage() {
     window.location.assign(data.redirect_url)
   }
 
+  if (details) {
+    return (
+      <ConnectionView
+        client={details.client?.name ?? 'ChatGPT'}
+        busy={busy}
+        onDecide={(approve) => void decide(approve)}
+      />
+    )
+  }
+
   return (
-    <div className="login-page">
-      <div className="atmosphere" aria-hidden="true" />
-      <main className="login-card">
-        <p className="login-brand">LIFE</p>
-        <h1 className="login-title">{t('oauth.title')}</h1>
-        {!details && !error ? <p className="login-copy">{t('common.loading')}</p> : null}
-        {details ? (
-          <>
-            <p className="login-copy">
-              {t('oauth.request', { client: details.client?.name ?? 'ChatGPT' })}
-            </p>
-            <div className="oauth-permissions">
-              <strong>{t('oauth.permissions')}</strong>
-              <ul>
-                <li>{t('oauth.read')}</li>
-                <li>{t('oauth.write')}</li>
-              </ul>
-            </div>
-            <p className="login-hint">{t('oauth.safety')}</p>
-            <div className="oauth-actions">
-              <button className="btn btn-ghost" type="button" disabled={busy} onClick={() => void decide(false)}>
-                {t('oauth.deny')}
-              </button>
-              <button className="btn btn-primary" type="button" disabled={busy} onClick={() => void decide(true)}>
-                {busy ? t('common.saving') : t('oauth.approve')}
-              </button>
-            </div>
-          </>
-        ) : null}
-        {error ? <p className="login-hint is-error">{error}</p> : null}
-      </main>
+    <div className="auth-gate">
+      <p className={error ? 'is-error' : undefined}>{error ?? t('common.loading')}</p>
     </div>
   )
+}
+
+export function OAuthConsentDemoPage() {
+  const [searchParams] = useSearchParams()
+  const client = searchParams.get('client') === 'Codex' ? 'Codex' : 'ChatGPT'
+  return <ConnectionView client={client} demo onDecide={() => undefined} />
 }
