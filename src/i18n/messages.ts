@@ -22,7 +22,7 @@ export const en = {
   'nav.lifeHome': 'LIFE home',
   'nav.userMenu': 'User menu',
 
-  'modules.study': 'Plan',
+  'modules.study': 'Plans',
   'modules.workout': 'Workout',
   'modules.assets': 'Assets',
   'modules.journal': 'Journal',
