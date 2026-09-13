@@ -266,6 +266,31 @@ export function StudyPage() {
     itemsRef.current = items
   }, [items])
 
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      const target = event.target as HTMLElement | null
+      if (
+        event.altKey ||
+        event.ctrlKey ||
+        event.metaKey ||
+        event.shiftKey ||
+        target?.isContentEditable ||
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target instanceof HTMLSelectElement
+      ) {
+        return
+      }
+      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return
+
+      event.preventDefault()
+      setSelectedDay((day) => addLocalDays(day, event.key === 'ArrowLeft' ? -1 : 1))
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [])
+
   const remaining = items.filter((todo) => !isDone(todo)).length
 
   async function persistOrder(next: LifeObject[]) {
