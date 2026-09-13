@@ -149,7 +149,7 @@ export function CardEditPage() {
                     </span>
                     <button
                       type="button"
-                      className="btn btn-ghost card-edit-action"
+                      className="card-edit-action"
                       aria-label={t('cards.remove')}
                       onClick={() => void handleRemove(module.id)}
                       disabled={visibleModules.length <= 1}
@@ -190,7 +190,7 @@ export function CardEditPage() {
                     </span>
                     <button
                       type="button"
-                      className="btn btn-primary card-edit-action"
+                      className="card-edit-action"
                       aria-label={t('common.add')}
                       onClick={() => void handleAdd(module.id)}
                     >

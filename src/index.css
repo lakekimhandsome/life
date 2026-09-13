@@ -3112,6 +3112,24 @@ select.inline-meta-control {
   width: 2.6rem;
   height: 2.6rem;
   padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.card-edit-action:hover:not(:disabled) {
+  color: var(--ink);
+}
+
+.card-edit-action:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.card-edit-action:focus-visible {
+  outline: 2px solid var(--line-strong);
+  outline-offset: 2px;
 }
 
 html[data-theme='dark'] .user-menu-trigger,
