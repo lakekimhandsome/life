@@ -127,7 +127,7 @@ const SCHEMA_DEFS: Record<ObjectType, SchemaDef> = {
   },
   study: {
     type: 'study',
-    enLabel: 'Study',
+    enLabel: 'Plan',
     descriptionKey: 'schema.study.description',
     titlePlaceholderKey: 'schema.study.titlePlaceholder',
     bodyPlaceholderKey: 'schema.study.bodyPlaceholder',

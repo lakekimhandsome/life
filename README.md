@@ -1,6 +1,6 @@
 # LIFE
 
-Personal Life OS — 일기, 프로젝트, 운동, 공부, 목표, 자산을 **하나의 Object + Relationship 구조**로 관리합니다.
+Personal Life OS — 일기, 프로젝트, 운동, 계획, 목표, 자산을 **하나의 Object + Relationship 구조**로 관리합니다.
 
 ## 실행
 
@@ -18,7 +18,7 @@ Settings → Secrets and variables → Actions → **Repository secrets**
 ## MVP 범위
 
 - 홈 (삶의 영역 허브)
-- 일기 / 프로젝트 / 운동 / 공부 / 목표 / 자산 모듈
+- 일기 / 프로젝트 / 운동 / 계획 / 목표 / 자산 모듈
 - 객체 상세 및 목표 연결
 - Local First (IndexedDB via Dexie)
 

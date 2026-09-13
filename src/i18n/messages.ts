@@ -1,6 +1,6 @@
 export const en = {
   'meta.description':
-    'LIFE — Personal Life OS. Journal, projects, workouts, study, and goals in one system.',
+    'LIFE — Personal Life OS. Journal, projects, workouts, plans, and goals in one system.',
 
   'common.home': 'Home',
   'common.back': 'Back',
@@ -22,7 +22,7 @@ export const en = {
   'nav.lifeHome': 'LIFE home',
   'nav.userMenu': 'User menu',
 
-  'modules.study': 'Study',
+  'modules.study': 'Plan',
   'modules.workout': 'Workout',
   'modules.assets': 'Assets',
   'modules.journal': 'Journal',
@@ -35,7 +35,7 @@ export const en = {
   'object.project': 'Project',
   'object.note': 'Note',
   'object.workout': 'Workout',
-  'object.study': 'Study',
+  'object.study': 'Plan',
   'object.goal': 'Goal',
   'object.asset': 'Asset',
 
@@ -129,7 +129,7 @@ export const en = {
   'study.remaining': '{count} left',
   'study.goToday': 'Go to today',
   'study.emptyTitle': 'No tasks',
-  'study.emptyBody': 'Add today’s study above.',
+  'study.emptyBody': 'Add today’s plan above.',
   'study.deleteConfirm': 'Delete “{title}”?',
   'study.complete': 'Mark {title} done',
   'study.uncomplete': 'Unmark {title}',
@@ -292,7 +292,7 @@ export const en = {
   'schema.workout.bodyPlaceholder': 'Sets, how it felt, notes',
   'schema.workout.bodyLabel': 'Notes',
   'schema.workout.duration': 'Time (min)',
-  'schema.study.description': 'What to study that day',
+  'schema.study.description': 'What to do that day',
   'schema.study.titlePlaceholder': 'e.g. Math workbook p.10',
   'schema.study.bodyPlaceholder': 'Notes (optional)',
   'schema.study.bodyLabel': 'Notes',
@@ -331,7 +331,7 @@ export type MessageKey = keyof typeof en
 
 export const ko: Record<MessageKey, string> = {
   'meta.description':
-    'LIFE — Personal Life OS. 일기, 프로젝트, 운동, 공부, 목표를 하나의 시스템으로.',
+    'LIFE — Personal Life OS. 일기, 프로젝트, 운동, 계획, 목표를 하나의 시스템으로.',
 
   'common.home': '홈',
   'common.back': '뒤로',
@@ -353,7 +353,7 @@ export const ko: Record<MessageKey, string> = {
   'nav.lifeHome': 'LIFE 홈',
   'nav.userMenu': '사용자 메뉴',
 
-  'modules.study': '공부',
+  'modules.study': '계획',
   'modules.workout': '운동',
   'modules.assets': '자산',
   'modules.journal': '일기',
@@ -366,7 +366,7 @@ export const ko: Record<MessageKey, string> = {
   'object.project': '프로젝트',
   'object.note': '노트',
   'object.workout': '운동',
-  'object.study': '공부',
+  'object.study': '계획',
   'object.goal': '목표',
   'object.asset': '자산',
 
@@ -460,7 +460,7 @@ export const ko: Record<MessageKey, string> = {
   'study.remaining': '{count}개 남음',
   'study.goToday': '오늘로 이동',
   'study.emptyTitle': '할 일이 없습니다',
-  'study.emptyBody': '위에서 오늘의 공부를 추가해 보세요.',
+  'study.emptyBody': '위에서 오늘의 계획을 추가해 보세요.',
   'study.deleteConfirm': '「{title}」 할 일을 삭제할까요?',
   'study.complete': '{title} 완료',
   'study.uncomplete': '{title} 완료 취소',
@@ -622,7 +622,7 @@ export const ko: Record<MessageKey, string> = {
   'schema.workout.bodyPlaceholder': '세트, 느낌, 특이사항',
   'schema.workout.bodyLabel': '메모',
   'schema.workout.duration': '시간 (분)',
-  'schema.study.description': '그날 해야 할 공부',
+  'schema.study.description': '그날 해야 할 일',
   'schema.study.titlePlaceholder': '예: 수학 문제집 10쪽',
   'schema.study.bodyPlaceholder': '메모 (선택)',
   'schema.study.bodyLabel': '메모',
