@@ -4,6 +4,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react'
@@ -54,15 +55,23 @@ export function LifeProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false)
   const [objects, setObjects] = useState<LifeObject[]>([])
   const [counts, setCounts] = useState(emptyCounts)
+  const objectsRef = useRef<LifeObject[]>([])
+  const updateQueues = useRef(new Map<string, Promise<void>>())
+  const updateVersions = useRef(new Map<string, number>())
+
+  const replaceObjects = useCallback((next: LifeObject[]) => {
+    objectsRef.current = next
+    setObjects(next)
+  }, [])
 
   const refresh = useCallback(async () => {
     const [nextObjects, nextCounts] = await Promise.all([
       repository.listObjects(),
       repository.countByType(),
     ])
-    setObjects(nextObjects)
+    replaceObjects(nextObjects)
     setCounts(nextCounts)
-  }, [])
+  }, [replaceObjects])
 
   useEffect(() => {
     if (!authReady) return
@@ -70,7 +79,7 @@ export function LifeProvider({ children }: { children: ReactNode }) {
     let active = true
 
     if (!user) {
-      setObjects([])
+      replaceObjects([])
       setCounts(emptyCounts)
       setReady(true)
       return () => {
@@ -92,7 +101,7 @@ export function LifeProvider({ children }: { children: ReactNode }) {
     return () => {
       active = false
     }
-  }, [authReady, user, refresh])
+  }, [authReady, user, refresh, replaceObjects])
 
   const createObject = useCallback(
     async (input: CreateObjectInput) => {
@@ -105,11 +114,56 @@ export function LifeProvider({ children }: { children: ReactNode }) {
 
   const updateObject = useCallback(
     async (id: string, input: UpdateObjectInput) => {
-      const updated = await repository.updateObject(id, input)
-      await refresh()
-      return updated
+      const previous = objectsRef.current.find((object) => object.id === id)
+      if (!previous) return undefined
+
+      const version = (updateVersions.current.get(id) ?? 0) + 1
+      updateVersions.current.set(id, version)
+
+      const optimistic: LifeObject = {
+        ...previous,
+        title: input.title?.trim() ?? previous.title,
+        body: input.body !== undefined ? input.body.trim() : previous.body,
+        occurredAt: input.occurredAt ?? previous.occurredAt,
+        meta: input.meta ?? previous.meta,
+        updatedAt: new Date().toISOString(),
+      }
+      replaceObjects(
+        objectsRef.current.map((object) => (object.id === id ? optimistic : object)),
+      )
+
+      const pending = updateQueues.current.get(id) ?? Promise.resolve()
+      const operation = pending
+        .catch(() => undefined)
+        .then(() => repository.updateObject(id, input))
+      const queueTail = operation.then(
+        () => undefined,
+        () => undefined,
+      )
+      updateQueues.current.set(id, queueTail)
+
+      try {
+        const updated = await operation
+        if (updated && updateVersions.current.get(id) === version) {
+          replaceObjects(
+            objectsRef.current.map((object) => (object.id === id ? updated : object)),
+          )
+        }
+        return updated
+      } catch (error) {
+        if (updateVersions.current.get(id) === version) {
+          replaceObjects(
+            objectsRef.current.map((object) => (object.id === id ? previous : object)),
+          )
+        }
+        throw error
+      } finally {
+        if (updateQueues.current.get(id) === queueTail) {
+          updateQueues.current.delete(id)
+        }
+      }
     },
-    [refresh],
+    [replaceObjects],
   )
 
   const deleteObject = useCallback(

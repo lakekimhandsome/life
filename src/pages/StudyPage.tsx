@@ -307,12 +307,16 @@ export function StudyPage() {
   }
 
   async function toggleDone(todo: LifeObject) {
-    await updateObject(todo.id, {
-      meta: {
-        ...todo.meta,
-        done: !isDone(todo),
-      },
-    })
+    try {
+      await updateObject(todo.id, {
+        meta: {
+          ...todo.meta,
+          done: !isDone(todo),
+        },
+      })
+    } catch (error) {
+      console.error('Failed to update todo', error)
+    }
   }
 
   async function renameTodo(todo: LifeObject, title: string) {
