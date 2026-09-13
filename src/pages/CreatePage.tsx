@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { Navigate, useNavigate, useParams } from 'react-router-dom'
+import { Navigate, useParams } from 'react-router-dom'
 import {
   InlineMarkdownObject,
   type ObjectSaveState,
@@ -19,7 +19,6 @@ function isObjectType(value: string | undefined): value is ObjectType {
 export function CreatePage() {
   const t = useT()
   const { type } = useParams()
-  const navigate = useNavigate()
   const { createObject, updateObject } = useLife()
   const [saveState, setSaveState] = useState<ObjectSaveState>('saved')
   const createdIdRef = useRef<string | null>(null)
@@ -80,7 +79,7 @@ export function CreatePage() {
             ...input,
           })
           createdIdRef.current = created.id
-          navigate(`/object/${created.id}`, { replace: true })
+          window.history.replaceState(window.history.state, '', `/object/${created.id}`)
         }}
       />
     </article>

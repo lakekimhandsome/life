@@ -21,6 +21,7 @@ export function ObjectDetailPage() {
   const t = useT()
   const [relationships, setRelationships] = useState<Relationship[]>([])
   const [saveState, setSaveState] = useState<ObjectSaveState>('saved')
+  const [deleting, setDeleting] = useState(false)
 
   const object = id ? getObject(id) : undefined
 
@@ -39,7 +40,7 @@ export function ObjectDetailPage() {
   }, [id, getRelationships])
 
   if (ready && id && !object) {
-    return <Navigate to="/" replace />
+    return deleting ? null : <Navigate to="/" replace />
   }
 
   if (!object) {
@@ -47,6 +48,7 @@ export function ObjectDetailPage() {
   }
 
   const schema = getSchema(object.type)
+  const objectId = object.id
   const module = getModuleForObjectType(object.type)
   const backTo = module?.path ?? '/'
   const supportsMarkdown = supportsMarkdownBody(object.type)
@@ -69,6 +71,18 @@ export function ObjectDetailPage() {
         ? t('clipboard.saveError')
         : t('clipboard.saved')
 
+  async function handleDelete() {
+    const confirmed = window.confirm(t('detail.deleteConfirm'))
+    if (!confirmed) return
+    setDeleting(true)
+    try {
+      await deleteObject(objectId)
+      navigate(backTo)
+    } finally {
+      setDeleting(false)
+    }
+  }
+
   return (
     <article className="detail">
       <div className="object-page-toolbar">
@@ -85,12 +99,8 @@ export function ObjectDetailPage() {
               type="button"
               className="object-header-action"
               aria-label={t('detail.deleteAria', { type: schema.label })}
-              onClick={async () => {
-                const confirmed = window.confirm(t('detail.deleteConfirm'))
-                if (!confirmed) return
-                await deleteObject(object.id)
-                navigate(backTo)
-              }}
+              disabled={deleting}
+              onClick={() => void handleDelete()}
             >
               <Trash2 size={20} strokeWidth={1.75} aria-hidden="true" />
             </button>
@@ -184,12 +194,8 @@ export function ObjectDetailPage() {
           <button
             type="button"
             className="btn btn-danger"
-            onClick={async () => {
-              const confirmed = window.confirm(t('detail.deleteConfirm'))
-              if (!confirmed) return
-              await deleteObject(object.id)
-              navigate(backTo)
-            }}
+            disabled={deleting}
+            onClick={() => void handleDelete()}
           >
             {t('common.delete')}
           </button>
