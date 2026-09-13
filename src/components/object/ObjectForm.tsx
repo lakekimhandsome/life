@@ -180,8 +180,7 @@ export function ObjectForm({
         </label>
       ) : null}
 
-      <div className="field">
-        <label htmlFor="body">{schema.bodyLabel}</label>
+      <div className="field" aria-label={schema.bodyLabel}>
         {supportsMarkdown ? (
           <MarkdownEditor
             value={body}
@@ -192,6 +191,7 @@ export function ObjectForm({
         ) : (
           <textarea
             id="body"
+            aria-label={schema.bodyLabel}
             rows={type === 'note' ? 14 : 7}
             value={body}
             onChange={(event) => setBody(event.target.value)}

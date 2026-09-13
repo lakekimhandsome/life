@@ -216,8 +216,7 @@ export function InlineMarkdownObject({
         />
       </header>
 
-      <section className="detail-body">
-        <h2>{schema.bodyLabel}</h2>
+      <section className="detail-body" aria-label={schema.bodyLabel}>
         <MarkdownEditor
           value={body}
           onChange={changeBody}

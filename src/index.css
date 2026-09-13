@@ -2375,7 +2375,7 @@ button.assets-row-title:focus-visible {
 }
 
 .detail-body p {
-  margin: 0.8rem 0 0;
+  margin: 0;
   white-space: pre-wrap;
   line-height: 1.7;
   font-size: 1.05rem;
@@ -2446,7 +2446,7 @@ select.inline-meta-control {
 
 .inline-markdown-content.markdown-content {
   min-height: 7rem;
-  margin-top: 0.8rem;
+  margin-top: 0;
   padding: 0;
   color: var(--ink);
   font-family: inherit;

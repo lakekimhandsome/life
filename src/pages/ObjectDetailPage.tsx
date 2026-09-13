@@ -122,8 +122,7 @@ export function ObjectDetailPage() {
           </header>
 
           {object.body ? (
-            <section className="detail-body">
-              <h2>{schema.bodyLabel}</h2>
+            <section className="detail-body" aria-label={schema.bodyLabel}>
               <p>{object.body}</p>
             </section>
           ) : null}
