@@ -75,6 +75,17 @@ const tools: Tool[] = [
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false },
   },
   {
+    name: 'delete_object',
+    description: 'Permanently delete one LIFE object and its relationships.',
+    inputSchema: {
+      type: 'object',
+      properties: { id: { type: 'string' } },
+      required: ['id'],
+      additionalProperties: false,
+    },
+    annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: false },
+  },
+  {
     name: 'link_objects',
     description: 'Create a first-class relationship between two LIFE objects.',
     inputSchema: {
@@ -227,6 +238,17 @@ async function updateObject(args: JsonObject, authorization: string) {
   return rows[0]
 }
 
+async function deleteObject(args: JsonObject, authorization: string) {
+  const id = requiredString(args.id, 'id')
+  const params = new URLSearchParams({ id: `eq.${id}` })
+  const rows = await rest(`life_objects?${params}`, authorization, {
+    method: 'DELETE',
+    headers: { Prefer: 'return=representation' },
+  })
+  if (!rows.length) throw new Error('LIFE object not found')
+  return rows[0]
+}
+
 async function linkObjects(args: JsonObject, authorization: string, userId: string) {
   const sourceId = requiredString(args.sourceId, 'sourceId')
   const targetId = requiredString(args.targetId, 'targetId')
@@ -268,6 +290,7 @@ async function callTool(name: string, args: JsonObject, authorization: string, u
     case 'get_object': return getObject(args, authorization)
     case 'create_object': return createObject(args, authorization, userId)
     case 'update_object': return updateObject(args, authorization)
+    case 'delete_object': return deleteObject(args, authorization)
     case 'link_objects': return linkObjects(args, authorization, userId)
     default: throw new Error(`Unknown tool: ${name}`)
   }
