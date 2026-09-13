@@ -18,16 +18,19 @@ export function startVerticalReorder({
   const draggedRow = rows[draggedIndex]
   if (!draggedRow) return
 
-  const height = draggedRow.getBoundingClientRect().height
-  const centers = rows.map((row) => {
-    const rect = row.getBoundingClientRect()
-    return rect.top + rect.height / 2
-  })
+  const rects = rows.map((row) => row.getBoundingClientRect())
+  const draggedRect = rects[draggedIndex]
+  const height = draggedRect.height
+  const centers = rects.map((rect) => rect.top + rect.height / 2)
   let targetIndex = draggedIndex
 
-  const resetTransforms = () => {
-    rows.forEach((row) => {
-      row.style.transform = ''
+  const moveRows = (dragOffset: number) => {
+    rows.forEach((row, index) => {
+      let offset = 0
+      if (index === draggedIndex) offset = dragOffset
+      else if (draggedIndex < index && index <= targetIndex) offset = -height
+      else if (targetIndex <= index && index < draggedIndex) offset = height
+      row.style.transform = `translate3d(0, ${offset}px, 0)`
     })
   }
 
@@ -40,22 +43,32 @@ export function startVerticalReorder({
         break
       }
     }
-
-    rows.forEach((row, index) => {
-      let offset = 0
-      if (index === draggedIndex) offset = event.clientY - startY
-      else if (draggedIndex < index && index <= targetIndex) offset = -height
-      else if (targetIndex <= index && index < draggedIndex) offset = height
-      row.style.transform = `translate3d(0, ${offset}px, 0)`
-    })
+    moveRows(event.clientY - startY)
   }
 
   const finish = (event: PointerEvent) => {
     handle.removeEventListener('pointermove', onMove)
     handle.removeEventListener('pointerup', finish)
     handle.removeEventListener('pointercancel', finish)
-    resetTransforms()
-    onDrop(event.type === 'pointercancel' ? draggedIndex : targetIndex)
+
+    if (event.type === 'pointercancel') targetIndex = draggedIndex
+    const destinationTop =
+      targetIndex < draggedIndex
+        ? rects[targetIndex].top
+        : targetIndex > draggedIndex
+          ? rects[targetIndex].bottom - height
+          : draggedRect.top
+
+    draggedRow.style.transition = 'transform 160ms cubic-bezier(0.22, 1, 0.36, 1)'
+    moveRows(destinationTop - draggedRect.top)
+
+    window.setTimeout(() => {
+      rows.forEach((row) => {
+        row.style.transform = ''
+      })
+      draggedRow.style.transition = ''
+      onDrop(targetIndex)
+    }, 160)
   }
 
   handle.setPointerCapture(pointerId)
