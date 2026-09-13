@@ -15,6 +15,7 @@ import {
   resolveHubModules,
 } from '../domain/hubLayout'
 import { moduleTitle, type ModuleId } from '../domain/modules'
+import { startVerticalReorder } from '../lib/verticalReorder'
 import { useLife } from '../state/LifeContext'
 import { useT } from '../state/LocaleContext'
 import { usePrefs } from '../state/PrefsContext'
@@ -28,8 +29,6 @@ export function CardEditPage() {
   const [dragId, setDragId] = useState<ModuleId | null>(null)
 
   const orderRef = useRef(order)
-  const dragIdRef = useRef<ModuleId | null>(null)
-  const dragOrigin = useRef<ModuleId[] | null>(null)
   const listRef = useRef<HTMLUListElement | null>(null)
 
   useEffect(() => {
@@ -48,19 +47,6 @@ export function CardEditPage() {
   function contentCount(module: (typeof visibleModules)[number]): number {
     return module.objectType ? counts[module.objectType] : 0
   }
-  function moveDraggedToIndex(nextIndex: number) {
-    const id = dragIdRef.current
-    if (!id) return
-    setOrder((current) => {
-      const fromIndex = current.findIndex((item) => item === id)
-      if (fromIndex < 0 || fromIndex === nextIndex) return current
-      const next = [...current]
-      const [moved] = next.splice(fromIndex, 1)
-      next.splice(nextIndex, 0, moved)
-      return next
-    })
-  }
-
   function onReorderStart(
     moduleId: ModuleId,
     event: ReactPointerEvent<HTMLButtonElement>,
@@ -68,53 +54,29 @@ export function CardEditPage() {
     if (event.button !== 0) return
     event.preventDefault()
 
-    dragOrigin.current = orderRef.current
-    dragIdRef.current = moduleId
+    const current = orderRef.current
+    const draggedIndex = current.indexOf(moduleId)
+    const list = listRef.current
+    if (draggedIndex < 0 || !list) return
+
     setDragId(moduleId)
-
-    const handle = event.currentTarget
-    handle.setPointerCapture(event.pointerId)
-
-    const onMove = (moveEvent: PointerEvent) => {
-      const list = listRef.current
-      if (!list) return
-      const rows = [...list.querySelectorAll<HTMLElement>('[data-card-id]')]
-      const y = moveEvent.clientY
-      let targetIndex = rows.length - 1
-      for (let index = 0; index < rows.length; index += 1) {
-        const rect = rows[index].getBoundingClientRect()
-        if (y < rect.top + rect.height / 2) {
-          targetIndex = index
-          break
-        }
-      }
-      moveDraggedToIndex(targetIndex)
-    }
-
-    const finish = () => {
-      handle.removeEventListener('pointermove', onMove)
-      handle.removeEventListener('pointerup', finish)
-      handle.removeEventListener('pointercancel', finish)
-
-      const current = orderRef.current
-      const origin = dragOrigin.current
-      dragOrigin.current = null
-      dragIdRef.current = null
-      setDragId(null)
-
-      const changed =
-        !origin ||
-        origin.length !== current.length ||
-        origin.some((id, index) => id !== current[index])
-
-      if (changed) {
-        void setHubLayout(reorderHubModules({ order: current, excluded }, current))
-      }
-    }
-
-    handle.addEventListener('pointermove', onMove)
-    handle.addEventListener('pointerup', finish)
-    handle.addEventListener('pointercancel', finish)
+    startVerticalReorder({
+      handle: event.currentTarget,
+      pointerId: event.pointerId,
+      startY: event.clientY,
+      rows: [...list.querySelectorAll<HTMLElement>('[data-card-id]')],
+      draggedIndex,
+      onDrop: (nextIndex) => {
+        setDragId(null)
+        if (nextIndex === draggedIndex) return
+        const next = [...current]
+        const [moved] = next.splice(draggedIndex, 1)
+        next.splice(nextIndex, 0, moved)
+        orderRef.current = next
+        setOrder(next)
+        void setHubLayout(reorderHubModules({ order: next, excluded }, next))
+      },
+    })
   }
 
   async function handleRemove(id: ModuleId) {

@@ -7,7 +7,6 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from 'react'
 import { Check, ChevronLeft, ChevronRight, GripVertical, Plus } from 'lucide-react'
-import * as repository from '../core/repository'
 import type { LifeObject } from '../core/types'
 import { BackLink } from '../components/ui/BackLink'
 import {
@@ -17,6 +16,7 @@ import {
   noonOnLocalDay,
   startOfLocalDay,
 } from '../lib/format'
+import { startVerticalReorder } from '../lib/verticalReorder'
 import { useLife } from '../state/LifeContext'
 import { useT } from '../state/LocaleContext'
 
@@ -241,15 +241,13 @@ function StudyTodoItem({
 
 export function StudyPage() {
   const t = useT()
-  const { ready, listByType, createObject, updateObject, deleteObject, refresh } = useLife()
+  const { ready, listByType, createObject, updateObject, deleteObject } = useLife()
   const [selectedDay, setSelectedDay] = useState(() => startOfLocalDay())
   const [draft, setDraft] = useState('')
   const [saving, setSaving] = useState(false)
   const [items, setItems] = useState<LifeObject[]>([])
   const [dragId, setDragId] = useState<string | null>(null)
-  const dragIdRef = useRef<string | null>(null)
   const itemsRef = useRef<LifeObject[]>([])
-  const dragOrigin = useRef<LifeObject[] | null>(null)
   const listRef = useRef<HTMLUListElement>(null)
 
   const sourceTodos = useMemo(() => {
@@ -273,12 +271,11 @@ export function StudyPage() {
   async function persistOrder(next: LifeObject[]) {
     await Promise.all(
       next.map((todo, index) =>
-        repository.updateObject(todo.id, {
+        updateObject(todo.id, {
           meta: { ...todo.meta, order: index },
         }),
       ),
     )
-    await refresh()
   }
 
   async function handleAdd(event: FormEvent) {
@@ -323,68 +320,33 @@ export function StudyPage() {
     await updateObject(todo.id, { title })
   }
 
-  function moveDraggedToIndex(nextIndex: number) {
-    const id = dragIdRef.current
-    if (!id) return
-    setItems((current) => {
-      const fromIndex = current.findIndex((todo) => todo.id === id)
-      if (fromIndex < 0 || fromIndex === nextIndex) return current
-      const next = [...current]
-      const [moved] = next.splice(fromIndex, 1)
-      next.splice(nextIndex, 0, moved)
-      return next
-    })
-  }
-
   function onReorderStart(todoId: string, event: ReactPointerEvent<HTMLButtonElement>) {
     if (event.button !== 0) return
     event.preventDefault()
 
-    dragOrigin.current = itemsRef.current
-    dragIdRef.current = todoId
+    const current = itemsRef.current
+    const draggedIndex = current.findIndex((todo) => todo.id === todoId)
+    const list = listRef.current
+    if (draggedIndex < 0 || !list) return
+
     setDragId(todoId)
-
-    const handle = event.currentTarget
-    handle.setPointerCapture(event.pointerId)
-
-    const onMove = (moveEvent: PointerEvent) => {
-      const list = listRef.current
-      if (!list) return
-      const rows = [...list.querySelectorAll<HTMLElement>('[data-todo-id]')]
-      const y = moveEvent.clientY
-      let targetIndex = rows.length - 1
-      for (let index = 0; index < rows.length; index += 1) {
-        const rect = rows[index].getBoundingClientRect()
-        if (y < rect.top + rect.height / 2) {
-          targetIndex = index
-          break
-        }
-      }
-      moveDraggedToIndex(targetIndex)
-    }
-
-    const finish = () => {
-      handle.removeEventListener('pointermove', onMove)
-      handle.removeEventListener('pointerup', finish)
-      handle.removeEventListener('pointercancel', finish)
-
-      const current = itemsRef.current
-      const origin = dragOrigin.current
-      dragOrigin.current = null
-      dragIdRef.current = null
-      setDragId(null)
-
-      const changed =
-        !origin ||
-        origin.length !== current.length ||
-        origin.some((todo, index) => todo.id !== current[index]?.id)
-
-      if (changed) void persistOrder(current)
-    }
-
-    handle.addEventListener('pointermove', onMove)
-    handle.addEventListener('pointerup', finish)
-    handle.addEventListener('pointercancel', finish)
+    startVerticalReorder({
+      handle: event.currentTarget,
+      pointerId: event.pointerId,
+      startY: event.clientY,
+      rows: [...list.querySelectorAll<HTMLElement>('[data-todo-id]')],
+      draggedIndex,
+      onDrop: (nextIndex) => {
+        setDragId(null)
+        if (nextIndex === draggedIndex) return
+        const next = [...current]
+        const [moved] = next.splice(draggedIndex, 1)
+        next.splice(nextIndex, 0, moved)
+        itemsRef.current = next
+        setItems(next)
+        void persistOrder(next)
+      },
+    })
   }
 
   return (

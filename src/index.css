@@ -892,13 +892,15 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
   border-radius: 0;
   background: transparent;
   touch-action: pan-y;
-  transition: opacity 160ms ease, background 160ms ease;
+  transition: transform 160ms ease, opacity 160ms ease, background 160ms ease;
 }
 
 .todo-item.is-dragging {
   z-index: 2;
   opacity: 0.72;
   background: color-mix(in srgb, var(--ink) 3%, transparent);
+  transition: opacity 160ms ease, background 160ms ease;
+  will-change: transform;
 }
 
 .todo-swipe-track {
@@ -3048,13 +3050,15 @@ select.inline-meta-control {
   border-bottom: 1px solid var(--line);
   border-radius: 0;
   background: transparent;
-  transition: opacity 160ms ease, background 160ms ease;
+  transition: transform 160ms ease, opacity 160ms ease, background 160ms ease;
 }
 
 .card-edit-row.is-dragging {
   z-index: 2;
   opacity: 0.72;
   background: color-mix(in srgb, var(--ink) 3%, transparent);
+  transition: opacity 160ms ease, background 160ms ease;
+  will-change: transform;
 }
 
 .card-edit-row.is-excluded {
