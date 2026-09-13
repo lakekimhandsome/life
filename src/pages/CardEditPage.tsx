@@ -4,7 +4,7 @@ import {
   useState,
   type PointerEvent as ReactPointerEvent,
 } from 'react'
-import { GripVertical, Plus, Trash2 } from 'lucide-react'
+import { GripVertical, Minus, Plus } from 'lucide-react'
 import { ModuleIcon } from '../components/ui/ModuleIcon'
 import { BackLink } from '../components/ui/BackLink'
 import {
@@ -154,7 +154,7 @@ export function CardEditPage() {
                       onClick={() => void handleRemove(module.id)}
                       disabled={visibleModules.length <= 1}
                     >
-                      <Trash2 size={18} strokeWidth={1.9} aria-hidden="true" />
+                      <Minus size={20} strokeWidth={1.9} aria-hidden="true" />
                     </button>
                   </li>
                 ))}
