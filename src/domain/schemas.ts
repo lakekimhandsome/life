@@ -125,20 +125,20 @@ const SCHEMA_DEFS: Record<ObjectType, SchemaDef> = {
       },
     ],
   },
-  study: {
-    type: 'study',
+  plan: {
+    type: 'plan',
     enLabel: 'Plan',
-    descriptionKey: 'schema.study.description',
-    titlePlaceholderKey: 'schema.study.titlePlaceholder',
-    bodyPlaceholderKey: 'schema.study.bodyPlaceholder',
-    bodyLabelKey: 'schema.study.bodyLabel',
-    accent: 'var(--accent-study)',
+    descriptionKey: 'schema.plan.description',
+    titlePlaceholderKey: 'schema.plan.titlePlaceholder',
+    bodyPlaceholderKey: 'schema.plan.bodyPlaceholder',
+    bodyLabelKey: 'schema.plan.bodyLabel',
+    accent: 'var(--accent-plan)',
     fields: [
       {
         key: 'subject',
         kind: 'text',
-        labelKey: 'schema.study.subject',
-        placeholderKey: 'schema.study.subjectPlaceholder',
+        labelKey: 'schema.plan.subject',
+        placeholderKey: 'schema.plan.subjectPlaceholder',
       },
     ],
   },
@@ -228,7 +228,7 @@ export const CREATE_ORDER: ObjectType[] = [
   'project',
   'note',
   'workout',
-  'study',
+  'plan',
   'goal',
   'asset',
 ]
@@ -242,7 +242,7 @@ const OBJECT_LABEL_KEY: Record<ObjectType, MessageKey> = {
   project: 'object.project',
   note: 'object.note',
   workout: 'object.workout',
-  study: 'object.study',
+  plan: 'object.plan',
   goal: 'object.goal',
   asset: 'object.asset',
 }
@@ -272,7 +272,7 @@ export function defaultMeta(type: ObjectType): Record<string, string | number | 
       return {}
     case 'workout':
       return { durationMin: null, intensity: 'medium' }
-    case 'study':
+    case 'plan':
       return { subject: '', done: false }
     case 'goal':
       return { status: 'active', targetDate: null, showOnHome: true }

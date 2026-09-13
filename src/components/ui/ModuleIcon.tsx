@@ -12,7 +12,7 @@ import {
 import type { ModuleId } from '../../domain/modules'
 
 const ICONS: Record<ModuleId, LucideIcon> = {
-  study: BookOpen,
+  plans: BookOpen,
   workout: Dumbbell,
   assets: Wallet,
   journal: Notebook,

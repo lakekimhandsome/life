@@ -45,7 +45,7 @@ const emptyCounts: Record<ObjectType, number> = {
   project: 0,
   note: 0,
   workout: 0,
-  study: 0,
+  plan: 0,
   goal: 0,
   asset: 0,
 }

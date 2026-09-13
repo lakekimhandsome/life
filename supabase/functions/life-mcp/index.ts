@@ -2,7 +2,7 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? ''
 const SUPABASE_KEY = Deno.env.get('SUPABASE_ANON_KEY') ?? ''
 const MCP_URL = `${SUPABASE_URL}/functions/v1/life-mcp`
 const AUTH_ISSUER = `${SUPABASE_URL}/auth/v1`
-const OBJECT_TYPES = ['journal', 'project', 'note', 'workout', 'study', 'goal', 'asset'] as const
+const OBJECT_TYPES = ['journal', 'project', 'note', 'workout', 'plan', 'goal', 'asset'] as const
 const RELATIONSHIP_KINDS = ['related', 'supports', 'part_of'] as const
 
 type JsonObject = Record<string, unknown>
@@ -42,7 +42,7 @@ const tools: Tool[] = [
   },
   {
     name: 'create_object',
-    description: 'Create a journal, project, note, workout, study, goal, or asset in LIFE.',
+    description: 'Create a journal, project, note, workout, plan, goal, or asset in LIFE.',
     inputSchema: {
       type: 'object',
       properties: {

@@ -23,7 +23,7 @@
   --accent-journal: #2f6f8f;
   --accent-project: #3d6b4f;
   --accent-workout: #b05a2c;
-  --accent-study: #5a4f8c;
+  --accent-plan: #5a4f8c;
   --accent-goal: #1f6f78;
   --accent-asset: #8a6a2f;
   --accent-note: #4d5f6d;
@@ -57,7 +57,7 @@ html[data-theme='dark'] {
   --accent-journal: #72acd0;
   --accent-project: #78ae8b;
   --accent-workout: #df8c5f;
-  --accent-study: #a195d2;
+  --accent-plan: #a195d2;
   --accent-goal: #b6aa96;
   --accent-asset: #c5a35f;
   --accent-note: #9db0be;
@@ -669,7 +669,7 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
   height: 1.25rem;
 }
 
-.hub-card--study { --card-accent: var(--accent-study); }
+.hub-card--plans { --card-accent: var(--accent-plan); }
 .hub-card--workout { --card-accent: var(--accent-workout); }
 .hub-card--assets { --card-accent: var(--accent-asset); }
 .hub-card--journal { --card-accent: var(--accent-journal); }
@@ -678,7 +678,7 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
 .hub-card--notes { --card-accent: var(--accent-note); }
 .hub-card--clipboard { --card-accent: var(--accent-clipboard); }
 
-.hub-card--study .hub-card-icon,
+.hub-card--plans .hub-card-icon,
 .hub-card--workout .hub-card-icon,
 .hub-card--assets .hub-card-icon,
 .hub-card--journal .hub-card-icon,
@@ -782,7 +782,7 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
   height: 1.25rem;
 }
 
-.module-heading--study { --heading-accent: var(--accent-study); }
+.module-heading--plans { --heading-accent: var(--accent-plan); }
 .module-heading--workout { --heading-accent: var(--accent-workout); }
 .module-heading--assets { --heading-accent: var(--accent-asset); }
 .module-heading--journal { --heading-accent: var(--accent-journal); }
@@ -842,7 +842,7 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
   padding: 0;
   border: 0;
   background: transparent;
-  color: var(--accent-study);
+  color: var(--accent-plan);
   font-size: 0.85rem;
   font-weight: 650;
   cursor: pointer;
@@ -866,8 +866,8 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
 }
 
 .todo-composer input:focus {
-  border-color: color-mix(in srgb, var(--accent-study) 55%, white);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-study) 16%, transparent);
+  border-color: color-mix(in srgb, var(--accent-plan) 55%, white);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-plan) 16%, transparent);
 }
 
 .todo-composer .module-header-btn {
@@ -955,7 +955,7 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
 }
 
 .todo-toggle:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--accent-study) 55%, white);
+  outline: 2px solid color-mix(in srgb, var(--accent-plan) 55%, white);
   outline-offset: 2px;
 }
 
@@ -975,8 +975,8 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
 }
 
 .todo-box.is-checked {
-  background: var(--accent-study);
-  border-color: var(--accent-study);
+  background: var(--accent-plan);
+  border-color: var(--accent-plan);
 }
 
 .todo-box svg {
@@ -999,7 +999,7 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
 }
 
 .todo-title:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--accent-study) 55%, white);
+  outline: 2px solid color-mix(in srgb, var(--accent-plan) 55%, white);
   outline-offset: 1px;
 }
 
@@ -1008,13 +1008,13 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
   min-width: 0;
   margin: 0;
   padding: 0.55rem 0.45rem;
-  border: 1px solid color-mix(in srgb, var(--accent-study) 40%, var(--line-strong));
+  border: 1px solid color-mix(in srgb, var(--accent-plan) 40%, var(--line-strong));
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.92);
   font-size: 1rem;
   line-height: 1.45;
   outline: none;
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-study) 14%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-plan) 14%, transparent);
 }
 
 .todo-item.is-done .todo-title {
@@ -1049,7 +1049,7 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
 }
 
 .todo-handle:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--accent-study) 55%, white);
+  outline: 2px solid color-mix(in srgb, var(--accent-plan) 55%, white);
   outline-offset: 2px;
 }
 
@@ -3443,7 +3443,7 @@ html[data-theme='dark'] .clipboard-image-remove:hover {
     font-weight: 650;
   }
 
-  .sidebar-link--study.is-active { color: var(--accent-study); }
+  .sidebar-link--plans.is-active { color: var(--accent-plan); }
   .sidebar-link--workout.is-active { color: var(--accent-workout); }
   .sidebar-link--assets.is-active { color: var(--accent-asset); }
   .sidebar-link--journal.is-active { color: var(--accent-journal); }

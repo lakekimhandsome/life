@@ -14,7 +14,7 @@ import { ModulePage } from './pages/ModulePage'
 import { ObjectDetailPage } from './pages/ObjectDetailPage'
 import { OAuthConsentDemoPage, OAuthConsentPage } from './pages/OAuthConsentPage'
 import { SettingsPage } from './pages/SettingsPage'
-import { StudyPage } from './pages/StudyPage'
+import { PlansPage } from './pages/PlansPage'
 import { AuthProvider } from './state/AuthContext'
 import { LifeProvider } from './state/LifeContext'
 import { LocaleProvider } from './state/LocaleContext'
@@ -37,7 +37,8 @@ export default function App() {
                   <Route element={<RequireAuth />}>
                     <Route element={<AppShell />}>
                       <Route index element={<HomePage />} />
-                      <Route path="study" element={<StudyPage />} />
+                      <Route path="plans" element={<PlansPage />} />
+                      <Route path="study" element={<Navigate to="/plans" replace />} />
                       <Route path="workout" element={<ModulePage />} />
                       <Route path="journal" element={<ModulePage />} />
                       <Route path="goals" element={<ModulePage />} />

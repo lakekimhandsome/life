@@ -4,7 +4,7 @@ import { t, type MessageKey } from '../i18n'
 import { isSameLocalDay } from '../lib/format'
 
 export type ModuleId =
-  | 'study'
+  | 'plans'
   | 'workout'
   | 'assets'
   | 'journal'
@@ -21,7 +21,7 @@ export interface LifeModule {
 }
 
 const MODULE_TITLE_KEY: Record<ModuleId, MessageKey> = {
-  study: 'modules.study',
+  plans: 'modules.plans',
   workout: 'modules.workout',
   assets: 'modules.assets',
   journal: 'modules.journal',
@@ -33,9 +33,9 @@ const MODULE_TITLE_KEY: Record<ModuleId, MessageKey> = {
 
 export const LIFE_MODULES: LifeModule[] = [
   {
-    id: 'study',
-    path: '/study',
-    objectType: 'study',
+    id: 'plans',
+    path: '/plans',
+    objectType: 'plan',
   },
   {
     id: 'workout',
@@ -98,14 +98,14 @@ export function getModuleStatus(
   const now = new Date()
 
   switch (moduleId) {
-    case 'study': {
-      const today = ofType(objects, 'study').filter((object) =>
+    case 'plans': {
+      const today = ofType(objects, 'plan').filter((object) =>
         isSameLocalDay(object.occurredAt, now),
       )
-      if (today.length === 0) return t('hub.study.none')
+      if (today.length === 0) return t('hub.plans.none')
       const remaining = today.filter((object) => object.meta.done !== true)
-      if (remaining.length === 0) return t('hub.study.done')
-      return t('hub.study.remaining', { count: remaining.length })
+      if (remaining.length === 0) return t('hub.plans.done')
+      return t('hub.plans.remaining', { count: remaining.length })
     }
     case 'workout': {
       const today = ofType(objects, 'workout').filter((object) =>

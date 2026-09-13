@@ -3,7 +3,7 @@ export const OBJECT_TYPES = [
   'project',
   'note',
   'workout',
-  'study',
+  'plan',
   'goal',
   'asset',
 ] as const
