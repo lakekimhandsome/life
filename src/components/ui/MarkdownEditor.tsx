@@ -15,7 +15,9 @@ import {
   type CodeBlockEditorProps,
 } from '@mdxeditor/editor'
 import { $isListItemNode } from '@lexical/list'
+import { STRIKETHROUGH } from '@lexical/markdown'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { MarkdownShortcutPlugin as LexicalMarkdownShortcutPlugin } from '@lexical/react/LexicalMarkdownShortcutPlugin'
 import { Check, Copy } from 'lucide-react'
 import {
   $getNearestNodeFromDOMNode,
@@ -163,6 +165,14 @@ const listTabPlugin = realmPlugin({
   },
 })
 
+const strikethroughShortcutPlugin = realmPlugin({
+  init(realm) {
+    realm.pub(addComposerChild$, () => (
+      <LexicalMarkdownShortcutPlugin transformers={[STRIKETHROUGH]} />
+    ))
+  },
+})
+
 function PlainTextCodeEditor({ code }: CodeBlockEditorProps) {
   const t = useT()
   const { setCode } = useCodeBlockEditorContext()
@@ -230,6 +240,7 @@ export function MarkdownEditor({
       tablePlugin(),
       codeBlockPlugin({ codeBlockEditorDescriptors: [plainTextCodeEditorDescriptor] }),
       markdownShortcutPlugin(),
+      strikethroughShortcutPlugin(),
       listTabPlugin(),
     ],
     [],
