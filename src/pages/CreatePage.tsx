@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import { Save } from 'lucide-react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { ObjectForm } from '../components/object/ObjectForm'
 import { BackLink } from '../components/ui/BackLink'
@@ -15,6 +17,7 @@ export function CreatePage() {
   const { type } = useParams()
   const navigate = useNavigate()
   const { createObject, linkObjects } = useLife()
+  const [saving, setSaving] = useState(false)
 
   if (!isObjectType(type)) {
     return <Navigate to="/" replace />
@@ -25,7 +28,20 @@ export function CreatePage() {
   return (
     <div className="compose">
       <div className="compose-header">
-        <BackLink to="/" />
+        <div className="object-page-toolbar">
+          <BackLink to="/" />
+          <div className="object-header-actions">
+            <button
+              type="submit"
+              form="create-object-form"
+              className="object-header-action"
+              disabled={saving}
+              aria-label={saving ? t('common.saving') : t('common.save')}
+            >
+              <Save size={20} strokeWidth={1.75} aria-hidden="true" />
+            </button>
+          </div>
+        </div>
         <p className="eyebrow" style={{ color: schema.accent }}>
           {schema.enLabel}
         </p>
@@ -35,6 +51,9 @@ export function CreatePage() {
 
       <ObjectForm
         type={type}
+        formId="create-object-form"
+        showSubmitButton={false}
+        onSavingChange={setSaving}
         submitLabel={t('common.save')}
         onSubmit={async ({ title, body, occurredAt, meta, linkedGoalId }) => {
           const created = await createObject({

@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import { Save } from 'lucide-react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { ObjectForm } from '../components/object/ObjectForm'
 import { BackLink } from '../components/ui/BackLink'
@@ -9,6 +11,7 @@ export function EditPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { ready, getObject, updateObject } = useLife()
+  const [saving, setSaving] = useState(false)
 
   const t = useT()
   const object = id ? getObject(id) : undefined
@@ -32,6 +35,17 @@ export function EditPage() {
       <div className="compose-header">
         <div className="object-page-toolbar">
           <BackLink to={`/object/${object.id}`} />
+          <div className="object-header-actions">
+            <button
+              type="submit"
+              form="edit-object-form"
+              className="object-header-action"
+              disabled={saving}
+              aria-label={saving ? t('common.saving') : t('edit.save')}
+            >
+              <Save size={20} strokeWidth={1.75} aria-hidden="true" />
+            </button>
+          </div>
         </div>
         <p className="eyebrow" style={{ color: schema.accent }}>
           {schema.enLabel}
@@ -43,6 +57,9 @@ export function EditPage() {
       <ObjectForm
         type={object.type}
         initial={object}
+        formId="edit-object-form"
+        showSubmitButton={false}
+        onSavingChange={setSaving}
         submitLabel={t('edit.save')}
         onSubmit={async ({ title, body, occurredAt, meta }) => {
           await updateObject(object.id, {
