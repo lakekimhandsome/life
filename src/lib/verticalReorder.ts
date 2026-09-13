@@ -1,3 +1,5 @@
+import { flushSync } from 'react-dom'
+
 type VerticalReorderOptions = {
   handle: HTMLElement
   pointerId: number
@@ -21,6 +23,8 @@ export function startVerticalReorder({
   const rects = rows.map((row) => row.getBoundingClientRect())
   const draggedRect = rects[draggedIndex]
   const height = draggedRect.height
+  const gap = rows.length > 1 ? Math.max(0, rects[1].top - rects[0].bottom) : 0
+  const displacedOffset = height + gap
   const centers = rects.map((rect) => rect.top + rect.height / 2)
   let targetIndex = draggedIndex
 
@@ -28,8 +32,8 @@ export function startVerticalReorder({
     rows.forEach((row, index) => {
       let offset = 0
       if (index === draggedIndex) offset = dragOffset
-      else if (draggedIndex < index && index <= targetIndex) offset = -height
-      else if (targetIndex <= index && index < draggedIndex) offset = height
+      else if (draggedIndex < index && index <= targetIndex) offset = -displacedOffset
+      else if (targetIndex <= index && index < draggedIndex) offset = displacedOffset
       row.style.transform = `translate3d(0, ${offset}px, 0)`
     })
   }
@@ -64,10 +68,15 @@ export function startVerticalReorder({
 
     window.setTimeout(() => {
       rows.forEach((row) => {
+        row.style.transition = 'none'
         row.style.transform = ''
       })
-      draggedRow.style.transition = ''
-      onDrop(targetIndex)
+      flushSync(() => onDrop(targetIndex))
+      window.requestAnimationFrame(() => {
+        rows.forEach((row) => {
+          row.style.transition = ''
+        })
+      })
     }, 160)
   }
 

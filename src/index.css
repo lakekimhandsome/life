@@ -880,7 +880,8 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 1px;
+  background: var(--line);
 }
 
 .todo-item {
@@ -888,13 +889,9 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
   overflow: hidden;
   border: 0;
   border-radius: 0;
-  background: transparent;
+  background: var(--paper);
   touch-action: pan-y;
   transition: transform 160ms ease, opacity 160ms ease, background 160ms ease;
-}
-
-.todo-item + .todo-item {
-  border-top: 1px solid var(--line);
 }
 
 .todo-item.is-dragging {
@@ -3036,10 +3033,11 @@ select.inline-meta-control {
 .card-edit-list {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 1px;
   margin: 0;
   padding: 0;
   list-style: none;
+  background: var(--line);
 }
 
 .card-edit-row {
@@ -3049,12 +3047,8 @@ select.inline-meta-control {
   padding: 0.7rem 0.1rem;
   border: 0;
   border-radius: 0;
-  background: transparent;
+  background: var(--paper);
   transition: transform 160ms ease, opacity 160ms ease, background 160ms ease;
-}
-
-.card-edit-row + .card-edit-row {
-  border-top: 1px solid var(--line);
 }
 
 .card-edit-row.is-dragging {
@@ -3066,7 +3060,6 @@ select.inline-meta-control {
 }
 
 .card-edit-row.is-excluded {
-  background: transparent;
   opacity: 0.78;
 }
 
