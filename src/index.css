@@ -3107,8 +3107,11 @@ select.inline-meta-control {
 
 .card-edit-action {
   flex-shrink: 0;
-  padding: 0.55rem 0.95rem;
-  font-size: 0.85rem;
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  padding: 0;
 }
 
 html[data-theme='dark'] .user-menu-trigger,
