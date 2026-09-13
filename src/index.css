@@ -2122,7 +2122,7 @@ button.assets-row-title:focus-visible {
 }
 
 .compose {
-  width: min(680px, 100%);
+  width: 100%;
   margin: 0 auto;
 }
 

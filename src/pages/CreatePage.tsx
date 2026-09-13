@@ -4,6 +4,7 @@ import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { ObjectForm } from '../components/object/ObjectForm'
 import { BackLink } from '../components/ui/BackLink'
 import { OBJECT_TYPES, type ObjectType } from '../core/types'
+import { getModuleForObjectType } from '../domain/modules'
 import { getSchema } from '../domain/schemas'
 import { useLife } from '../state/LifeContext'
 import { useT } from '../state/LocaleContext'
@@ -24,12 +25,13 @@ export function CreatePage() {
   }
 
   const schema = getSchema(type)
+  const backTo = getModuleForObjectType(type)?.path ?? '/'
 
   return (
     <div className="compose">
       <div className="compose-header">
         <div className="object-page-toolbar">
-          <BackLink to="/" />
+          <BackLink to={backTo} />
           <div className="object-header-actions">
             <button
               type="submit"
