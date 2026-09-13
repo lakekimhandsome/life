@@ -40,7 +40,7 @@ export function ObjectDetailPage() {
   }, [id, getRelationships])
 
   if (ready && id && !object) {
-    return deleting ? null : <Navigate to="/" replace />
+    return <Navigate to="/" replace />
   }
 
   if (!object) {
@@ -75,9 +75,12 @@ export function ObjectDetailPage() {
     const confirmed = window.confirm(t('detail.deleteConfirm'))
     if (!confirmed) return
     setDeleting(true)
+    navigate(backTo, { replace: true, flushSync: true })
     try {
       await deleteObject(objectId)
-      navigate(backTo)
+    } catch (error) {
+      console.error('Failed to delete object', error)
+      navigate(`/object/${objectId}`, { replace: true })
     } finally {
       setDeleting(false)
     }
