@@ -21,6 +21,7 @@ interface Draft {
 interface InlineMarkdownObjectProps {
   object: LifeObject
   onSaveStateChange: (state: ObjectSaveState) => void
+  onSave?: (draft: Draft) => Promise<void>
 }
 
 function InlineDateInput({
@@ -54,6 +55,7 @@ function InlineDateInput({
 export function InlineMarkdownObject({
   object,
   onSaveStateChange,
+  onSave,
 }: InlineMarkdownObjectProps) {
   const t = useT()
   const { updateObject } = useLife()
@@ -69,6 +71,8 @@ export function InlineMarkdownObject({
   const savingRef = useRef(false)
   const pendingSaveRef = useRef(false)
   const saveTimerRef = useRef<number | null>(null)
+  const onSaveRef = useRef(onSave)
+  onSaveRef.current = onSave
   const [title, setTitle] = useState(object.title)
   const [body, setBody] = useState(object.body)
   const [occurredAt, setOccurredAt] = useState(initialOccurredAt)
@@ -96,12 +100,14 @@ export function InlineMarkdownObject({
 
     let failed = false
     try {
-      await updateObject(object.id, {
-        title: draft.title.trim(),
-        body: draft.body,
-        occurredAt: fromDateInputValue(draft.occurredAt),
-        meta: draft.meta,
-      })
+      const nextDraft = { ...draft, title: draft.title.trim() }
+      if (onSaveRef.current) await onSaveRef.current(nextDraft)
+      else {
+        await updateObject(object.id, {
+          ...nextDraft,
+          occurredAt: fromDateInputValue(nextDraft.occurredAt),
+        })
+      }
       onSaveStateChange('saved')
       setError(null)
     } catch (nextError) {

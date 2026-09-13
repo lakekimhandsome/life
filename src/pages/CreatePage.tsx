@@ -1,11 +1,14 @@
-import { useState } from 'react'
-import { Save } from 'lucide-react'
+import { useRef, useState } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
-import { ObjectForm } from '../components/object/ObjectForm'
+import {
+  InlineMarkdownObject,
+  type ObjectSaveState,
+} from '../components/object/InlineMarkdownObject'
 import { BackLink } from '../components/ui/BackLink'
-import { OBJECT_TYPES, type ObjectType } from '../core/types'
+import { OBJECT_TYPES, type LifeObject, type ObjectType } from '../core/types'
 import { getModuleForObjectType } from '../domain/modules'
-import { getSchema } from '../domain/schemas'
+import { defaultMeta } from '../domain/schemas'
+import { fromDateInputValue } from '../lib/format'
 import { useLife } from '../state/LifeContext'
 import { useT } from '../state/LocaleContext'
 
@@ -17,60 +20,69 @@ export function CreatePage() {
   const t = useT()
   const { type } = useParams()
   const navigate = useNavigate()
-  const { createObject, linkObjects } = useLife()
-  const [saving, setSaving] = useState(false)
+  const { createObject, updateObject } = useLife()
+  const [saveState, setSaveState] = useState<ObjectSaveState>('saved')
+  const createdIdRef = useRef<string | null>(null)
 
   if (!isObjectType(type)) {
     return <Navigate to="/" replace />
   }
 
-  const schema = getSchema(type)
   const backTo = getModuleForObjectType(type)?.path ?? '/'
+  const now = new Date().toISOString()
+  const draft: LifeObject = {
+    id: 'new',
+    type,
+    title: '',
+    body: '',
+    occurredAt: now,
+    createdAt: now,
+    updatedAt: now,
+    meta: defaultMeta(type),
+  }
+  const saveLabel =
+    saveState === 'saving'
+      ? t('clipboard.saving')
+      : saveState === 'error'
+        ? t('clipboard.saveError')
+        : t('clipboard.saved')
 
   return (
-    <div className="compose">
-      <div className="compose-header">
-        <div className="object-page-toolbar">
-          <BackLink to={backTo} />
-          <div className="object-header-actions">
-            <button
-              type="submit"
-              form="create-object-form"
-              className="object-header-action"
-              disabled={saving}
-              aria-label={saving ? t('common.saving') : t('common.save')}
-            >
-              <Save size={20} strokeWidth={1.75} aria-hidden="true" />
-            </button>
-          </div>
+    <article className="detail">
+      <div className="object-page-toolbar">
+        <BackLink to={backTo} />
+        <div className="object-header-actions">
+          <span
+            className={`clipboard-save${saveState === 'error' ? ' is-error' : ''}`}
+            aria-live="polite"
+          >
+            {saveLabel}
+          </span>
         </div>
-        <p className="eyebrow" style={{ color: schema.accent }}>
-          {schema.enLabel}
-        </p>
-        <h1>{t('create.heading', { type: schema.label })}</h1>
-        {schema.description ? <p className="compose-lead">{schema.description}</p> : null}
       </div>
 
-      <ObjectForm
-        type={type}
-        formId="create-object-form"
-        showSubmitButton={false}
-        onSavingChange={setSaving}
-        submitLabel={t('common.save')}
-        onSubmit={async ({ title, body, occurredAt, meta, linkedGoalId }) => {
-          const created = await createObject({
-            type,
+      <InlineMarkdownObject
+        object={draft}
+        onSaveStateChange={setSaveState}
+        onSave={async ({ title, body, occurredAt, meta }) => {
+          const input = {
             title,
             body,
-            occurredAt,
+            occurredAt: fromDateInputValue(occurredAt),
             meta,
-          })
-          if (linkedGoalId) {
-            await linkObjects(created.id, linkedGoalId, 'supports')
           }
-          navigate(`/object/${created.id}`)
+          if (createdIdRef.current) {
+            await updateObject(createdIdRef.current, input)
+            return
+          }
+          const created = await createObject({
+            type,
+            ...input,
+          })
+          createdIdRef.current = created.id
+          navigate(`/object/${created.id}`, { replace: true })
         }}
       />
-    </div>
+    </article>
   )
 }
