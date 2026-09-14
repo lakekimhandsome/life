@@ -119,6 +119,15 @@ function requiredString(value: unknown, field: string) {
   return value.trim()
 }
 
+function objectType(value: unknown) {
+  const type = requiredString(value, 'type')
+  const normalized = type === 'study' ? 'plan' : type
+  if (!OBJECT_TYPES.includes(normalized as typeof OBJECT_TYPES[number])) {
+    throw new Error('Invalid object type')
+  }
+  return normalized
+}
+
 function optionalIso(value: unknown, field: string) {
   if (value === undefined) return undefined
   const text = requiredString(value, field)
@@ -167,8 +176,7 @@ async function rest(path: string, authorization: string, init: RequestInit = {})
 async function findObjects(args: JsonObject, authorization: string) {
   const limit = Math.min(50, Math.max(1, Number(args.limit) || 20))
   const query = typeof args.query === 'string' ? args.query.trim().toLocaleLowerCase() : ''
-  const type = args.type === undefined ? undefined : requiredString(args.type, 'type')
-  if (type && !OBJECT_TYPES.includes(type as typeof OBJECT_TYPES[number])) throw new Error('Invalid object type')
+  const type = args.type === undefined ? undefined : objectType(args.type)
   const before = optionalIso(args.before, 'before')
 
   const params = new URLSearchParams({ select: '*', order: 'occurred_at.desc' })
@@ -196,8 +204,7 @@ async function getObject(args: JsonObject, authorization: string) {
 }
 
 async function createObject(args: JsonObject, authorization: string, userId: string) {
-  const type = requiredString(args.type, 'type')
-  if (!OBJECT_TYPES.includes(type as typeof OBJECT_TYPES[number])) throw new Error('Invalid object type')
+  const type = objectType(args.type)
   const timestamp = new Date().toISOString()
   const row = {
     id: crypto.randomUUID(),
