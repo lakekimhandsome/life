@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Trash2 } from 'lucide-react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import {
@@ -7,7 +7,7 @@ import {
 } from '../components/object/InlineMarkdownObject'
 import { BackLink } from '../components/ui/BackLink'
 import { TypeBadge } from '../components/ui/TypeBadge'
-import type { LifeObject, Relationship } from '../core/types'
+import { ObjectRelations } from '../components/object/ObjectRelations'
 import { getModuleForObjectType } from '../domain/modules'
 import { formatMetaValue, getSchema, supportsMarkdownBody } from '../domain/schemas'
 import { formatDate, formatDateTime, fromDateInputValue } from '../lib/format'
@@ -17,27 +17,12 @@ import { useT } from '../state/LocaleContext'
 export function ObjectDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { ready, getObject, deleteObject, getRelationships } = useLife()
+  const { ready, getObject, deleteObject } = useLife()
   const t = useT()
-  const [relationships, setRelationships] = useState<Relationship[]>([])
   const [saveState, setSaveState] = useState<ObjectSaveState>('saved')
   const [deleting, setDeleting] = useState(false)
 
   const object = id ? getObject(id) : undefined
-
-  useEffect(() => {
-    if (!id) return
-    let active = true
-    setRelationships([])
-    setSaveState('saved')
-    ;(async () => {
-      const next = await getRelationships(id)
-      if (active) setRelationships(next)
-    })()
-    return () => {
-      active = false
-    }
-  }, [id, getRelationships])
 
   if (ready && id && !object) {
     return <Navigate to="/" replace />
@@ -57,13 +42,6 @@ export function ObjectDetailPage() {
       ? object.meta.targetDate
       : null
   const headerDate = object.type === 'goal' ? goalTargetDate : object.occurredAt
-  const related = relationships
-    .map((rel) => {
-      const otherId = rel.sourceId === object.id ? rel.targetId : rel.sourceId
-      const other = getObject(otherId)
-      return other ? { rel, other } : null
-    })
-    .filter((item): item is { rel: Relationship; other: LifeObject } => !!item)
   const saveLabel =
     saveState === 'saving'
       ? t('clipboard.saving')
@@ -168,26 +146,7 @@ export function ObjectDetailPage() {
         </>
       )}
 
-      <section className="detail-relations">
-        <h2>{t('detail.links')}</h2>
-        {related.length === 0 ? (
-          <p className="muted">
-            {t('detail.noLinks')}
-          </p>
-        ) : (
-          <ul className="relation-list">
-            {related.map(({ rel, other }) => (
-              <li key={rel.id}>
-                <Link to={`/object/${other.id}`}>
-                  <TypeBadge type={other.type} />
-                  <span>{other.title}</span>
-                  <em>{rel.kind}</em>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      <ObjectRelations key={object.id} object={object} />
 
       {!supportsMarkdown ? (
         <div className="detail-actions">
