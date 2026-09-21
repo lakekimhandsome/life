@@ -29,7 +29,7 @@ export function ObjectRelations({ object }: { object: LifeObject }) {
   }, [object.id, getRelationships])
 
   const linkedIds = new Set(relationships.flatMap((rel) => [rel.sourceId, rel.targetId]))
-  const candidates = objects.filter((other) => other.id !== object.id && !linkedIds.has(other.id))
+  const candidates = objects.filter((other) => other.type !== 'plan' && other.id !== object.id && !linkedIds.has(other.id))
 
   async function handleLink(event: FormEvent) {
     event.preventDefault()
