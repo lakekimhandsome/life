@@ -1019,8 +1019,6 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
 
 .todo-item.is-done .todo-title {
   color: var(--muted);
-  text-decoration: line-through;
-  text-decoration-thickness: 1px;
 }
 
 .todo-handle {
