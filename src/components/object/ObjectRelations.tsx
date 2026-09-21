@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
+import { Link2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import type { LifeObject, Relationship } from '../../core/types'
 import { getSchema } from '../../domain/schemas'
@@ -78,8 +79,15 @@ export function ObjectRelations({ object }: { object: LifeObject }) {
             </select>
           </div>
           <div className="form-actions">
-            <button type="submit" className="btn btn-primary" disabled={!targetId || saving}>
-              {saving ? t('common.saving') : t('detail.addLink')}
+            <button
+              type="submit"
+              className="object-header-action"
+              disabled={!targetId || saving}
+              aria-label={saving ? t('common.saving') : t('detail.addLink')}
+              title={saving ? t('common.saving') : t('detail.addLink')}
+              aria-busy={saving}
+            >
+              <Link2 size={20} strokeWidth={1.75} aria-hidden="true" />
             </button>
           </div>
         </form>
