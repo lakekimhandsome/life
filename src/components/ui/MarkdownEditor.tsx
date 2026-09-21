@@ -176,11 +176,15 @@ const strikethroughShortcutPlugin = realmPlugin({
 function PlainTextCodeEditor({ code }: CodeBlockEditorProps) {
   const t = useT()
   const { setCode } = useCodeBlockEditorContext()
+  const [draftCode, setDraftCode] = useState(code)
   const [copied, setCopied] = useState(false)
+
+  // Keep external edits (including undo/redo) in sync with the local input.
+  useEffect(() => setDraftCode(code), [code])
 
   async function copyCode() {
     try {
-      await navigator.clipboard.writeText(code)
+      await navigator.clipboard.writeText(draftCode)
       setCopied(true)
       window.setTimeout(() => setCopied(false), 1500)
     } catch {
@@ -192,8 +196,13 @@ function PlainTextCodeEditor({ code }: CodeBlockEditorProps) {
     <div className="inline-code-editor-wrap">
       <textarea
         className="inline-code-editor"
-        value={code}
-        onChange={(event) => setCode(event.target.value)}
+        value={draftCode}
+        onChange={(event) => {
+          // Lexical publishes code later; React needs the new value immediately
+          // to avoid restoring the old value and moving the caret to the end.
+          setDraftCode(event.target.value)
+          setCode(event.target.value)
+        }}
         spellCheck={false}
       />
       <button
