@@ -1,5 +1,6 @@
 import {
   MDXEditor,
+  $createTableNode,
   addComposerChild$,
   realmPlugin,
   codeBlockPlugin,
@@ -22,8 +23,10 @@ import { Check, Copy } from 'lucide-react'
 import {
   $getNearestNodeFromDOMNode,
   $getNodeByKey,
+  $getRoot,
   $getSelection,
   $isRangeSelection,
+  $isParagraphNode,
   COMMAND_PRIORITY_HIGH,
   INDENT_CONTENT_COMMAND,
   KEY_TAB_COMMAND,
@@ -33,6 +36,102 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useT } from '../../state/LocaleContext'
 
 const MAX_SWIPE_DURATION_MS = 500
+
+function splitTableRow(value: string) {
+  const trimmed = value.trim()
+  if (!trimmed.includes('|')) return null
+  const cells = trimmed.replace(/^\|/, '').replace(/\|$/, '').split('|').map((cell) => cell.trim())
+  return cells.length > 1 ? cells : null
+}
+
+function splitTableSeparator(value: string) {
+  const trimmed = value.trim()
+  if (!trimmed.startsWith('|') || !trimmed.endsWith('|')) return null
+  const cells = splitTableRow(trimmed)
+  return cells?.every((cell) => /^:?-{3,}:?$/.test(cell)) ? cells : null
+}
+
+function TableMarkdownShortcutPlugin() {
+  const [editor] = useLexicalComposerContext()
+
+  useEffect(() => editor.registerUpdateListener(({ editorState, tags }) => {
+    if (tags.has('table-markdown-shortcut')) return
+    let match: { headerKey: string; separatorKey: string; rowKeys: string[] } | null = null
+    editorState.read(() => {
+      const paragraphs = $getRoot().getChildren()
+      for (let index = 1; index < paragraphs.length; index += 1) {
+        const header = paragraphs[index - 1]
+        const separator = paragraphs[index]
+        if (!$isParagraphNode(header) || !$isParagraphNode(separator)) continue
+        const headers = splitTableRow(header.getTextContent())
+        const separators = splitTableSeparator(separator.getTextContent())
+        if (
+          headers &&
+          separators &&
+          headers.length === separators.length &&
+          separators
+        ) {
+          const rowKeys: string[] = []
+          for (let rowIndex = index + 1; rowIndex < paragraphs.length; rowIndex += 1) {
+            const row = paragraphs[rowIndex]
+            if (!$isParagraphNode(row) || splitTableRow(row.getTextContent())?.length !== headers.length) break
+            rowKeys.push(row.getKey())
+          }
+          match = { headerKey: header.getKey(), separatorKey: separator.getKey(), rowKeys }
+          break
+        }
+      }
+    })
+    const matched = match as { headerKey: string; separatorKey: string; rowKeys: string[] } | null
+    if (!matched) return
+    const { headerKey, separatorKey, rowKeys } = matched
+
+    editor.update(() => {
+      const header = $getNodeByKey(headerKey)
+      const separator = $getNodeByKey(separatorKey)
+      if (!$isParagraphNode(header) || !$isParagraphNode(separator)) return
+      const headers = splitTableRow(header.getTextContent())
+      const separators = splitTableSeparator(separator.getTextContent())
+      if (!headers || !separators || headers.length !== separators.length) return
+      const rows = rowKeys.flatMap((key) => {
+        const row = $getNodeByKey(key)
+        if (!$isParagraphNode(row)) return []
+        const values = splitTableRow(row.getTextContent())
+        return values?.length === headers.length ? [{ row, values }] : []
+      })
+
+      const table = $createTableNode({
+        type: 'table',
+        align: separators.map((cell) =>
+          cell.startsWith(':') && cell.endsWith(':')
+            ? 'center'
+            : cell.endsWith(':')
+              ? 'right'
+              : 'left',
+        ),
+        children: [headers, ...rows.map(({ values }) => values)].map((values) => ({
+          type: 'tableRow',
+          children: values.map((value) => ({
+            type: 'tableCell',
+            children: value ? [{ type: 'text', value }] : [],
+          })),
+        })),
+      })
+      header.replace(table)
+      separator.remove()
+      rows.forEach(({ row }) => row.remove())
+      window.setTimeout(() => table.select([0, 0]))
+    }, { tag: 'table-markdown-shortcut' })
+  }), [editor])
+
+  return null
+}
+
+const tableMarkdownShortcutPlugin = realmPlugin({
+  init(realm) {
+    realm.pub(addComposerChild$, TableMarkdownShortcutPlugin)
+  },
+})
 
 function ListTabAnywherePlugin() {
   const [editor] = useLexicalComposerContext()
@@ -267,6 +366,7 @@ export function MarkdownEditor({
       thematicBreakPlugin(),
       linkPlugin(),
       tablePlugin(),
+      tableMarkdownShortcutPlugin(),
       codeBlockPlugin({ codeBlockEditorDescriptors: [plainTextCodeEditorDescriptor] }),
       markdownShortcutPlugin(),
       strikethroughShortcutPlugin(),

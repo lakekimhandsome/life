@@ -10,6 +10,7 @@ import '../src/index.css'
 
 export function Check() {
   const [value, setValue] = useState('```\nabcdef\nsecond line\n```')
+  const [tableValue, setTableValue] = useState('')
   const [result, setResult] = useState('Edit the middle of the code block.')
   return <>
     <div onInputCapture={(event) => {
@@ -25,6 +26,10 @@ export function Check() {
     </div>
     <output>{result}</output>
     <pre aria-label="Serialized markdown">{value}</pre>
+    <section aria-label="Table shortcut check">
+      <MarkdownEditor value={tableValue} onChange={setTableValue} />
+      <pre aria-label="Serialized table markdown">{tableValue}</pre>
+    </section>
   </>
 }
 createRoot(document.getElementById('root')!).render(<AuthProvider><LocaleProvider><Check /></LocaleProvider></AuthProvider>)
