@@ -29,7 +29,7 @@ import {
   KEY_TAB_COMMAND,
   OUTDENT_CONTENT_COMMAND,
 } from 'lexical'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useT } from '../../state/LocaleContext'
 
 const MAX_SWIPE_DURATION_MS = 500
@@ -178,6 +178,25 @@ function PlainTextCodeEditor({ code }: CodeBlockEditorProps) {
   const { setCode } = useCodeBlockEditorContext()
   const [draftCode, setDraftCode] = useState(code)
   const [copied, setCopied] = useState(false)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  useLayoutEffect(() => {
+    const textarea = textareaRef.current
+    if (!textarea) return
+    const fitHeight = () => {
+      textarea.style.height = 'auto'
+      textarea.style.height = `${textarea.scrollHeight}px`
+    }
+    fitHeight()
+    let width = textarea.clientWidth
+    const observer = new ResizeObserver(() => {
+      if (textarea.clientWidth === width) return
+      width = textarea.clientWidth
+      fitHeight()
+    })
+    observer.observe(textarea)
+    return () => observer.disconnect()
+  }, [draftCode])
 
   // Keep external edits (including undo/redo) in sync with the local input.
   useEffect(() => setDraftCode(code), [code])
@@ -195,6 +214,7 @@ function PlainTextCodeEditor({ code }: CodeBlockEditorProps) {
   return (
     <div className="inline-code-editor-wrap">
       <textarea
+        ref={textareaRef}
         className="inline-code-editor"
         value={draftCode}
         onChange={(event) => {

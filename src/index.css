@@ -2473,7 +2473,8 @@ select.inline-meta-control {
   display: block;
   width: 100%;
   min-height: 7rem;
-  resize: vertical;
+  resize: none;
+  overflow-y: hidden;
   padding: 0.9rem 4rem 0.9rem 1rem;
   border: 0;
   border-radius: 10px;
