@@ -28,6 +28,7 @@ import {
   type ValuedAsset,
 } from '../domain/assets'
 import { t as translate } from '../i18n'
+import { evaluateArithmetic } from '../lib/arithmetic'
 import { ensureDailyAssetSnapshot } from '../lib/assetHistory'
 import { useLife } from '../state/LifeContext'
 import { useT } from '../state/LocaleContext'
@@ -215,8 +216,8 @@ function AssetRow({
     const value = draft.trim()
 
     if (field === 'quantity') {
-      const nextQuantity = Number(value)
-      if (!Number.isFinite(nextQuantity) || nextQuantity <= 0) {
+      const nextQuantity = evaluateArithmetic(value)
+      if (nextQuantity === null || nextQuantity <= 0) {
         setSaveError(
           isDirectPriceKind(item.kind) ? t('assets.needAmount') : t('assets.needQuantity'),
         )
@@ -342,9 +343,7 @@ function AssetRow({
                 editingField === 'quantity' ? (
                   <input
                     className="assets-inline-input assets-inline-quantity"
-                    type="number"
-                    min={0}
-                    step="any"
+                    inputMode="decimal"
                     value={draft}
                     autoFocus
                     disabled={saving}
@@ -374,9 +373,7 @@ function AssetRow({
             {isDirectPriceKind(item.kind) && editingField === 'quantity' ? (
               <input
                 className="assets-inline-input assets-inline-value"
-                type="number"
-                min={0}
-                step="any"
+                inputMode="decimal"
                 value={draft}
                 autoFocus
                 disabled={saving}
@@ -703,7 +700,7 @@ export function AssetsPage() {
     event.preventDefault()
     const nextSymbol = symbol.trim().toUpperCase()
     const nextTitle = isDirectPriceKind(kind) ? title.trim() : titleFromSymbol(kind, nextSymbol)
-    const nextQuantity = Number(quantity)
+    const nextQuantity = evaluateArithmetic(quantity)
 
     if (isDirectPriceKind(kind) && !nextTitle) {
       setFormError(t('assets.needName'))
@@ -713,7 +710,7 @@ export function AssetsPage() {
       setFormError(kindHint(kind))
       return
     }
-    if (!Number.isFinite(nextQuantity) || nextQuantity <= 0) {
+    if (nextQuantity === null || nextQuantity <= 0) {
       setFormError(isDirectPriceKind(kind) ? t('assets.needAmount') : t('assets.needQuantity'))
       return
     }
@@ -873,9 +870,7 @@ export function AssetsPage() {
                       </label>
                       <input
                         id="asset-quantity"
-                        type="number"
-                        min={0}
-                        step="any"
+                        inputMode="decimal"
                         value={quantity}
                         onChange={(event) => setQuantity(event.target.value)}
                         placeholder="0"
