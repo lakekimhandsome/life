@@ -754,13 +754,6 @@ export function AssetsPage() {
           <h1>{t('modules.assets')}</h1>
         </div>
         <div className="module-header-actions">
-          <Link
-            to="/assets/history"
-            className="module-header-btn"
-            aria-label={t('assets.history')}
-          >
-            <ChartNoAxesCombined size={22} strokeWidth={1.75} aria-hidden="true" />
-          </Link>
           <button
             type="button"
             className="module-header-btn"
@@ -770,6 +763,13 @@ export function AssetsPage() {
           >
             <Plus size={22} strokeWidth={1.75} aria-hidden="true" />
           </button>
+          <Link
+            to="/assets/history"
+            className="module-header-btn"
+            aria-label={t('assets.history')}
+          >
+            <ChartNoAxesCombined size={22} strokeWidth={1.75} aria-hidden="true" />
+          </Link>
         </div>
       </div>
 
