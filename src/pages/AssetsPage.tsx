@@ -4,9 +4,10 @@ import {
   useRef,
   useState,
   type FormEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
   type PointerEvent as ReactPointerEvent,
 } from 'react'
-import { ChartNoAxesCombined, Check, GripVertical, Pencil, Plus, X } from 'lucide-react'
+import { ChartNoAxesCombined, GripVertical, Plus, X } from 'lucide-react'
 import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { AssetsPieChart } from '../components/assets/AssetsPieChart'
@@ -89,18 +90,16 @@ const SWIPE_DELETE_THRESHOLD = 88
 
 function AssetRow({
   item,
-  editing,
   dragging,
   reorderDisabled,
-  onEdit,
+  onUpdate,
   onDelete,
   onReorderStart,
 }: {
   item: ValuedAsset
-  editing: boolean
   dragging: boolean
   reorderDisabled: boolean
-  onEdit: () => void
+  onUpdate: (input: { title?: string; symbol?: string; quantity?: number }) => Promise<void>
   onDelete: () => void
   onReorderStart: (event: ReactPointerEvent<HTMLButtonElement>) => void
 }) {
@@ -113,6 +112,10 @@ function AssetRow({
   const offsetRef = useRef(0)
   const [offset, setOffset] = useState(0)
   const [animating, setAnimating] = useState(false)
+  const [editingField, setEditingField] = useState<'title' | 'quantity' | null>(null)
+  const [draft, setDraft] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
 
   function updateOffset(nextOffset: number) {
     offsetRef.current = nextOffset
@@ -130,7 +133,7 @@ function AssetRow({
   }
 
   function onSwipePointerDown(event: ReactPointerEvent<HTMLDivElement>) {
-    if (!editing || event.button !== 0 || dragging) return
+    if (editingField || event.button !== 0 || dragging) return
     swiping.current = true
     swiped.current = false
     axis.current = 'none'
@@ -193,6 +196,83 @@ function AssetRow({
     updateOffset(0)
   }
 
+  function beginEdit(field: 'title' | 'quantity') {
+    if (swiped.current || saving) return
+    setSaveError(null)
+    setDraft(
+      field === 'quantity'
+        ? String(item.quantity)
+        : isDirectPriceKind(item.kind)
+          ? item.object.title
+          : item.symbol,
+    )
+    setEditingField(field)
+  }
+
+  async function commitEdit() {
+    if (!editingField || saving) return
+    const field = editingField
+    const value = draft.trim()
+
+    if (field === 'quantity') {
+      const nextQuantity = Number(value)
+      if (!Number.isFinite(nextQuantity) || nextQuantity <= 0) {
+        setSaveError(
+          isDirectPriceKind(item.kind) ? t('assets.needAmount') : t('assets.needQuantity'),
+        )
+        return
+      }
+      if (nextQuantity === item.quantity) {
+        setEditingField(null)
+        return
+      }
+      setSaving(true)
+      try {
+        await onUpdate({ quantity: nextQuantity })
+        setEditingField(null)
+      } catch {
+        setSaveError(t('form.saveFailed'))
+      } finally {
+        setSaving(false)
+      }
+      return
+    }
+
+    if (!value) {
+      setSaveError(t('assets.needName'))
+      return
+    }
+    const normalized = isDirectPriceKind(item.kind) ? value : value.toUpperCase()
+    if (normalized === (isDirectPriceKind(item.kind) ? item.object.title : item.symbol)) {
+      setEditingField(null)
+      return
+    }
+    setSaving(true)
+    try {
+      await onUpdate(
+        isDirectPriceKind(item.kind)
+          ? { title: normalized }
+          : { symbol: normalized, title: titleFromSymbol(item.kind, normalized) },
+      )
+      setEditingField(null)
+    } catch {
+      setSaveError(t('form.saveFailed'))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  function onEditKeyDown(event: ReactKeyboardEvent<HTMLInputElement>) {
+    if (event.key === 'Enter') {
+      event.preventDefault()
+      event.currentTarget.blur()
+    }
+    if (event.key === 'Escape') {
+      event.preventDefault()
+      setEditingField(null)
+    }
+  }
+
   return (
     <li
       className={`assets-row${dragging ? ' is-dragging' : ''}`}
@@ -209,70 +289,129 @@ function AssetRow({
         <div className="assets-row-inner">
           <div className="assets-row-main">
             <div className="assets-row-heading">
-              {editing ? (
+              {editingField === 'title' && item.kind === 'commodity' ? (
+                <select
+                  className="assets-inline-input assets-inline-select"
+                  value={draft}
+                  autoFocus
+                  disabled={saving}
+                  onPointerDown={(event) => event.stopPropagation()}
+                  onChange={(event) => {
+                    const next = event.target.value
+                    setDraft(next)
+                    setSaving(true)
+                    void onUpdate({ symbol: next, title: titleFromSymbol(item.kind, next) })
+                      .then(() => setEditingField(null))
+                      .catch(() => setSaveError(t('form.saveFailed')))
+                      .finally(() => setSaving(false))
+                  }}
+                  onBlur={() => {
+                    if (!saving) setEditingField(null)
+                  }}
+                  aria-label={t('assets.editName', { title: item.object.title })}
+                >
+                  {COMMODITY_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {t(option.labelKey)}
+                    </option>
+                  ))}
+                </select>
+              ) : editingField === 'title' ? (
+                <input
+                  className="assets-inline-input assets-inline-title"
+                  value={draft}
+                  autoFocus
+                  disabled={saving}
+                  onChange={(event) => setDraft(event.target.value)}
+                  onBlur={() => void commitEdit()}
+                  onKeyDown={onEditKeyDown}
+                  onPointerDown={(event) => event.stopPropagation()}
+                  aria-label={t('assets.editName', { title: item.object.title })}
+                />
+              ) : (
                 <button
                   type="button"
                   className="assets-row-title"
-                  onClick={() => {
-                    if (swiped.current) return
-                    onEdit()
-                  }}
+                  onClick={() => beginEdit('title')}
+                  aria-label={t('assets.editName', { title: item.object.title })}
                 >
                   {item.object.title}
                 </button>
-              ) : (
-                <span className="assets-row-title">{item.object.title}</span>
               )}
               {!isDirectPriceKind(item.kind) ? (
-                <span className="assets-row-qty">
-                  {formatQuantity(item.kind, item.quantity, item.symbol)}
-                </span>
+                editingField === 'quantity' ? (
+                  <input
+                    className="assets-inline-input assets-inline-quantity"
+                    type="number"
+                    min={0}
+                    step="any"
+                    value={draft}
+                    autoFocus
+                    disabled={saving}
+                    onChange={(event) => setDraft(event.target.value)}
+                    onBlur={() => void commitEdit()}
+                    onKeyDown={onEditKeyDown}
+                    onPointerDown={(event) => event.stopPropagation()}
+                    aria-label={t('assets.editQuantity', { title: item.object.title })}
+                  />
+                ) : (
+                  <button
+                    type="button"
+                    className="assets-row-qty"
+                    onClick={() => beginEdit('quantity')}
+                    aria-label={t('assets.editQuantity', { title: item.object.title })}
+                  >
+                    {formatQuantity(item.kind, item.quantity, item.symbol)}
+                  </button>
+                )
               ) : null}
             </div>
-            {item.error ? <p className="assets-row-error">{item.error}</p> : null}
+            {saveError || item.error ? (
+              <p className="assets-row-error">{saveError ?? item.error}</p>
+            ) : null}
           </div>
           <div className="assets-row-side">
-            <strong>
-              {item.valueKrw !== null ? formatAssetValue(item.kind, item.valueKrw) : '—'}
-            </strong>
-            {editing ? (
-              <div className="assets-row-actions">
-                <button
-                  type="button"
-                  className="assets-row-edit"
-                  onPointerDown={(event) => event.stopPropagation()}
-                  onClick={(event) => {
-                    event.stopPropagation()
-                    onEdit()
-                  }}
-                >
-                  {t('common.edit')}
-                </button>
-                <button
-                  type="button"
-                  className="assets-row-delete"
-                  onPointerDown={(event) => event.stopPropagation()}
-                  onClick={(event) => {
-                    event.stopPropagation()
-                    requestDelete()
-                  }}
-                >
-                  {t('common.delete')}
-                </button>
-                <button
-                  type="button"
-                  className="assets-handle"
-                  aria-label={t('assets.reorder', { title: item.object.title })}
-                  disabled={reorderDisabled}
-                  onPointerDown={(event) => {
-                    event.stopPropagation()
-                    onReorderStart(event)
-                  }}
-                >
-                  <GripVertical size={16} strokeWidth={2} aria-hidden="true" />
-                </button>
-              </div>
-            ) : null}
+            {isDirectPriceKind(item.kind) && editingField === 'quantity' ? (
+              <input
+                className="assets-inline-input assets-inline-value"
+                type="number"
+                min={0}
+                step="any"
+                value={draft}
+                autoFocus
+                disabled={saving}
+                onChange={(event) => setDraft(event.target.value)}
+                onBlur={() => void commitEdit()}
+                onKeyDown={onEditKeyDown}
+                onPointerDown={(event) => event.stopPropagation()}
+                aria-label={t('assets.editAmount', { title: item.object.title })}
+              />
+            ) : isDirectPriceKind(item.kind) ? (
+              <button
+                type="button"
+                className="assets-row-value"
+                onClick={() => beginEdit('quantity')}
+                aria-label={t('assets.editAmount', { title: item.object.title })}
+              >
+                {item.valueKrw !== null ? formatAssetValue(item.kind, item.valueKrw) : '—'}
+              </button>
+            ) : (
+              <strong>
+                {item.valueKrw !== null ? formatAssetValue(item.kind, item.valueKrw) : '—'}
+              </strong>
+            )}
+            <button
+              type="button"
+              className="assets-handle"
+              aria-label={t('assets.reorder', { title: item.object.title })}
+              disabled={reorderDisabled || editingField !== null}
+              onPointerDown={(event) => {
+                event.stopPropagation()
+                onReorderStart(event)
+              }}
+            >
+              <GripVertical size={16} strokeWidth={2} aria-hidden="true" />
+            </button>
           </div>
         </div>
         <div className="assets-swipe-action" aria-hidden="true">
@@ -297,8 +436,6 @@ export function AssetsPage() {
   const [priceError, setPriceError] = useState<string | null>(null)
 
   const [composerOpen, setComposerOpen] = useState(false)
-  const [editingMode, setEditingMode] = useState(false)
-  const [editingId, setEditingId] = useState<string | null>(null)
   const [title, setTitle] = useState('')
   const [kind, setKind] = useState<AssetKind>('cash')
   const [symbol, setSymbol] = useState('KRW')
@@ -433,7 +570,6 @@ export function AssetsPage() {
   }, [items])
 
   function resetComposer() {
-    setEditingId(null)
     setTitle('')
     setQuantity('')
     setKind('cash')
@@ -446,20 +582,23 @@ export function AssetsPage() {
     setComposerOpen(true)
   }
 
-  function openEditor(item: ValuedAsset) {
-    setEditingId(item.object.id)
-    setTitle(item.object.title)
-    setKind(item.kind)
-    setSymbol(item.symbol)
-    setQuantity(String(item.quantity))
-    setFormError(null)
-    setComposerOpen(true)
-  }
-
   function closeComposer() {
     setComposerOpen(false)
-    setEditingId(null)
     setFormError(null)
+  }
+
+  async function updateAsset(
+    item: ValuedAsset,
+    input: { title?: string; symbol?: string; quantity?: number },
+  ) {
+    await updateObject(item.object.id, {
+      title: input.title ?? item.object.title,
+      meta: {
+        ...item.object.meta,
+        symbol: input.symbol ?? item.symbol,
+        quantity: input.quantity ?? item.quantity,
+      },
+    })
   }
 
   async function persistOrder(next: ValuedAsset[]) {
@@ -582,42 +721,22 @@ export function AssetsPage() {
     setSaving(true)
     setFormError(null)
     try {
-      if (editingId) {
-        const existing = assets.find((asset) => asset.id === editingId)
-        await updateObject(editingId, {
-          title: nextTitle,
-          meta: {
-            ...(existing?.meta ?? {}),
-            kind,
-            symbol: nextSymbol,
-            quantity: nextQuantity,
-            order:
-              typeof existing?.meta.order === 'number'
-                ? existing.meta.order
-                : assets.reduce((max, asset) => {
-                    const value = typeof asset.meta.order === 'number' ? asset.meta.order : -1
-                    return Math.max(max, value)
-                  }, -1) + 1,
-          },
-        })
-      } else {
-        const nextOrder =
-          assets.reduce((max, asset) => {
-            const value = typeof asset.meta.order === 'number' ? asset.meta.order : -1
-            return Math.max(max, value)
-          }, -1) + 1
+      const nextOrder =
+        assets.reduce((max, asset) => {
+          const value = typeof asset.meta.order === 'number' ? asset.meta.order : -1
+          return Math.max(max, value)
+        }, -1) + 1
 
-        await createObject({
-          type: 'asset',
-          title: nextTitle,
-          meta: {
-            kind,
-            symbol: nextSymbol,
-            quantity: nextQuantity,
-            order: nextOrder,
-          },
-        })
-      }
+      await createObject({
+        type: 'asset',
+        title: nextTitle,
+        meta: {
+          kind,
+          symbol: nextSymbol,
+          quantity: nextQuantity,
+          order: nextOrder,
+        },
+      })
       resetComposer()
       setComposerOpen(false)
     } catch (error) {
@@ -651,20 +770,6 @@ export function AssetsPage() {
           >
             <Plus size={22} strokeWidth={1.75} aria-hidden="true" />
           </button>
-          <button
-            type="button"
-            className="module-header-btn"
-            onClick={() => setEditingMode((value) => !value)}
-            disabled={!ready}
-            aria-label={editingMode ? t('assets.editDone') : t('assets.edit')}
-            aria-pressed={editingMode}
-          >
-            {editingMode ? (
-              <Check size={22} strokeWidth={1.75} aria-hidden="true" />
-            ) : (
-              <Pencil size={22} strokeWidth={1.75} aria-hidden="true" />
-            )}
-          </button>
         </div>
       </div>
 
@@ -685,7 +790,7 @@ export function AssetsPage() {
                 aria-labelledby="assets-modal-title"
               >
                 <header className="assets-composer-header">
-                  <h2 id="assets-modal-title">{editingId ? t('assets.editItem') : t('assets.add')}</h2>
+                  <h2 id="assets-modal-title">{t('assets.add')}</h2>
                   <button
                     type="button"
                     className="assets-composer-close"
@@ -864,10 +969,9 @@ export function AssetsPage() {
                   <AssetRow
                     key={item.object.id}
                     item={item}
-                    editing={editingMode}
                     dragging={dragId === item.object.id}
                     reorderDisabled={dragKind !== null && dragKind !== group.kind}
-                    onEdit={() => openEditor(item)}
+                    onUpdate={(input) => updateAsset(item, input)}
                     onDelete={() => void deleteObject(item.object.id)}
                     onReorderStart={(event) =>
                       onReorderStart(group.kind, item.object.id, event)
