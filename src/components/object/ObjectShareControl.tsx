@@ -28,10 +28,10 @@ export function ObjectShareControl({ object }: { object: LifeObject }) {
   async function shareLink() {
     if (!object.shareToken) return
     const url = new URL(`/share/${object.shareToken}`, window.location.origin)
-    const shareText = `Lake's Interface For Everything\n\n${url}`
+    const shareText = "Lake's Interface For Everything"
     try {
       if (navigator.share) {
-        await navigator.share({ text: shareText })
+        await navigator.share({ text: shareText, url: url.toString() })
         setError(null)
         return
       }
