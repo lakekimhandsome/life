@@ -20,6 +20,7 @@ interface Draft {
 
 interface InlineMarkdownObjectProps {
   object: LifeObject
+  saveState: ObjectSaveState
   onSaveStateChange: (state: ObjectSaveState) => void
   onSave?: (draft: Draft) => Promise<void>
 }
@@ -54,6 +55,7 @@ function InlineDateInput({
 
 export function InlineMarkdownObject({
   object,
+  saveState,
   onSaveStateChange,
   onSave,
 }: InlineMarkdownObjectProps) {
@@ -184,6 +186,12 @@ export function InlineMarkdownObject({
     object.type === 'goal' && typeof meta.targetDate === 'string' && meta.targetDate
       ? meta.targetDate
       : null
+  const saveLabel =
+    saveState === 'saving'
+      ? t('clipboard.saving')
+      : saveState === 'error'
+        ? t('clipboard.saveError')
+        : t('clipboard.saved')
 
   return (
     <>
@@ -205,6 +213,12 @@ export function InlineMarkdownObject({
               includeTime
             />
           )}
+          <span
+            className={`clipboard-save${saveState === 'error' ? ' is-error' : ''}`}
+            aria-live="polite"
+          >
+            {saveLabel}
+          </span>
         </div>
         <input
           className="inline-title-input"

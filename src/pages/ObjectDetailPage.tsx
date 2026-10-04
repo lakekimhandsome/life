@@ -44,13 +44,6 @@ export function ObjectDetailPage() {
       ? object.meta.targetDate
       : null
   const headerDate = object.type === 'goal' ? goalTargetDate : object.occurredAt
-  const saveLabel =
-    saveState === 'saving'
-      ? t('clipboard.saving')
-      : saveState === 'error'
-        ? t('clipboard.saveError')
-        : t('clipboard.saved')
-
   async function handleDelete() {
     const confirmed = window.confirm(t('detail.deleteConfirm'))
     if (!confirmed) return
@@ -72,12 +65,6 @@ export function ObjectDetailPage() {
         <BackLink to={backTo} />
         {supportsMarkdown ? (
           <div className="object-header-actions">
-            <span
-              className={`clipboard-save${saveState === 'error' ? ' is-error' : ''}`}
-              aria-live="polite"
-            >
-              {saveLabel}
-            </span>
             {isShareableObjectType(object.type) ? (
               <ObjectShareControl object={object} />
             ) : null}
@@ -98,6 +85,7 @@ export function ObjectDetailPage() {
         <InlineMarkdownObject
           key={object.id}
           object={object}
+          saveState={saveState}
           onSaveStateChange={setSaveState}
         />
       ) : (

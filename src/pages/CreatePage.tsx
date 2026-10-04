@@ -10,14 +10,12 @@ import { getModuleForObjectType } from '../domain/modules'
 import { defaultMeta } from '../domain/schemas'
 import { fromDateInputValue } from '../lib/format'
 import { useLife } from '../state/LifeContext'
-import { useT } from '../state/LocaleContext'
 
 function isObjectType(value: string | undefined): value is ObjectType {
   return !!value && (OBJECT_TYPES as readonly string[]).includes(value)
 }
 
 export function CreatePage() {
-  const t = useT()
   const { type } = useParams()
   const { createObject, updateObject } = useLife()
   const [saveState, setSaveState] = useState<ObjectSaveState>('saved')
@@ -41,29 +39,15 @@ export function CreatePage() {
     shareToken: null,
     meta: defaultMeta(type),
   }
-  const saveLabel =
-    saveState === 'saving'
-      ? t('clipboard.saving')
-      : saveState === 'error'
-        ? t('clipboard.saveError')
-        : t('clipboard.saved')
-
   return (
     <article className="detail">
       <div className="object-page-toolbar">
         <BackLink to={backTo} />
-        <div className="object-header-actions">
-          <span
-            className={`clipboard-save${saveState === 'error' ? ' is-error' : ''}`}
-            aria-live="polite"
-          >
-            {saveLabel}
-          </span>
-        </div>
       </div>
 
       <InlineMarkdownObject
         object={draft}
+        saveState={saveState}
         onSaveStateChange={setSaveState}
         onSave={async ({ title, body, occurredAt, meta }) => {
           const input = {
