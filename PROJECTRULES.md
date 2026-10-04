@@ -9,7 +9,7 @@ LIFE는 일정 앱이 아니다.
 LIFE는 운동 기록 앱이 아니다.
 LIFE는 가계부가 아니다.
 
-LIFE는 사용자의 삶 전체를 하나의 시스템으로 관리하는 **Personal Life OS**이다.
+LIFE는 사용자의 삶 전체를 하나의 시스템으로 관리하는 **Lake's Interface For Everything**이다.
 
 운동, 계획, 자산, 프로젝트, 일정, 일기, 메모는 모두 LIFE의 기능(Module)일 뿐이며, 각각이 독립적인 앱처럼 존재해서는 안 된다.
 

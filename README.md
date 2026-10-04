@@ -1,6 +1,6 @@
 # LIFE
 
-Personal Life OS — 일기, 프로젝트, 운동, 계획, 목표, 자산을 **하나의 Object + Relationship 구조**로 관리합니다.
+Lake's Interface For Everything — 일기, 프로젝트, 운동, 계획, 목표, 자산을 **하나의 Object + Relationship 구조**로 관리합니다.
 
 ## 실행
 

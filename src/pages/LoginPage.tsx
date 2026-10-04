@@ -48,7 +48,7 @@ export function LoginPage() {
       <div className="atmosphere" aria-hidden="true" />
       <div className="login-card">
         <p className="login-brand">LIFE</p>
-        <h1 className="login-title">Personal Life OS</h1>
+        <h1 className="login-title">Lake&apos;s Interface For Everything</h1>
         <p className="login-copy">{t('login.copy')}</p>
 
         {!configured ? (

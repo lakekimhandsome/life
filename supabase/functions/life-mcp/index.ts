@@ -349,7 +349,7 @@ Deno.serve(async (req) => {
       protocolVersion: '2025-11-25',
       capabilities: { tools: { listChanged: false } },
       serverInfo: { name: 'life', version: '1.0.0' },
-      instructions: 'Use LIFE as the user’s connected Personal Life OS. Read before writing when identity is ambiguous. Preserve links between related objects. Never invent stored facts.',
+      instructions: 'Use LIFE as the user’s connected Lake\'s Interface For Everything. Read before writing when identity is ambiguous. Preserve links between related objects. Never invent stored facts.',
     })
   }
   if (request.method === 'ping') return rpc(id, {})

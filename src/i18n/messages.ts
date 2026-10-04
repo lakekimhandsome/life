@@ -1,6 +1,6 @@
 export const en = {
   'meta.description':
-    'LIFE — Personal Life OS. Journal, projects, workouts, plans, and goals in one system.',
+    'LIFE — Lake\'s Interface For Everything. Journal, projects, workouts, plans, and goals in one system.',
 
   'common.home': 'Home',
   'common.back': 'Back',
@@ -351,7 +351,7 @@ export type MessageKey = keyof typeof en
 
 export const ko: Record<MessageKey, string> = {
   'meta.description':
-    'LIFE — Personal Life OS. 일기, 프로젝트, 운동, 계획, 목표를 하나의 시스템으로.',
+    'LIFE — Lake\'s Interface For Everything. 일기, 프로젝트, 운동, 계획, 목표를 하나의 시스템으로.',
 
   'common.home': '홈',
   'common.back': '뒤로',
