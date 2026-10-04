@@ -1,4 +1,4 @@
-import { Copy, Link2 } from 'lucide-react'
+import { Link2, Share2 } from 'lucide-react'
 import { useState } from 'react'
 import type { LifeObject, ObjectVisibility } from '../../core/types'
 import { useLife } from '../../state/LifeContext'
@@ -25,19 +25,26 @@ export function ObjectShareControl({ object }: { object: LifeObject }) {
     }
   }
 
-  async function copyLink() {
-    if (!object.shareToken || !navigator.clipboard?.writeText) {
-      setError(t('share.copyFailed'))
-      return
-    }
-
+  async function shareLink() {
+    if (!object.shareToken) return
+    const url = new URL(`/share/${object.shareToken}`, window.location.origin)
     try {
-      const url = new URL(`/share/${object.shareToken}`, window.location.origin)
+      if (navigator.share) {
+        await navigator.share({
+          title: object.title,
+          text: t('share.unlistedHint'),
+          url: url.toString(),
+        })
+        setError(null)
+        return
+      }
+
       await navigator.clipboard.writeText(url.toString())
       setCopied(true)
       setError(null)
-    } catch {
-      setError(t('share.copyFailed'))
+    } catch (nextError) {
+      if (nextError instanceof DOMException && nextError.name === 'AbortError') return
+      setError(t('share.shareFailed'))
     }
   }
 
@@ -63,11 +70,11 @@ export function ObjectShareControl({ object }: { object: LifeObject }) {
         <button
           type="button"
           className="object-header-action"
-          aria-label={t('share.copyLink')}
-          title={t('share.copyLink')}
-          onClick={() => void copyLink()}
+          aria-label={t('share.shareLink')}
+          title={t('share.shareLink')}
+          onClick={() => void shareLink()}
         >
-          <Copy size={18} strokeWidth={1.75} aria-hidden="true" />
+          <Share2 size={18} strokeWidth={1.75} aria-hidden="true" />
         </button>
       ) : null}
 
