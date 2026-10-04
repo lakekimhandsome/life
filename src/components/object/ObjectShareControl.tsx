@@ -39,6 +39,7 @@ export function ObjectShareControl({ object }: { object: LifeObject }) {
 
       await navigator.clipboard.writeText(url.toString())
       setCopied(true)
+      window.setTimeout(() => setCopied(false), 1500)
       setError(null)
     } catch (nextError) {
       if (nextError instanceof DOMException && nextError.name === 'AbortError') return
@@ -57,6 +58,7 @@ export function ObjectShareControl({ object }: { object: LifeObject }) {
       const url = new URL(`/share/${object.shareToken}`, window.location.origin)
       await navigator.clipboard.writeText(url.toString())
       setCopied(true)
+      window.setTimeout(() => setCopied(false), 1500)
       setError(null)
     } catch {
       setError(t('share.copyFailed'))
