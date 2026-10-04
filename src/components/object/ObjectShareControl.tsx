@@ -36,7 +36,7 @@ export function ObjectShareControl({ object }: { object: LifeObject }) {
         return
       }
 
-      await navigator.clipboard.writeText(shareText)
+      await navigator.clipboard.writeText(url.toString())
       setCopied(true)
       setError(null)
     } catch (nextError) {
