@@ -1,4 +1,4 @@
-import { Link2, Share2 } from 'lucide-react'
+import { Check, Link2, Share2 } from 'lucide-react'
 import { useState } from 'react'
 import type { LifeObject, ObjectVisibility } from '../../core/types'
 import { useLife } from '../../state/LifeContext'
@@ -47,6 +47,7 @@ export function ObjectShareControl({ object }: { object: LifeObject }) {
   }
 
   async function copyLink() {
+    setCopied(false)
     if (!object.shareToken || !navigator.clipboard?.writeText) {
       setError(t('share.copyFailed'))
       return
@@ -84,11 +85,15 @@ export function ObjectShareControl({ object }: { object: LifeObject }) {
           <button
             type="button"
             className="object-header-action"
-            aria-label={t('share.copyLink')}
-            title={t('share.copyLink')}
+            aria-label={copied ? t('share.copied') : t('share.copyLink')}
+            title={copied ? t('share.copied') : t('share.copyLink')}
             onClick={() => void copyLink()}
           >
-            <Link2 size={18} strokeWidth={1.75} aria-hidden="true" />
+            {copied ? (
+              <Check size={18} strokeWidth={1.75} aria-hidden="true" />
+            ) : (
+              <Link2 size={18} strokeWidth={1.75} aria-hidden="true" />
+            )}
           </button>
           <button
             type="button"
@@ -103,7 +108,7 @@ export function ObjectShareControl({ object }: { object: LifeObject }) {
       ) : null}
 
       <span
-        className={`object-share-feedback${error ? ' is-error' : ''}`}
+        className={error ? 'object-share-feedback is-error' : 'sr-only'}
         aria-live="polite"
       >
         {error ?? (copied ? t('share.copied') : '')}
