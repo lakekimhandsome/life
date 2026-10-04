@@ -1,4 +1,4 @@
-import { Share2 } from 'lucide-react'
+import { Link2, Share2 } from 'lucide-react'
 import { useState } from 'react'
 import type { LifeObject, ObjectVisibility } from '../../core/types'
 import { useLife } from '../../state/LifeContext'
@@ -28,10 +28,11 @@ export function ObjectShareControl({ object }: { object: LifeObject }) {
   async function shareLink() {
     if (!object.shareToken) return
     const url = new URL(`/share/${object.shareToken}`, window.location.origin)
-    const shareText = "Lake's Interface For Everything"
+    const shareText = `Lake's Interface For Everything\n\n${object.title}\n${url}`
+    setCopied(false)
     try {
       if (navigator.share) {
-        await navigator.share({ text: shareText, url: url.toString() })
+        await navigator.share({ text: shareText })
         setError(null)
         return
       }
@@ -42,6 +43,22 @@ export function ObjectShareControl({ object }: { object: LifeObject }) {
     } catch (nextError) {
       if (nextError instanceof DOMException && nextError.name === 'AbortError') return
       setError(t('share.shareFailed'))
+    }
+  }
+
+  async function copyLink() {
+    if (!object.shareToken || !navigator.clipboard?.writeText) {
+      setError(t('share.copyFailed'))
+      return
+    }
+
+    try {
+      const url = new URL(`/share/${object.shareToken}`, window.location.origin)
+      await navigator.clipboard.writeText(url.toString())
+      setCopied(true)
+      setError(null)
+    } catch {
+      setError(t('share.copyFailed'))
     }
   }
 
@@ -63,15 +80,26 @@ export function ObjectShareControl({ object }: { object: LifeObject }) {
       </label>
 
       {object.visibility === 'unlisted' && object.shareToken ? (
-        <button
-          type="button"
-          className="object-header-action"
-          aria-label={t('share.shareLink')}
-          title={t('share.shareLink')}
-          onClick={() => void shareLink()}
-        >
-          <Share2 size={18} strokeWidth={1.75} aria-hidden="true" />
-        </button>
+        <>
+          <button
+            type="button"
+            className="object-header-action"
+            aria-label={t('share.copyLink')}
+            title={t('share.copyLink')}
+            onClick={() => void copyLink()}
+          >
+            <Link2 size={18} strokeWidth={1.75} aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            className="object-header-action"
+            aria-label={t('share.shareLink')}
+            title={t('share.shareLink')}
+            onClick={() => void shareLink()}
+          >
+            <Share2 size={18} strokeWidth={1.75} aria-hidden="true" />
+          </button>
+        </>
       ) : null}
 
       <span
