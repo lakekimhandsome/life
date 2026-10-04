@@ -14,6 +14,7 @@ import { ModulePage } from './pages/ModulePage'
 import { ObjectDetailPage } from './pages/ObjectDetailPage'
 import { OAuthConsentDemoPage, OAuthConsentPage } from './pages/OAuthConsentPage'
 import { SettingsPage } from './pages/SettingsPage'
+import { SharedObjectPage } from './pages/SharedObjectPage'
 import { PlansPage } from './pages/PlansPage'
 import { AuthProvider } from './state/AuthContext'
 import { LifeProvider } from './state/LifeContext'
@@ -34,6 +35,7 @@ export default function App() {
                   <Route path="auth/callback" element={<AuthCallbackPage />} />
                   <Route path="oauth/consent" element={<OAuthConsentPage />} />
                   <Route path="oauth/demo" element={<OAuthConsentDemoPage />} />
+                  <Route path="share/:token" element={<SharedObjectPage />} />
                   <Route element={<RequireAuth />}>
                     <Route element={<AppShell />}>
                       <Route index element={<HomePage />} />

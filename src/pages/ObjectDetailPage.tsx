@@ -8,6 +8,8 @@ import {
 import { BackLink } from '../components/ui/BackLink'
 import { TypeBadge } from '../components/ui/TypeBadge'
 import { ObjectRelations } from '../components/object/ObjectRelations'
+import { ObjectShareControl } from '../components/object/ObjectShareControl'
+import { isShareableObjectType } from '../core/types'
 import { getModuleForObjectType } from '../domain/modules'
 import { formatMetaValue, getSchema, supportsMarkdownBody } from '../domain/schemas'
 import { formatDate, formatDateTime, fromDateInputValue } from '../lib/format'
@@ -76,6 +78,9 @@ export function ObjectDetailPage() {
             >
               {saveLabel}
             </span>
+            {isShareableObjectType(object.type) ? (
+              <ObjectShareControl object={object} />
+            ) : null}
             <button
               type="button"
               className="object-header-action"

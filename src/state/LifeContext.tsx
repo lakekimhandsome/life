@@ -125,6 +125,7 @@ export function LifeProvider({ children }: { children: ReactNode }) {
         title: input.title?.trim() ?? previous.title,
         body: input.body !== undefined ? input.body.trim() : previous.body,
         occurredAt: input.occurredAt ?? previous.occurredAt,
+        visibility: input.visibility ?? previous.visibility,
         meta: input.meta ?? previous.meta,
         updatedAt: new Date().toISOString(),
       }

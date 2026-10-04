@@ -4,6 +4,7 @@ import {
   relationshipToRow,
   rowToObject,
   rowToRelationship,
+  rowToSharedObject,
 } from '../lib/database'
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
 import { t } from '../i18n'
@@ -13,6 +14,7 @@ import type {
   ObjectType,
   Relationship,
   RelationshipKind,
+  SharedLifeObject,
   UpdateObjectInput,
 } from './types'
 
@@ -83,6 +85,8 @@ export async function createObject(input: CreateObjectInput): Promise<LifeObject
     occurredAt: input.occurredAt ?? timestamp,
     createdAt: timestamp,
     updatedAt: timestamp,
+    visibility: 'private',
+    shareToken: null,
     meta: input.meta ?? {},
   }
 
@@ -106,18 +110,37 @@ export async function updateObject(
     title: input.title?.trim() ?? existing.title,
     body: input.body !== undefined ? input.body.trim() : existing.body,
     occurredAt: input.occurredAt ?? existing.occurredAt,
+    visibility: input.visibility ?? existing.visibility,
     meta: input.meta ?? existing.meta,
     updatedAt: nowIso(),
   }
 
   const userId = await requireUserId()
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('life_objects')
     .update(objectToRow(next, userId))
     .eq('user_id', userId)
     .eq('id', id)
+    .select('*')
+    .maybeSingle()
   if (error) throw error
-  return next
+  return data ? rowToObject(data) : undefined
+}
+
+export async function getSharedObject(token: string): Promise<SharedLifeObject | undefined> {
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(token)) {
+    return undefined
+  }
+
+  if (!isSupabaseConfigured()) {
+    throw new Error(t('error.noSupabase'))
+  }
+
+  const { data, error } = await supabase.rpc('get_shared_life_object', {
+    p_share_token: token,
+  })
+  if (error) throw error
+  return data?.[0] ? rowToSharedObject(data[0]) : undefined
 }
 
 export async function deleteObject(id: string): Promise<void> {

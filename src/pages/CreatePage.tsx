@@ -37,6 +37,8 @@ export function CreatePage() {
     occurredAt: now,
     createdAt: now,
     updatedAt: now,
+    visibility: 'private',
+    shareToken: null,
     meta: defaultMeta(type),
   }
   const saveLabel =

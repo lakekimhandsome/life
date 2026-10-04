@@ -4,6 +4,7 @@ const MCP_URL = `${SUPABASE_URL}/functions/v1/life-mcp`
 const AUTH_ISSUER = `${SUPABASE_URL}/auth/v1`
 const OBJECT_TYPES = ['journal', 'project', 'note', 'workout', 'plan', 'goal', 'asset'] as const
 const RELATIONSHIP_KINDS = ['related', 'supports', 'part_of'] as const
+const OBJECT_COLUMNS = 'id,type,title,body,occurred_at,created_at,updated_at,meta,visibility'
 
 type JsonObject = Record<string, unknown>
 type Tool = {
@@ -179,7 +180,7 @@ async function findObjects(args: JsonObject, authorization: string) {
   const type = args.type === undefined ? undefined : objectType(args.type)
   const before = optionalIso(args.before, 'before')
 
-  const params = new URLSearchParams({ select: '*', order: 'occurred_at.desc' })
+  const params = new URLSearchParams({ select: OBJECT_COLUMNS, order: 'occurred_at.desc' })
   if (type) params.set('type', `eq.${type}`)
   if (before) params.set('occurred_at', `lt.${before}`)
   // ponytail: client-side search caps at 1,000 personal objects; add Postgres FTS when an account exceeds that.
@@ -193,7 +194,7 @@ async function findObjects(args: JsonObject, authorization: string) {
 
 async function getObject(args: JsonObject, authorization: string) {
   const id = requiredString(args.id, 'id')
-  const objectParams = new URLSearchParams({ select: '*', id: `eq.${id}`, limit: '1' })
+  const objectParams = new URLSearchParams({ select: OBJECT_COLUMNS, id: `eq.${id}`, limit: '1' })
   const objects = await rest(`life_objects?${objectParams}`, authorization)
   if (!objects.length) throw new Error('LIFE object not found')
   const relationships = await rest('life_relationships?select=*&order=created_at.desc', authorization)
@@ -217,7 +218,8 @@ async function createObject(args: JsonObject, authorization: string, userId: str
     updated_at: timestamp,
     meta: optionalMeta(args.meta) ?? {},
   }
-  return (await rest('life_objects', authorization, {
+  const params = new URLSearchParams({ select: OBJECT_COLUMNS })
+  return (await rest(`life_objects?${params}`, authorization, {
     method: 'POST',
     headers: { Prefer: 'return=representation' },
     body: JSON.stringify(row),
@@ -235,7 +237,7 @@ async function updateObject(args: JsonObject, authorization: string) {
   if (args.occurredAt !== undefined) patch.occurred_at = optionalIso(args.occurredAt, 'occurredAt')
   if (args.meta !== undefined) patch.meta = optionalMeta(args.meta)
   if (Object.keys(patch).length === 1) throw new Error('Provide at least one field to update')
-  const params = new URLSearchParams({ id: `eq.${id}` })
+  const params = new URLSearchParams({ select: OBJECT_COLUMNS, id: `eq.${id}` })
   const rows = await rest(`life_objects?${params}`, authorization, {
     method: 'PATCH',
     headers: { Prefer: 'return=representation' },
@@ -247,7 +249,7 @@ async function updateObject(args: JsonObject, authorization: string) {
 
 async function deleteObject(args: JsonObject, authorization: string) {
   const id = requiredString(args.id, 'id')
-  const params = new URLSearchParams({ id: `eq.${id}` })
+  const params = new URLSearchParams({ select: OBJECT_COLUMNS, id: `eq.${id}` })
   const rows = await rest(`life_objects?${params}`, authorization, {
     method: 'DELETE',
     headers: { Prefer: 'return=representation' },

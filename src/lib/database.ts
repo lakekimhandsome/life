@@ -1,9 +1,29 @@
-import type { LifeObject, ObjectType, Relationship, RelationshipKind } from '../core/types'
+import type {
+  LifeObject,
+  ObjectType,
+  ObjectVisibility,
+  Relationship,
+  RelationshipKind,
+  SharedLifeObject,
+  ShareableObjectType,
+} from '../core/types'
 
 export type LifeObjectRow = {
   id: string
   user_id: string
   type: ObjectType
+  title: string
+  body: string
+  occurred_at: string
+  created_at: string
+  updated_at: string
+  visibility: ObjectVisibility
+  share_token: string | null
+  meta: LifeObject['meta']
+}
+
+export type SharedLifeObjectRow = {
+  type: ShareableObjectType
   title: string
   body: string
   occurred_at: string
@@ -101,7 +121,12 @@ export type Database = {
       }
     }
     Views: Record<string, never>
-    Functions: Record<string, never>
+    Functions: {
+      get_shared_life_object: {
+        Args: { p_share_token: string }
+        Returns: SharedLifeObjectRow[]
+      }
+    }
     Enums: Record<string, never>
     CompositeTypes: Record<string, never>
   }
@@ -110,6 +135,20 @@ export type Database = {
 export function rowToObject(row: LifeObjectRow): LifeObject {
   return {
     id: row.id,
+    type: row.type,
+    title: row.title,
+    body: row.body,
+    occurredAt: row.occurred_at,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    visibility: row.visibility,
+    shareToken: row.share_token,
+    meta: row.meta ?? {},
+  }
+}
+
+export function rowToSharedObject(row: SharedLifeObjectRow): SharedLifeObject {
+  return {
     type: row.type,
     title: row.title,
     body: row.body,
@@ -130,6 +169,8 @@ export function objectToRow(object: LifeObject, userId: string): LifeObjectRow {
     occurred_at: object.occurredAt,
     created_at: object.createdAt,
     updated_at: object.updatedAt,
+    visibility: object.visibility,
+    share_token: object.shareToken,
     meta: object.meta,
   }
 }
