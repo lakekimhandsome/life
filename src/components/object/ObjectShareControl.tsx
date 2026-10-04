@@ -1,4 +1,4 @@
-import { Link2, Share2 } from 'lucide-react'
+import { Share2 } from 'lucide-react'
 import { useState } from 'react'
 import type { LifeObject, ObjectVisibility } from '../../core/types'
 import { useLife } from '../../state/LifeContext'
@@ -48,7 +48,6 @@ export function ObjectShareControl({ object }: { object: LifeObject }) {
   return (
     <div className="object-share-control">
       <label className="object-visibility-field">
-        <Link2 size={16} aria-hidden="true" />
         <span className="sr-only">{t('share.visibility')}</span>
         <select
           value={object.visibility}
