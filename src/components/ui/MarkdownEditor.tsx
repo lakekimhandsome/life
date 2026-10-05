@@ -25,12 +25,15 @@ import {
   $getNodeByKey,
   $getRoot,
   $getSelection,
+  $setSelection,
+  $isElementNode,
   $isRangeSelection,
   $isParagraphNode,
   COMMAND_PRIORITY_HIGH,
   INDENT_CONTENT_COMMAND,
   KEY_TAB_COMMAND,
   OUTDENT_CONTENT_COMMAND,
+  type ElementNode,
 } from 'lexical'
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useT } from '../../state/LocaleContext'
@@ -51,54 +54,78 @@ function splitTableSeparator(value: string) {
   return cells?.every((cell) => /^:?-{3,}:?$/.test(cell)) ? cells : null
 }
 
+function parseTableLines(lines: string[]) {
+  const headers = splitTableRow(lines[0] ?? '')
+  const separators = splitTableSeparator(lines[1] ?? '')
+  if (!headers || !separators || headers.length !== separators.length) return null
+  if (lines.length < 3 || !lines.at(-1)?.trim().endsWith('|')) return null
+
+  const rows = lines.slice(2).map(splitTableRow)
+  if (rows.length === 0 || rows.some((row) => row?.length !== headers.length)) return null
+  return { headers, separators, rows: rows as string[][] }
+}
+
+function findTableMatch() {
+  function visit(parent: ElementNode = $getRoot()): {
+    nodeKeys: string[]
+    table: NonNullable<ReturnType<typeof parseTableLines>>
+  } | null {
+    const children = parent.getChildren()
+
+    for (let index = 0; index < children.length; index += 1) {
+      const header = children[index]
+      if (!$isParagraphNode(header)) continue
+
+      const inlineTable = parseTableLines(header.getTextContent().split('\n'))
+      if (inlineTable) return { nodeKeys: [header.getKey()], table: inlineTable }
+
+      const headers = splitTableRow(header.getTextContent())
+      const separator = children[index + 1]
+      if (!headers || !$isParagraphNode(separator)) continue
+
+      const lines = [header.getTextContent(), separator.getTextContent()]
+      const nodeKeys = [header.getKey(), separator.getKey()]
+      for (let rowIndex = index + 2; rowIndex < children.length; rowIndex += 1) {
+        const row = children[rowIndex]
+        if (
+          !$isParagraphNode(row) ||
+          !row.getTextContent().trim().endsWith('|') ||
+          splitTableRow(row.getTextContent())?.length !== headers.length
+        ) break
+        lines.push(row.getTextContent())
+        nodeKeys.push(row.getKey())
+      }
+      const table = parseTableLines(lines)
+      if (table) return { nodeKeys, table }
+    }
+
+    for (const child of children) {
+      if ($isElementNode(child)) {
+        const match = visit(child)
+        if (match) return match
+      }
+    }
+    return null
+  }
+
+  return visit()
+}
+
 function TableMarkdownShortcutPlugin() {
   const [editor] = useLexicalComposerContext()
 
   useEffect(() => editor.registerUpdateListener(({ editorState, tags }) => {
     if (tags.has('table-markdown-shortcut')) return
-    let match: { headerKey: string; separatorKey: string; rowKeys: string[] } | null = null
-    editorState.read(() => {
-      const paragraphs = $getRoot().getChildren()
-      for (let index = 1; index < paragraphs.length; index += 1) {
-        const header = paragraphs[index - 1]
-        const separator = paragraphs[index]
-        if (!$isParagraphNode(header) || !$isParagraphNode(separator)) continue
-        const headers = splitTableRow(header.getTextContent())
-        const separators = splitTableSeparator(separator.getTextContent())
-        if (
-          headers &&
-          separators &&
-          headers.length === separators.length &&
-          separators
-        ) {
-          const rowKeys: string[] = []
-          for (let rowIndex = index + 1; rowIndex < paragraphs.length; rowIndex += 1) {
-            const row = paragraphs[rowIndex]
-            if (!$isParagraphNode(row) || splitTableRow(row.getTextContent())?.length !== headers.length) break
-            rowKeys.push(row.getKey())
-          }
-          match = { headerKey: header.getKey(), separatorKey: separator.getKey(), rowKeys }
-          break
-        }
-      }
-    })
-    const matched = match as { headerKey: string; separatorKey: string; rowKeys: string[] } | null
-    if (!matched) return
-    const { headerKey, separatorKey, rowKeys } = matched
+    if (!editorState.read(() => findTableMatch())) return
 
     editor.update(() => {
-      const header = $getNodeByKey(headerKey)
-      const separator = $getNodeByKey(separatorKey)
-      if (!$isParagraphNode(header) || !$isParagraphNode(separator)) return
-      const headers = splitTableRow(header.getTextContent())
-      const separators = splitTableSeparator(separator.getTextContent())
-      if (!headers || !separators || headers.length !== separators.length) return
-      const rows = rowKeys.flatMap((key) => {
-        const row = $getNodeByKey(key)
-        if (!$isParagraphNode(row)) return []
-        const values = splitTableRow(row.getTextContent())
-        return values?.length === headers.length ? [{ row, values }] : []
-      })
+      const match = findTableMatch()
+      if (!match) return
+      const firstNode = $getNodeByKey(match.nodeKeys[0])
+      if (!$isParagraphNode(firstNode)) return
+      const { headers, separators, rows } = match.table
+
+      $setSelection(null)
 
       const table = $createTableNode({
         type: 'table',
@@ -109,7 +136,7 @@ function TableMarkdownShortcutPlugin() {
               ? 'right'
               : 'left',
         ),
-        children: [headers, ...rows.map(({ values }) => values)].map((values) => ({
+        children: [headers, ...rows].map((values) => ({
           type: 'tableRow',
           children: values.map((value) => ({
             type: 'tableCell',
@@ -117,10 +144,9 @@ function TableMarkdownShortcutPlugin() {
           })),
         })),
       })
-      header.replace(table)
-      separator.remove()
-      rows.forEach(({ row }) => row.remove())
-      window.setTimeout(() => table.select([0, 0]))
+      firstNode.replace(table)
+      match.nodeKeys.slice(1).forEach((key) => $getNodeByKey(key)?.remove())
+      window.setTimeout(() => table.select([1, 0]))
     }, { tag: 'table-markdown-shortcut' })
   }), [editor])
 
