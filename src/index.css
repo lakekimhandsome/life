@@ -2705,6 +2705,7 @@ select.inline-meta-control {
 
 .markdown-content a {
   color: color-mix(in srgb, var(--accent) 75%, var(--ink));
+  cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 0.15em;
 }

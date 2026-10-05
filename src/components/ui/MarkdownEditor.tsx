@@ -404,17 +404,25 @@ export function MarkdownEditor({
   )
 
   return (
-    <MDXEditor
-      className="inline-markdown-editor"
-      contentEditableClassName="markdown-content inline-markdown-content"
-      markdown={value}
-      placeholder={placeholder}
-      onChange={(markdown, initialMarkdownNormalize) => {
-        if (!initialMarkdownNormalize) onChange(markdown)
-      }}
-      onBlur={onBlur}
-      onError={({ error }) => onError?.(error)}
-      plugins={plugins}
-    />
+    <div onClickCapture={(event) => {
+      const link = event.target instanceof Element ? event.target.closest('a') : null
+      if (!(link instanceof HTMLAnchorElement)) return
+      event.preventDefault()
+      event.stopPropagation()
+      window.open(link.href, '_blank', 'noopener,noreferrer')
+    }}>
+      <MDXEditor
+        className="inline-markdown-editor"
+        contentEditableClassName="markdown-content inline-markdown-content"
+        markdown={value}
+        placeholder={placeholder}
+        onChange={(markdown, initialMarkdownNormalize) => {
+          if (!initialMarkdownNormalize) onChange(markdown)
+        }}
+        onBlur={onBlur}
+        onError={({ error }) => onError?.(error)}
+        plugins={plugins}
+      />
+    </div>
   )
 }
