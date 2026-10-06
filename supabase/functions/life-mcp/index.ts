@@ -1,3 +1,5 @@
+import { withMergedMeta } from './update.ts'
+
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? ''
 const SUPABASE_KEY = Deno.env.get('SUPABASE_ANON_KEY') ?? ''
 const MCP_URL = `${SUPABASE_URL}/functions/v1/life-mcp`
@@ -60,7 +62,7 @@ const tools: Tool[] = [
   },
   {
     name: 'update_object',
-    description: 'Update an existing LIFE object. Omitted fields stay unchanged.',
+    description: 'Update an existing LIFE object. Omitted top-level fields stay unchanged. Supplied meta keys are shallow-merged; omitted meta keys stay unchanged, and an empty meta object does not change meta.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -68,7 +70,11 @@ const tools: Tool[] = [
         title: { type: 'string', minLength: 1 },
         body: { type: 'string' },
         occurredAt: { type: 'string', format: 'date-time' },
-        meta: { type: 'object', additionalProperties: true },
+        meta: {
+          type: 'object',
+          description: 'Keys to shallow-merge into the existing meta object. Omitted keys stay unchanged; an empty object changes nothing. Null is stored as a value and does not delete a key.',
+          additionalProperties: true,
+        },
       },
       required: ['id'],
       additionalProperties: false,
@@ -139,11 +145,6 @@ function optionalIso(value: unknown, field: string) {
 function optionalMeta(value: unknown) {
   if (value === undefined) return undefined
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('meta must be an object')
-  for (const item of Object.values(value)) {
-    if (item !== null && !['string', 'number', 'boolean'].includes(typeof item)) {
-      throw new Error('meta values must be strings, numbers, booleans, or null')
-    }
-  }
   return value as JsonObject
 }
 
@@ -228,15 +229,25 @@ async function createObject(args: JsonObject, authorization: string, userId: str
 
 async function updateObject(args: JsonObject, authorization: string) {
   const id = requiredString(args.id, 'id')
-  const patch: JsonObject = { updated_at: new Date().toISOString() }
+  let patch: JsonObject = { updated_at: new Date().toISOString() }
   if (args.title !== undefined) patch.title = requiredString(args.title, 'title')
   if (args.body !== undefined) {
     if (typeof args.body !== 'string') throw new Error('body must be a string')
     patch.body = args.body.trim()
   }
   if (args.occurredAt !== undefined) patch.occurred_at = optionalIso(args.occurredAt, 'occurredAt')
-  if (args.meta !== undefined) patch.meta = optionalMeta(args.meta)
-  if (Object.keys(patch).length === 1) throw new Error('Provide at least one field to update')
+  const meta = optionalMeta(args.meta)
+  if (Object.keys(patch).length === 1 && meta === undefined) throw new Error('Provide at least one field to update')
+  if (meta !== undefined) {
+    const currentParams = new URLSearchParams({ select: 'meta', id: `eq.${id}`, limit: '1' })
+    const current = await rest(`life_objects?${currentParams}`, authorization)
+    if (!current.length) throw new Error('LIFE object not found')
+    const value = current[0].meta
+    const existingMeta = value && typeof value === 'object' && !Array.isArray(value)
+      ? value as JsonObject
+      : {}
+    patch = withMergedMeta(patch, existingMeta, meta)
+  }
   const params = new URLSearchParams({ select: OBJECT_COLUMNS, id: `eq.${id}` })
   const rows = await rest(`life_objects?${params}`, authorization, {
     method: 'PATCH',
