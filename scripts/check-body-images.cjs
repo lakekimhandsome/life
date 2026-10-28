@@ -58,6 +58,11 @@ async function check(engine) {
     await images.first().tap()
     await page.locator('dialog[open]').waitFor()
     assert.equal(await page.locator('.gallery-count').textContent(), '1 / 2')
+    const fullScreen = await page.locator('.gallery-image-stage').boundingBox()
+    assert.equal(fullScreen.x, 0)
+    assert.equal(fullScreen.y, 0)
+    assert.equal(fullScreen.width, 390)
+    assert(Math.abs(fullScreen.height - 844) < 1, 'The image stage must fill the entire mobile viewport')
     const hitArea = await page.locator('.gallery-menu-toggle').boundingBox()
     assert.equal(hitArea.width, 44)
     assert.equal(hitArea.height, 44)
@@ -89,6 +94,8 @@ async function check(engine) {
     await stage.dispatchEvent('touchend', { touches: [], changedTouches: fingers(70) })
     await page.waitForFunction(() => document.querySelector('.gallery-image-stage')?.dataset.zoom === '2')
     assert.equal(await stage.getAttribute('data-zoom'), '2')
+    const fullWidthImage = await page.locator('dialog img').boundingBox()
+    assert(fullWidthImage.x <= 0 && fullWidthImage.x + fullWidthImage.width >= 390, 'Zoomed photos must reach both screen edges')
     assert.equal(await page.locator('.gallery-count').textContent(), '1 / 2', 'Pinching must not change images')
     const panStart = [{ identifier: 1, clientX: cx, clientY: cy }]
     const panEnd = [{ identifier: 1, clientX: cx - 60, clientY: cy }]
