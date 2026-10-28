@@ -13,13 +13,13 @@ export function ImageGallery({ children }: { children: ReactNode }) {
     setGallery((current) => current && ({ ...current, index: Math.max(0, Math.min(current.images.length - 1, current.index + delta)) }))
   }
   function open(image: HTMLImageElement) {
-    const images = [...root.current!.querySelectorAll('img')]
+    const images = [...root.current!.querySelectorAll<HTMLImageElement>('img[src]')]
     setGallery({ images: images.map((item) => ({ src: item.currentSrc || item.src, alt: item.alt })), index: images.indexOf(image) })
   }
   useEffect(() => {
     const element = root.current!
     function accessibleImages() {
-      element.querySelectorAll('img').forEach((image) => {
+      element.querySelectorAll<HTMLImageElement>('img[src]').forEach((image) => {
         image.tabIndex = 0
         image.setAttribute('role', 'button')
         image.setAttribute('aria-label', t('bodyImage.enlarge'))
@@ -48,12 +48,12 @@ export function ImageGallery({ children }: { children: ReactNode }) {
       const target = event.target
       if (!(target instanceof Element) || target.closest('button')) return
       const image = target instanceof HTMLImageElement ? target : target.closest('[data-lexical-decorator]')?.querySelector('img')
-      if (!image) return
+      if (!image?.getAttribute('src')) return
       event.preventDefault()
       event.stopPropagation()
       open(image)
     }} onKeyDownCapture={(event) => {
-      if (!(event.target instanceof HTMLImageElement) || !['Enter', ' '].includes(event.key)) return
+      if (!(event.target instanceof HTMLImageElement) || !event.target.getAttribute('src') || !['Enter', ' '].includes(event.key)) return
       event.preventDefault()
       event.stopPropagation()
       open(event.target)

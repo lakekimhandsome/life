@@ -40,6 +40,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useT } from '../../state/LocaleContext'
 
 import { bodyImageInsertPlugin } from './BodyImageInsert'
+import { BodyImagePlaceholder, BodyImageToolbar } from './BodyImageControls'
 import { ImageGallery } from './ImageGallery'
 import { resolveBodyImage } from '../../lib/bodyImages'
 
@@ -392,7 +393,7 @@ export function MarkdownEditor({
   const plugins = useMemo(
     () => [
       headingsPlugin(),
-      imagePlugin({ imagePreviewHandler: resolveBodyImage, disableImageResize: true, disableImageSettingsButton: true }),
+      imagePlugin({ imagePreviewHandler: resolveBodyImage, disableImageResize: true, EditImageToolbar: BodyImageToolbar, imagePlaceholder: BodyImagePlaceholder }),
       bodyImageInsertPlugin(),
       listsPlugin(),
       quotePlugin(),

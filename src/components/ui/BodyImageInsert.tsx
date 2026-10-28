@@ -79,7 +79,10 @@ function BodyImageInsert() {
 
   return <div className="body-image-insert" contentEditable={false}>
     <button type="button" className="btn" disabled={uploading}
-      onPointerDown={(event) => { event.preventDefault(); rememberSelection() }}
+      onPointerDown={(event) => {
+        if (event.pointerType === 'mouse') event.preventDefault()
+        rememberSelection()
+      }}
       onClick={() => { rememberSelection(); input.current?.click() }}>
       <ImagePlus size={16} aria-hidden="true" /> {t(uploading ? 'bodyImage.uploading' : 'bodyImage.insert')}
     </button>
