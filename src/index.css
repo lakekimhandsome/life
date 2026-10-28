@@ -3755,7 +3755,7 @@ html[data-theme='dark'] .clipboard-image-remove:hover {
 
 .body-image-insert { display: flex; align-items: center; gap: 12px; padding: 8px 0; }
 .body-image-insert .btn { display: inline-flex; align-items: center; gap: 6px; }
-.markdown-content img { max-width: 100%; height: auto; cursor: zoom-in; border-radius: 8px; }
+.markdown-content img { width: 6.5rem; max-width: 100%; height: 6.5rem; object-fit: cover; cursor: zoom-in; border-radius: 12px; }
 .markdown-content img:focus-visible { outline: 2px solid var(--accent, #5289ed); outline-offset: 3px; }
 .image-gallery { position: fixed; inset: 0; width: 100%; max-width: none; height: 100dvh; max-height: none; margin: 0; padding: 56px 48px; border: 0; background: rgba(0,0,0,.94); color: white; overflow: hidden; }
 .image-gallery[open] { display: flex; align-items: center; justify-content: center; }
