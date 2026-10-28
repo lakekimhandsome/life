@@ -161,7 +161,7 @@ export function ImageGallery({ children }: { children: ReactNode }) {
         {gallery.images[gallery.index].remove && <button type="button" className="gallery-menu-delete" disabled={busy} onClick={removeImage}><Trash2 size={18} aria-hidden="true" />{t('clipboard.deleteImage')}</button>}
       </div>}
       <button type="button" className="gallery-previous" disabled={gallery.index === 0} aria-label={t('bodyImage.previous')} onClick={() => move(-1)}><ChevronLeft /></button>
-      <ZoomableImage key={`${gallery.index}:${gallery.images[gallery.index].src}`} src={gallery.images[gallery.index].src} alt={gallery.images[gallery.index].alt} onSwipe={move} />
+      <ZoomableImage key={`${gallery.index}:${gallery.images[gallery.index].src}`} src={gallery.images[gallery.index].src} alt={gallery.images[gallery.index].alt} previous={gallery.images[gallery.index - 1]} next={gallery.images[gallery.index + 1]} onSwipe={move} />
       <button type="button" className="gallery-next" disabled={gallery.index === gallery.images.length - 1} aria-label={t('bodyImage.next')} onClick={() => move(1)}><ChevronRight /></button>
       <span className="gallery-message" role="status">{busy ? t('common.loading') : message}</span>
       <span className="gallery-count" aria-live="polite">{gallery.index + 1} / {gallery.images.length}</span>

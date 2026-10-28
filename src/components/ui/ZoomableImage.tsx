@@ -1,4 +1,4 @@
-import { useRef, useState, type TouchList } from 'react'
+import { useEffect, useRef, useState, type TouchList } from 'react'
 
 type Point = { x: number; y: number }
 type Zoom = { scale: number; x: number; y: number }
@@ -7,18 +7,54 @@ const points = (touches: TouchList): Point[] => Array.from(touches, (touch) => (
 const distance = (a: Point, b: Point) => Math.hypot(a.x - b.x, a.y - b.y)
 const midpoint = (a: Point, b: Point): Point => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 })
 
-export function ZoomableImage({ src, alt, onSwipe }: { src: string; alt: string; onSwipe: (delta: number) => void }) {
+type Image = { src: string; alt: string }
+
+export function ZoomableImage({ src, alt, previous, next, onSwipe }: Image & { previous?: Image; next?: Image; onSwipe: (delta: number) => void }) {
   const stage = useRef<HTMLDivElement>(null)
+  const track = useRef<HTMLDivElement>(null)
+  const offset = useRef(0)
+  const frame = useRef(0)
   const image = useRef<HTMLImageElement>(null)
   const [zoom, setZoom] = useState(initialZoom)
   const current = useRef(initialZoom)
-  const gesture = useRef<{ points: Point[]; zoom: Zoom; center: Point } | null>(null)
+  const gesture = useRef<{ points: Point[]; zoom: Zoom; offset: number; center: Point } | null>(null)
   const multiTouch = useRef(false)
   const suppressClick = useRef(false)
 
+  useEffect(() => () => cancelAnimationFrame(frame.current), [])
+
+  function translate(x: number) {
+    offset.current = x
+    track.current!.style.transform = `translateX(${x}px)`
+  }
+
+  function settle(delta = 0) {
+    cancelAnimationFrame(frame.current)
+    const target = -delta * stage.current!.clientWidth
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      translate(0)
+      if (delta) onSwipe(delta)
+      return
+    }
+    let velocity = 0
+    let last = performance.now()
+    function tick(now: number) {
+      const dt = Math.min((now - last) / 1000, 0.032)
+      last = now
+      velocity += ((target - offset.current) * 220 - velocity * 30) * dt
+      translate(offset.current + velocity * dt)
+      if (Math.abs(target - offset.current) < 0.5 && Math.abs(velocity) < 5) {
+        if (delta) onSwipe(delta)
+        else translate(0)
+      } else frame.current = requestAnimationFrame(tick)
+    }
+    frame.current = requestAnimationFrame(tick)
+  }
+
   function start(touches: TouchList) {
+    cancelAnimationFrame(frame.current)
     const rect = stage.current!.getBoundingClientRect()
-    gesture.current = { points: points(touches), zoom: current.current, center: { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 } }
+    gesture.current = { points: points(touches), zoom: current.current, offset: offset.current, center: { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 } }
   }
 
   function update(next: Zoom) {
@@ -31,7 +67,7 @@ export function ZoomableImage({ src, alt, onSwipe }: { src: string; alt: string;
   return <div ref={stage} className="gallery-image-stage" data-zoom={zoom.scale}
     onTouchStart={(event) => {
       if (!gesture.current) { multiTouch.current = false; suppressClick.current = false }
-      if (event.touches.length > 1) { multiTouch.current = true; suppressClick.current = true }
+      if (event.touches.length > 1) { multiTouch.current = true; suppressClick.current = true; translate(0) }
       start(event.touches)
     }}
     onTouchMove={(event) => {
@@ -52,6 +88,11 @@ export function ZoomableImage({ src, alt, onSwipe }: { src: string; alt: string;
         const dy = after[0].y - before.points[0].y
         if (Math.hypot(dx, dy) > 8) suppressClick.current = true
         if (before.zoom.scale > 1) update({ scale: before.zoom.scale, x: before.zoom.x + dx, y: before.zoom.y + dy })
+        else if (!multiTouch.current && Math.abs(dx) > Math.abs(dy) * 1.25) {
+          const x = before.offset + dx
+          const atEdge = (x > 0 && !previous) || (x < 0 && !next)
+          translate(atEdge ? x / (1 + Math.abs(x) / 80) : x)
+        }
       }
     }}
     onTouchEnd={(event) => {
@@ -62,13 +103,19 @@ export function ZoomableImage({ src, alt, onSwipe }: { src: string; alt: string;
       const end = event.changedTouches[0]
       const dx = end.clientX - before.points[0].x
       const dy = end.clientY - before.points[0].y
-      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.25) onSwipe(dx < 0 ? 1 : -1)
+      const x = before.offset + dx
+      const delta = Math.abs(x) > 50 && Math.abs(dx) > Math.abs(dy) * 1.25 ? (x < 0 ? 1 : -1) : 0
+      settle((delta === 1 && next) || (delta === -1 && previous) ? delta : 0)
     }}
-    onTouchCancel={() => { gesture.current = null; suppressClick.current = true }}
+    onTouchCancel={() => { gesture.current = null; suppressClick.current = true; settle() }}
     onClickCapture={(event) => {
       if (suppressClick.current) { event.preventDefault(); event.stopPropagation() }
     }}>
-    <img ref={image} src={src} alt={alt} draggable={false}
-      style={{ transform: `translate(${zoom.x}px, ${zoom.y}px) scale(${zoom.scale})` }} />
+    <div ref={track} className="gallery-image-track">
+      {previous && <div className="gallery-image-neighbor gallery-image-previous" aria-hidden="true"><img src={previous.src} alt="" draggable={false} /></div>}
+      <img ref={image} src={src} alt={alt} draggable={false}
+        style={{ transform: `translate(${zoom.x}px, ${zoom.y}px) scale(${zoom.scale})` }} />
+      {next && <div className="gallery-image-neighbor gallery-image-next" aria-hidden="true"><img src={next.src} alt="" draggable={false} /></div>}
+    </div>
   </div>
 }
