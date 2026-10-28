@@ -96,7 +96,7 @@ export function SharedObjectPage() {
 
         {object.body ? (
           <section className="detail-body" aria-label={schema.bodyLabel}>
-            <MarkdownContent className="markdown-content">{object.body}</MarkdownContent>
+            <MarkdownContent className="markdown-content" shareToken={token}>{object.body}</MarkdownContent>
           </section>
         ) : null}
 

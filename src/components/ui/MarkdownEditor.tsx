@@ -5,6 +5,7 @@ import {
   realmPlugin,
   codeBlockPlugin,
   headingsPlugin,
+  imagePlugin,
   linkPlugin,
   listsPlugin,
   markdownShortcutPlugin,
@@ -37,6 +38,10 @@ import {
 } from 'lexical'
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useT } from '../../state/LocaleContext'
+
+import { bodyImageInsertPlugin } from './BodyImageInsert'
+import { ImageGallery } from './ImageGallery'
+import { resolveBodyImage } from '../../lib/bodyImages'
 
 const MAX_SWIPE_DURATION_MS = 500
 
@@ -387,6 +392,8 @@ export function MarkdownEditor({
   const plugins = useMemo(
     () => [
       headingsPlugin(),
+      imagePlugin({ imagePreviewHandler: resolveBodyImage, disableImageResize: true, disableImageSettingsButton: true }),
+      bodyImageInsertPlugin(),
       listsPlugin(),
       quotePlugin(),
       thematicBreakPlugin(),
@@ -402,7 +409,7 @@ export function MarkdownEditor({
   )
 
   return (
-    <div onClickCapture={(event) => {
+    <ImageGallery><div onClickCapture={(event) => {
       const link = event.target instanceof Element ? event.target.closest('a') : null
       if (!(link instanceof HTMLAnchorElement)) return
       event.preventDefault()
@@ -421,6 +428,6 @@ export function MarkdownEditor({
         onError={({ error }) => onError?.(error)}
         plugins={plugins}
       />
-    </div>
+    </div></ImageGallery>
   )
 }
