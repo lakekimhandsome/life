@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, Copy, Download, Ellipsis, Trash2, X } from '
 import { copyImageBlob } from '../../lib/clipboard'
 import { useT } from '../../state/LocaleContext'
 import { ImageRemovalContext } from './imageRemovalContext'
+import { ZoomableImage } from './ZoomableImage'
 
 type GalleryImage = { src: string; alt: string; remove?: () => void }
 
@@ -18,7 +19,6 @@ export function ImageGallery({ children }: { children: ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
-  const touch = useRef<{ x: number; y: number } | null>(null)
 
   function move(delta: number) {
     setMenuOpen(false)
@@ -144,7 +144,7 @@ export function ImageGallery({ children }: { children: ReactNode }) {
       onClick={(event) => {
         const target = event.target
         if (menuOpen && target instanceof Element && !target.closest('.gallery-menu, .gallery-menu-toggle')) setMenuOpen(false)
-        if (!menuOpen && target === event.currentTarget) setGallery(null)
+        if (!menuOpen && (target === event.currentTarget || (target instanceof Element && target.classList.contains('gallery-image-stage')))) setGallery(null)
       }}
       onKeyDown={(event) => {
         if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
@@ -152,15 +152,7 @@ export function ImageGallery({ children }: { children: ReactNode }) {
           move(event.key === 'ArrowLeft' ? -1 : 1)
         }
       }}
-      onTouchStart={(event) => { const point = event.touches[0]; touch.current = { x: point.clientX, y: point.clientY } }}
-      onTouchEnd={(event) => {
-        const start = touch.current
-        touch.current = null
-        if (!start) return
-        const point = event.changedTouches[0]
-        const dx = point.clientX - start.x
-        if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(point.clientY - start.y) * 1.25) move(dx < 0 ? 1 : -1)
-      }}>
+      >
       <button type="button" className="gallery-close" aria-label={t('common.close')} onClick={() => setGallery(null)}><X /></button>
       <button type="button" className="gallery-menu-toggle" ref={menuToggle} aria-label={t('bodyImage.menu')} aria-expanded={menuOpen} aria-controls={menuOpen ? menuId : undefined} onClick={() => setMenuOpen(!menuOpen)}><Ellipsis /></button>
       {menuOpen && <div id={menuId} className="gallery-menu" role="group" aria-label={t('bodyImage.menu')}>
@@ -169,7 +161,7 @@ export function ImageGallery({ children }: { children: ReactNode }) {
         {gallery.images[gallery.index].remove && <button type="button" className="gallery-menu-delete" disabled={busy} onClick={removeImage}><Trash2 size={18} aria-hidden="true" />{t('clipboard.deleteImage')}</button>}
       </div>}
       <button type="button" className="gallery-previous" disabled={gallery.index === 0} aria-label={t('bodyImage.previous')} onClick={() => move(-1)}><ChevronLeft /></button>
-      <img src={gallery.images[gallery.index].src} alt={gallery.images[gallery.index].alt} />
+      <ZoomableImage key={`${gallery.index}:${gallery.images[gallery.index].src}`} src={gallery.images[gallery.index].src} alt={gallery.images[gallery.index].alt} onSwipe={move} />
       <button type="button" className="gallery-next" disabled={gallery.index === gallery.images.length - 1} aria-label={t('bodyImage.next')} onClick={() => move(1)}><ChevronRight /></button>
       <span className="gallery-message" role="status">{busy ? t('common.loading') : message}</span>
       <span className="gallery-count" aria-live="polite">{gallery.index + 1} / {gallery.images.length}</span>

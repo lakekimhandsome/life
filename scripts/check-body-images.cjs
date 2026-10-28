@@ -61,9 +61,55 @@ async function check(engine) {
     const hitArea = await page.locator('.gallery-menu-toggle').boundingBox()
     assert.equal(hitArea.width, 44)
     assert.equal(hitArea.height, 44)
+    if (engine === chromium) {
+      const input = await page.context().newCDPSession(page)
+      const area = await page.locator('.gallery-image-stage').boundingBox()
+      await input.send('Input.synthesizePinchGesture', {
+        x: area.x + area.width / 2, y: area.y + area.height / 2,
+        scaleFactor: 2, relativeSpeed: 400, gestureSourceType: 'touch',
+      })
+      assert(Number(await page.locator('.gallery-image-stage').getAttribute('data-zoom')) > 1.5)
+      assert.equal(await page.evaluate(() => visualViewport.scale), 1, 'Only the photo should zoom')
+    }
     await page.getByRole('button', { name: '다음 이미지', exact: true }).tap()
     assert.equal(await page.locator('.gallery-count').textContent(), '2 / 2')
     assert((await page.locator('dialog img').boundingBox()).height > 104)
+    await page.getByRole('button', { name: '이전 이미지', exact: true }).tap()
+
+    const stage = page.locator('.gallery-image-stage')
+    const area = await stage.boundingBox()
+    const cx = area.x + area.width / 2
+    const cy = area.y + area.height / 2
+    const fingers = (spread) => [
+      { identifier: 1, clientX: cx - spread, clientY: cy },
+      { identifier: 2, clientX: cx + spread, clientY: cy },
+    ]
+    await stage.dispatchEvent('touchstart', { touches: fingers(35) })
+    await stage.dispatchEvent('touchmove', { touches: fingers(70) })
+    await stage.dispatchEvent('touchend', { touches: [], changedTouches: fingers(70) })
+    await page.waitForFunction(() => document.querySelector('.gallery-image-stage')?.dataset.zoom === '2')
+    assert.equal(await stage.getAttribute('data-zoom'), '2')
+    assert.equal(await page.locator('.gallery-count').textContent(), '1 / 2', 'Pinching must not change images')
+    const panStart = [{ identifier: 1, clientX: cx, clientY: cy }]
+    const panEnd = [{ identifier: 1, clientX: cx - 60, clientY: cy }]
+    await stage.dispatchEvent('touchstart', { touches: panStart })
+    await stage.dispatchEvent('touchmove', { touches: panEnd })
+    await stage.dispatchEvent('touchend', { touches: [], changedTouches: panEnd })
+    assert((await page.locator('dialog img').getAttribute('style')).includes('translate(-60px'))
+    assert.equal(await page.locator('.gallery-count').textContent(), '1 / 2', 'Panning must not change images')
+    await stage.dispatchEvent('click', { bubbles: true })
+    assert.equal(await page.locator('dialog[open]').count(), 1, 'A gesture must not dismiss the viewer')
+    await stage.dispatchEvent('touchstart', { touches: fingers(70) })
+    await stage.dispatchEvent('touchmove', { touches: fingers(35) })
+    await stage.dispatchEvent('touchend', { touches: [], changedTouches: fingers(35) })
+    assert.equal(await stage.getAttribute('data-zoom'), '1')
+    const swipeStart = [{ identifier: 1, clientX: cx + 70, clientY: cy }]
+    const swipeEnd = [{ identifier: 1, clientX: cx - 70, clientY: cy }]
+    await stage.dispatchEvent('touchstart', { touches: swipeStart })
+    await stage.dispatchEvent('touchmove', { touches: swipeEnd })
+    await stage.dispatchEvent('touchend', { touches: [], changedTouches: swipeEnd })
+    assert.equal(await page.locator('.gallery-count').textContent(), '2 / 2', 'Swiping still changes images at normal size')
+    assert.equal(await page.locator('.gallery-image-stage').getAttribute('data-zoom'), '1')
     await page.getByRole('button', { name: '이전 이미지', exact: true }).tap()
 
     await menu()
@@ -121,7 +167,7 @@ async function check(engine) {
     await page.getByRole('button', { name: '이미지 넣기', exact: true }).tap()
     await (await pendingChooser).setFiles([])
     assert.deepEqual(errors, [])
-    console.log(`PASS ${engine.name()}: compact thumbnails, gallery menu, copy/download/share, fetch errors, read-only safety, confirmed removal and native picker`)
+    console.log(`PASS ${engine.name()}: compact thumbnails, pinch zoom/pan/swipe, gallery menu, copy/download/share, fetch errors, read-only safety, confirmed removal and native picker`)
   } finally {
     await browser.close()
   }
