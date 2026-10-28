@@ -1,26 +1,23 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { $getNodeByKey } from 'lexical'
-import { Image as ImageIcon, Trash2 } from 'lucide-react'
+import { Image as ImageIcon } from 'lucide-react'
+import { useContext, useLayoutEffect, useRef } from 'react'
+import { ImageRemovalContext } from './imageRemovalContext'
 import { useT } from '../../state/LocaleContext'
 
 export function BodyImageToolbar({ nodeKey }: { nodeKey?: string }) {
   const [editor] = useLexicalComposerContext()
-  const t = useT()
+  const removals = useContext(ImageRemovalContext)
+  const marker = useRef<HTMLSpanElement>(null)
 
-  return <button
-    type="button"
-    className="body-image-delete"
-    aria-label={t('clipboard.deleteImage')}
-    title={t('clipboard.deleteImage')}
-    onClick={(event) => {
-      event.preventDefault()
-      event.stopPropagation()
-      if (!nodeKey || !window.confirm(t('bodyImage.deleteConfirm'))) return
-      editor.update(() => $getNodeByKey(nodeKey)?.remove())
-    }}
-  >
-    <span className="body-image-delete-icon"><Trash2 size={15} strokeWidth={1.8} aria-hidden="true" /></span>
-  </button>
+  useLayoutEffect(() => {
+    const image = marker.current?.parentElement?.querySelector<HTMLImageElement>('img[src]')
+    if (!image || !nodeKey || !removals) return
+    removals.set(image, () => { editor.update(() => $getNodeByKey(nodeKey)?.remove()) })
+    return () => { removals.delete(image) }
+  }, [editor, nodeKey, removals])
+
+  return <span hidden ref={marker} />
 }
 
 export function BodyImagePlaceholder() {

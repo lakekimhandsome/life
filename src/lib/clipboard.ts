@@ -238,9 +238,15 @@ async function blobToPng(blob: Blob): Promise<Blob> {
   })
 }
 
-export async function copyImageBlob(blob: Blob): Promise<void> {
+export async function copyImageBlob(blob: Blob | Promise<Blob>): Promise<void> {
   if (!navigator.clipboard?.write) {
     throw new Error(t('clipboard.copyUnsupported'))
+  }
+  if (!(blob instanceof Blob)) {
+    // Safari needs the clipboard write to start during the user's tap, before fetching.
+    const png = blob.then((image) => image.type === 'image/png' ? image : blobToPng(image))
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': png })])
+    return
   }
   const type = blob.type || 'image/png'
   try {
