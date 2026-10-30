@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
-import { ChevronRight, Folder, FolderPlus, FolderX, Plus } from 'lucide-react'
+import { ChevronRight, FolderPlus, FolderX, Plus } from 'lucide-react'
 import type { NoteFolder } from '../core/types'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { ObjectCard } from '../components/object/ObjectCard'
 import { BackLink } from '../components/ui/BackLink'
 import { FolderDialog } from '../components/ui/FolderDialog'
@@ -12,6 +12,7 @@ import { useNoteFolders } from '../state/useNoteFolders'
 
 export function NotesPage() {
   const t = useT()
+  const navigate = useNavigate()
   const [params] = useSearchParams()
   const folderId = params.get('folder') || null
   const { ready, listByType, refresh } = useLife()
@@ -26,7 +27,8 @@ export function NotesPage() {
   const current = folders.find((folder) => folder.id === folderId)
   const path = folderPath(folders, folderId)
   const children = folders.filter((folder) => folder.parent_id === folderId)
-  const notes = listByType('note').filter((note) => (note.folderId ?? null) === folderId)
+  const allNotes = listByType('note')
+  const notes = allNotes.filter((note) => (note.folderId ?? null) === folderId)
   const missing = Boolean(folderId && !current && !loading && !error)
 
   async function removeFolder() {
@@ -35,6 +37,7 @@ export function NotesPage() {
     setDeleteError(false)
     try {
       await deleteFolder(deleting.id)
+      navigate(notesUrl(deleting.parent_id))
       setDeleting(null)
       setRefreshError(false)
       try { await refresh() } catch { setRefreshError(true) }
@@ -63,6 +66,11 @@ export function NotesPage() {
           <h1 className="notes-path"><Link to="/notes">{t('modules.notes')}</Link><span>
             {path.map((folder) => <span key={folder.id}>{' / '}<Link to={notesUrl(folder.id)}>{folder.name}</Link></span>)}
           </span></h1>
+          {current && <button type="button" className="object-header-action note-folder-delete"
+            aria-label={t('folders.deleteNamed', { name: current.name })} title={t('folders.delete')}
+            disabled={saving || loading || error} onClick={() => { setDeleteError(false); setDeleting(current) }}>
+            <FolderX size={20} strokeWidth={1.75} aria-hidden="true" />
+          </button>}
         </div>
         <div className="module-header-actions">
           <Link to={`/create/note${folderId ? `?folder=${encodeURIComponent(folderId)}` : ''}`}
@@ -81,17 +89,18 @@ export function NotesPage() {
         : missing ? <p className="empty-state">{t('folders.notFound')}</p>
         : <>
           {children.length > 0 || notes.length > 0 ? <div className="object-stream">
-            {children.map((folder) => <div key={folder.id} className="object-row note-folder-item">
-              <Link to={notesUrl(folder.id)} className="note-folder-link">
-                <div className="object-row-main"><h3><Folder size={20} strokeWidth={1.75} aria-hidden="true" /><span>{folder.name}</span></h3></div>
+            {children.map((folder) => {
+              const preview = [...folders.filter((item) => item.parent_id === folder.id).map((item) => item.name),
+                ...allNotes.filter((note) => note.folderId === folder.id).map((note) => note.title)].join(', ')
+              return <Link key={folder.id} to={notesUrl(folder.id)} className="object-row note-folder-item">
+                <div className="object-row-main">
+                  <div className="object-row-meta"><span className="type-badge">folder</span></div>
+                  <h3>{folder.name}</h3>
+                  {preview && <p>{preview}</p>}
+                </div>
                 <ChevronRight className="object-row-arrow" size={18} strokeWidth={2} aria-hidden="true" />
               </Link>
-              <button type="button" className="object-header-action note-folder-delete"
-                aria-label={t('folders.deleteNamed', { name: folder.name })} title={t('folders.delete')}
-                disabled={saving} onClick={() => { setDeleteError(false); setDeleting(folder) }}>
-                <FolderX size={20} strokeWidth={1.75} aria-hidden="true" />
-              </button>
-            </div>)}
+            })}
             {notes.map((note) => <ObjectCard key={note.id} object={note} />)}
           </div> : <div className="empty-panel">
             <h3>{t('module.emptyTitle')}</h3><p>{t('module.emptyBody', { type: t('object.note') })}</p>
@@ -99,7 +108,7 @@ export function NotesPage() {
         </>}
       {deleting && <FolderDialog title={t('folders.delete')} onClose={() => { if (!saving) setDeleting(null) }}>
         <p>{t('folders.deleteConfirm', { name: deleting.name,
-          parent: current?.name ?? t('modules.notes') })}</p>
+          parent: folders.find((folder) => folder.id === deleting.parent_id)?.name ?? t('modules.notes') })}</p>
         {deleteError && <p role="alert">{t('folders.failed')}</p>}
         <div className="folder-dialog-actions">
           <button type="button" className="btn btn-ghost" disabled={saving} onClick={() => setDeleting(null)}>{t('common.cancel')}</button>
