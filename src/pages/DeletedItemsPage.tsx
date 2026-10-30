@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { RotateCcw, Trash } from 'lucide-react'
+import { RotateCcw, Trash2 } from 'lucide-react'
 import { BackLink } from '../components/ui/BackLink'
 import { TypeBadge } from '../components/ui/TypeBadge'
 import { listDeletedObjects, permanentlyDeleteObject, restoreDeletedObject } from '../core/repository'
@@ -88,7 +88,7 @@ export function DeletedItemsPage() {
                 <button type="button" className="object-header-action deleted-item-permanent" disabled={busy !== null}
                   aria-label={`${t('trash.permanent')}: ${item.object.title}`}
                   onClick={() => void act(item, false)}>
-                  <Trash size={20} strokeWidth={1.75} aria-hidden="true" />
+                  <Trash2 size={20} strokeWidth={1.75} aria-hidden="true" />
                 </button>
               </div>
             </li>
