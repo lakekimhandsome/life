@@ -48,14 +48,14 @@ export function NotesPage() {
           </span></h1>
         </div>
         <div className="module-header-actions">
-          <button type="button" className="module-header-btn" aria-label={t('folders.create')}
-            disabled={loading || error || missing} onClick={() => { setSaveError(false); setCreating(true) }}>
-            <FolderPlus size={22} strokeWidth={1.75} aria-hidden="true" />
-          </button>
           <Link to={`/create/note${folderId ? `?folder=${encodeURIComponent(folderId)}` : ''}`}
             className="module-header-btn" aria-label={t('module.addAria', { type: t('object.note') })}>
             <Plus size={22} strokeWidth={1.75} aria-hidden="true" />
           </Link>
+          <button type="button" className="module-header-btn" aria-label={t('folders.create')}
+            disabled={loading || error || missing} onClick={() => { setSaveError(false); setCreating(true) }}>
+            <FolderPlus size={22} strokeWidth={1.75} aria-hidden="true" />
+          </button>
         </div>
       </div>
       {!ready || loading ? <p className="empty-state">{t('common.loading')}</p>
