@@ -94,7 +94,7 @@ export function NotesPage() {
                 ...allNotes.filter((note) => note.folderId === folder.id).map((note) => note.title)].join(', ')
               return <Link key={folder.id} to={notesUrl(folder.id)} className="object-row note-folder-item">
                 <div className="object-row-main">
-                  <div className="object-row-meta"><span className="type-badge">folder</span></div>
+                  <div className="object-row-meta"><span className="type-badge">Folder</span></div>
                   <h3>{folder.name}</h3>
                   {preview && <p>{preview}</p>}
                 </div>
