@@ -148,13 +148,6 @@ export async function getSharedObject(token: string): Promise<SharedLifeObject |
 
 export async function deleteObject(id: string): Promise<void> {
   const userId = await requireUserId()
-  const { error: relError } = await supabase
-    .from('life_relationships')
-    .delete()
-    .eq('user_id', userId)
-    .or(`source_id.eq.${id},target_id.eq.${id}`)
-  if (relError) throw relError
-
   const { error } = await supabase
     .from('life_objects')
     .delete()
@@ -225,4 +218,28 @@ export async function deleteRelationship(id: string): Promise<void> {
 export async function countByType(): Promise<Record<ObjectType, number>> {
   const objects = await listObjects()
   return countObjects(objects)
+}
+
+export async function listDeletedObjects() {
+  const userId = await requireUserId()
+  const { data, error } = await supabase.from('life_deleted_objects')
+    .select('*').eq('user_id', userId).order('deleted_at', { ascending: false })
+  if (error) throw error
+  return (data ?? []).map((row) => ({
+    object: rowToObject(row.object_data),
+    deletedAt: row.deleted_at,
+  }))
+}
+
+export async function restoreDeletedObject(id: string): Promise<void> {
+  await requireUserId()
+  const { error } = await supabase.rpc('restore_deleted_life_object', { target_id: id })
+  if (error) throw error
+}
+
+export async function permanentlyDeleteObject(id: string): Promise<void> {
+  const userId = await requireUserId()
+  const { error } = await supabase.from('life_deleted_objects')
+    .delete().eq('user_id', userId).eq('id', id)
+  if (error) throw error
 }

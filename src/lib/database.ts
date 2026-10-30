@@ -24,6 +24,13 @@ export type LifeObjectRow = {
   meta: LifeObject['meta']
 }
 
+export type DeletedLifeObjectRow = {
+  id: string
+  user_id: string
+  object_data: LifeObjectRow
+  deleted_at: string
+}
+
 export type SharedLifeObjectRow = {
   type: ShareableObjectType
   title: string
@@ -97,6 +104,12 @@ export type Database = {
         Update: Partial<LifeObjectRow>
         Relationships: []
       }
+      life_deleted_objects: {
+        Row: DeletedLifeObjectRow
+        Insert: DeletedLifeObjectRow
+        Update: Partial<DeletedLifeObjectRow>
+        Relationships: []
+      }
       life_relationships: {
         Row: LifeRelationshipRow
         Insert: LifeRelationshipRow
@@ -130,6 +143,10 @@ export type Database = {
     }
     Views: Record<string, never>
     Functions: {
+      restore_deleted_life_object: {
+        Args: { target_id: string }
+        Returns: string
+      }
       delete_life_note_folder: {
         Args: { target_id: string }
         Returns: string | null

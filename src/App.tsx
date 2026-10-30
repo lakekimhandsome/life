@@ -14,6 +14,7 @@ import { NotesPage } from './pages/NotesPage'
 import { ModulePage } from './pages/ModulePage'
 import { ObjectDetailPage } from './pages/ObjectDetailPage'
 import { OAuthConsentDemoPage, OAuthConsentPage } from './pages/OAuthConsentPage'
+import { DeletedItemsPage } from './pages/DeletedItemsPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { SharedObjectPage } from './pages/SharedObjectPage'
 import { PlansPage } from './pages/PlansPage'
@@ -50,6 +51,7 @@ export default function App() {
                       <Route path="assets" element={<AssetsPage />} />
                       <Route path="assets/history" element={<AssetHistoryPage />} />
                       <Route path="settings" element={<SettingsPage />} />
+                      <Route path="settings/deleted" element={<DeletedItemsPage />} />
                       <Route path="settings/cards" element={<CardEditPage />} />
                       <Route path="create/:type" element={<CreatePage />} />
                       <Route path="object/:id/edit" element={<EditPage />} />

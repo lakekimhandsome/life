@@ -73,6 +73,14 @@ export function SettingsPage() {
           </div>
         </section>
 
+        <Link to="/settings/deleted" className="settings-menu-item">
+          <span className="settings-menu-copy">
+            <strong>{t('trash.title')}</strong>
+            <span>{t('trash.hint')}</span>
+          </span>
+          <ChevronRight className="settings-menu-chevron" size={18} aria-hidden="true" />
+        </Link>
+
         <Link to="/settings/cards" className="settings-menu-item">
           <span className="settings-menu-copy">
             <strong>{t('settings.cards')}</strong>

@@ -3822,3 +3822,43 @@ html[data-theme='dark'] .clipboard-image-remove:hover {
 .folder-picker-path button:hover { text-decoration: underline; }
 .folder-picker-list { display: grid; gap: 0.35rem; max-height: 45dvh; overflow-y: auto; }
 .folder-picker-empty { color: var(--muted); padding: 0.5rem; }
+
+.deleted-items-list {
+  list-style: none;
+  padding: 0;
+  margin: 24px 0;
+}
+
+.deleted-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.deleted-item-copy {
+  display: flex;
+  flex: 1 1 220px;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.deleted-item-copy strong {
+  overflow-wrap: anywhere;
+}
+
+.deleted-item-copy time {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.deleted-item-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

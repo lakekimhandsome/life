@@ -47,7 +47,8 @@ export function ObjectDetailPage() {
       : null
   const headerDate = object.type === 'goal' ? goalTargetDate : object.occurredAt
   async function handleDelete() {
-    const confirmed = window.confirm(t('detail.deleteConfirm'))
+    const movesToTrash = object && ['project', 'note', 'journal', 'goal'].includes(object.type)
+    const confirmed = window.confirm(t(movesToTrash ? 'trash.moveConfirm' : 'detail.deleteConfirm'))
     if (!confirmed) return
     setDeleting(true)
     navigate(backTo, { replace: true, flushSync: true })
