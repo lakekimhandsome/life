@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { Folder, FolderPlus, FolderX, Plus } from 'lucide-react'
+import { ChevronRight, Folder, FolderPlus, FolderX, Plus } from 'lucide-react'
 import type { NoteFolder } from '../core/types'
 import { Link, useSearchParams } from 'react-router-dom'
 import { ObjectCard } from '../components/object/ObjectCard'
@@ -80,10 +80,11 @@ export function NotesPage() {
         : error ? <p role="alert">{t('folders.failed')}</p>
         : missing ? <p className="empty-state">{t('folders.notFound')}</p>
         : <>
-          {children.length > 0 && <div className="note-folder-list">
-            {children.map((folder) => <div key={folder.id} className="note-folder-row note-folder-item">
+          {children.length > 0 || notes.length > 0 ? <div className="object-stream">
+            {children.map((folder) => <div key={folder.id} className="object-row note-folder-item">
               <Link to={notesUrl(folder.id)} className="note-folder-link">
-                <Folder size={20} strokeWidth={1.75} aria-hidden="true" /><span>{folder.name}</span>
+                <div className="object-row-main"><h3><Folder size={20} strokeWidth={1.75} aria-hidden="true" /><span>{folder.name}</span></h3></div>
+                <ChevronRight className="object-row-arrow" size={18} strokeWidth={2} aria-hidden="true" />
               </Link>
               <button type="button" className="object-header-action note-folder-delete"
                 aria-label={t('folders.deleteNamed', { name: folder.name })} title={t('folders.delete')}
@@ -91,10 +92,8 @@ export function NotesPage() {
                 <FolderX size={20} strokeWidth={1.75} aria-hidden="true" />
               </button>
             </div>)}
-          </div>}
-          {notes.length > 0 ? <div className="object-stream">
             {notes.map((note) => <ObjectCard key={note.id} object={note} />)}
-          </div> : children.length === 0 && <div className="empty-panel">
+          </div> : <div className="empty-panel">
             <h3>{t('module.emptyTitle')}</h3><p>{t('module.emptyBody', { type: t('object.note') })}</p>
           </div>}
         </>}

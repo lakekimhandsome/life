@@ -68,6 +68,17 @@ async function check(engine, touch = false) {
       await dialog.waitFor({ state: 'hidden' })
     }
     await createFolder('상위 폴더')
+    const stream = page.locator('.object-stream')
+    assert.equal(await stream.count(), 1)
+    assert.equal(await stream.locator(':scope > .object-row').count(), 2)
+    await stream.getByRole('link', { name: '상위 폴더', exact: true }).waitFor()
+    await stream.getByRole('link', { name: /원래 노트/ }).waitFor()
+    const rowStyles = await stream.locator(':scope > .object-row').evaluateAll((rows) => rows.map((row) => {
+      const style = getComputedStyle(row)
+      return [style.paddingTop, style.paddingBottom, style.borderBottom, getComputedStyle(row.querySelector('h3')).fontSize]
+    }))
+    assert.deepEqual(rowStyles[0], rowStyles[1])
+    if (process.env.SCREENSHOT_DIR) await page.screenshot({ path: `${process.env.SCREENSHOT_DIR}/note-folder-stream-${engine.name()}-${touch ? 'touch' : 'mouse'}.png` })
     await page.getByRole('link', { name: '상위 폴더', exact: true }).click()
     await createFolder('하위 폴더')
     await page.getByRole('link', { name: '하위 폴더', exact: true }).click()
