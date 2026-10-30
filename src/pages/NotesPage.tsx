@@ -44,7 +44,7 @@ export function NotesPage() {
         <BackLink to={folderId ? notesUrl(current?.parent_id) : '/'} />
         <div className="module-heading module-heading--notes">
           <h1 className="notes-path"><Link to="/notes">{t('modules.notes')}</Link><span>
-            {path.map((folder) => <span key={folder.id}>/<Link to={notesUrl(folder.id)}>{folder.name}</Link></span>)}
+            {path.map((folder) => <span key={folder.id}>{' / '}<Link to={notesUrl(folder.id)}>{folder.name}</Link></span>)}
           </span></h1>
         </div>
         <div className="module-header-actions">
