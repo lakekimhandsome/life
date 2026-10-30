@@ -42,7 +42,6 @@ export default function App() {
                       <Route index element={<HomePage />} />
                       <Route path="plans" element={<PlansPage />} />
                       <Route path="study" element={<Navigate to="/plans" replace />} />
-                      <Route path="workout" element={<ModulePage />} />
                       <Route path="journal" element={<ModulePage />} />
                       <Route path="goals" element={<ModulePage />} />
                       <Route path="projects" element={<ModulePage />} />

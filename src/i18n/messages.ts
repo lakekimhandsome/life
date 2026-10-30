@@ -1,6 +1,6 @@
 export const en = {
   'meta.description':
-    'LIFE — Lake\'s Interface For Everything. Journal, projects, workouts, plans, and goals in one system.',
+    'LIFE — Lake\'s Interface For Everything. Journal, projects, plans, and goals in one system.',
 
   'common.home': 'Home',
   'common.back': 'Back',
@@ -34,7 +34,6 @@ export const en = {
   'nav.userMenu': 'User menu',
 
   'modules.plans': 'Plans',
-  'modules.workout': 'Workout',
   'modules.assets': 'Assets',
   'modules.journal': 'Journal',
   'modules.goals': 'Goals',
@@ -54,7 +53,6 @@ export const en = {
   'object.journal': 'Journal',
   'object.project': 'Project',
   'object.note': 'Note',
-  'object.workout': 'Workout',
   'object.plan': 'Plan',
   'object.goal': 'Goal',
   'object.asset': 'Asset',
@@ -63,7 +61,6 @@ export const en = {
   'hub.plans.none': 'No Tasks Today',
   'hub.plans.done': 'All Done Today',
   'hub.plans.remaining': '{count} To Do Today',
-  'hub.workout.none': 'Nothing Logged Today',
   'hub.assets.none': 'No Records',
   'hub.assets.net': 'Net Worth {value}',
   'hub.journal.written': 'Written Today',
@@ -264,7 +261,6 @@ export const en = {
   'form.linkedGoal': 'Linked goal (optional)',
   'form.noLink': 'Don’t link',
   'form.linkHint': 'Records can link to a goal. Everything in LIFE can connect.',
-  'form.minutes': '{value} min',
   'create.heading': 'New {type}',
   'edit.heading': 'Edit {type}',
   'edit.save': 'Save changes',
@@ -310,10 +306,6 @@ export const en = {
   'mood.good': 'Good',
   'mood.hard': 'Hard',
   'mood.grateful': 'Grateful',
-  'intensity.label': 'Intensity',
-  'intensity.low': 'Low',
-  'intensity.medium': 'Medium',
-  'intensity.high': 'High',
 
   'schema.journal.titlePlaceholder': 'One line for today',
   'schema.journal.bodyPlaceholder':
@@ -327,11 +319,6 @@ export const en = {
   'schema.note.bodyPlaceholder':
     'Write freely.\n\nMarkdown: **bold**, - list, [link](url)',
   'schema.note.bodyLabel': 'Body',
-  'schema.workout.description': 'A mark left on the body',
-  'schema.workout.titlePlaceholder': 'e.g. Leg day, 5km run',
-  'schema.workout.bodyPlaceholder': 'Sets, how it felt, notes',
-  'schema.workout.bodyLabel': 'Notes',
-  'schema.workout.duration': 'Time (min)',
   'schema.plan.description': 'What to do that day',
   'schema.plan.titlePlaceholder': 'e.g. Math workbook p.10',
   'schema.plan.bodyPlaceholder': 'Notes (optional)',
@@ -371,7 +358,7 @@ export type MessageKey = keyof typeof en
 
 export const ko: Record<MessageKey, string> = {
   'meta.description':
-    'LIFE — Lake\'s Interface For Everything. 일기, 프로젝트, 운동, 계획, 목표를 하나의 시스템으로.',
+    'LIFE — Lake\'s Interface For Everything. 일기, 프로젝트, 계획, 목표를 하나의 시스템으로.',
 
   'common.home': '홈',
   'common.back': '뒤로',
@@ -405,7 +392,6 @@ export const ko: Record<MessageKey, string> = {
   'nav.userMenu': '사용자 메뉴',
 
   'modules.plans': '계획',
-  'modules.workout': '운동',
   'modules.assets': '자산',
   'modules.journal': '일기',
   'modules.goals': '목표',
@@ -425,7 +411,6 @@ export const ko: Record<MessageKey, string> = {
   'object.journal': '일기',
   'object.project': '프로젝트',
   'object.note': '노트',
-  'object.workout': '운동',
   'object.plan': '계획',
   'object.goal': '목표',
   'object.asset': '자산',
@@ -434,7 +419,6 @@ export const ko: Record<MessageKey, string> = {
   'hub.plans.none': '오늘 할 일 없음',
   'hub.plans.done': '오늘 할 일 완료',
   'hub.plans.remaining': '오늘 해야 할 일 {count}개',
-  'hub.workout.none': '오늘 미기록',
   'hub.assets.none': '기록 없음',
   'hub.assets.net': '순자산 {value}',
   'hub.journal.written': '오늘 작성됨',
@@ -634,7 +618,6 @@ export const ko: Record<MessageKey, string> = {
   'form.linkedGoal': '연결된 목표 (선택)',
   'form.noLink': '연결하지 않음',
   'form.linkHint': '기록은 목표와 연결될 수 있습니다. LIFE의 모든 객체는 서로 이어집니다.',
-  'form.minutes': '{value}분',
   'create.heading': '{type} 기록',
   'edit.heading': '{type} 수정',
   'edit.save': '수정 저장',
@@ -680,10 +663,6 @@ export const ko: Record<MessageKey, string> = {
   'mood.good': '좋음',
   'mood.hard': '힘듦',
   'mood.grateful': '감사',
-  'intensity.label': '강도',
-  'intensity.low': '낮음',
-  'intensity.medium': '보통',
-  'intensity.high': '높음',
 
   'schema.journal.titlePlaceholder': '오늘의 한 줄',
   'schema.journal.bodyPlaceholder':
@@ -697,11 +676,6 @@ export const ko: Record<MessageKey, string> = {
   'schema.note.bodyPlaceholder':
     '생각을 자유롭게 남겨 보세요.\n\n마크다운 예: **강조**, - 목록, [링크](url)',
   'schema.note.bodyLabel': '본문',
-  'schema.workout.description': '몸에 남긴 흔적',
-  'schema.workout.titlePlaceholder': '예: 하체 근력, 러닝 5km',
-  'schema.workout.bodyPlaceholder': '세트, 느낌, 특이사항',
-  'schema.workout.bodyLabel': '메모',
-  'schema.workout.duration': '시간 (분)',
   'schema.plan.description': '그날 해야 할 일',
   'schema.plan.titlePlaceholder': '예: 수학 문제집 10쪽',
   'schema.plan.bodyPlaceholder': '메모 (선택)',

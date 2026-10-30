@@ -2,7 +2,6 @@ export const OBJECT_TYPES = [
   'journal',
   'project',
   'note',
-  'workout',
   'plan',
   'goal',
   'asset',

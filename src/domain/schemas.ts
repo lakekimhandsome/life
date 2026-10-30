@@ -98,33 +98,6 @@ const SCHEMA_DEFS: Record<ObjectType, SchemaDef> = {
     accent: 'var(--accent-note)',
     fields: [],
   },
-  workout: {
-    type: 'workout',
-    enLabel: 'Workout',
-    descriptionKey: 'schema.workout.description',
-    titlePlaceholderKey: 'schema.workout.titlePlaceholder',
-    bodyPlaceholderKey: 'schema.workout.bodyPlaceholder',
-    bodyLabelKey: 'schema.workout.bodyLabel',
-    accent: 'var(--accent-workout)',
-    fields: [
-      {
-        key: 'durationMin',
-        kind: 'number',
-        labelKey: 'schema.workout.duration',
-        placeholder: '45',
-      },
-      {
-        key: 'intensity',
-        kind: 'select',
-        labelKey: 'intensity.label',
-        optionKeys: {
-          low: 'intensity.low',
-          medium: 'intensity.medium',
-          high: 'intensity.high',
-        },
-      },
-    ],
-  },
   plan: {
     type: 'plan',
     enLabel: 'Plan',
@@ -227,7 +200,6 @@ export const CREATE_ORDER: ObjectType[] = [
   'journal',
   'project',
   'note',
-  'workout',
   'plan',
   'goal',
   'asset',
@@ -241,7 +213,6 @@ const OBJECT_LABEL_KEY: Record<ObjectType, MessageKey> = {
   journal: 'object.journal',
   project: 'object.project',
   note: 'object.note',
-  workout: 'object.workout',
   plan: 'object.plan',
   goal: 'object.goal',
   asset: 'object.asset',
@@ -270,8 +241,6 @@ export function defaultMeta(type: ObjectType): Record<string, string | number | 
       return { status: 'active' }
     case 'note':
       return {}
-    case 'workout':
-      return { durationMin: null, intensity: 'medium' }
     case 'plan':
       return { subject: '', done: false }
     case 'goal':
@@ -294,9 +263,6 @@ export function formatMetaValue(
   }
   if (field.kind === 'date') {
     return formatDate(fromDateInputValue(String(value).slice(0, 10)))
-  }
-  if (field.kind === 'number' && key === 'durationMin') {
-    return t('form.minutes', { value: String(value) })
   }
   if (type === 'asset' && key === 'quantity') {
     return String(value)

@@ -1,4 +1,5 @@
 import { createId } from './id'
+import { OBJECT_TYPES } from './types'
 import {
   objectToRow,
   relationshipToRow,
@@ -39,7 +40,6 @@ function emptyCounts(): Record<ObjectType, number> {
     journal: 0,
     project: 0,
     note: 0,
-    workout: 0,
     plan: 0,
     goal: 0,
     asset: 0,
@@ -56,7 +56,7 @@ function countObjects(objects: LifeObject[]): Record<ObjectType, number> {
 
 export async function listObjects(type?: ObjectType): Promise<LifeObject[]> {
   const userId = await requireUserId()
-  let query = supabase.from('life_objects').select('*').eq('user_id', userId)
+  let query = supabase.from('life_objects').select('*').eq('user_id', userId).in('type', OBJECT_TYPES)
   if (type) query = query.eq('type', type)
   const { data, error } = await query.order('occurred_at', { ascending: false })
   if (error) throw error
@@ -70,6 +70,7 @@ export async function getObject(id: string): Promise<LifeObject | undefined> {
     .select('*')
     .eq('user_id', userId)
     .eq('id', id)
+    .in('type', OBJECT_TYPES)
     .maybeSingle()
   if (error) throw error
   return data ? rowToObject(data) : undefined

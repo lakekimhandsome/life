@@ -2,7 +2,6 @@ import {
   ListTodo,
   Clipboard,
   Wallet,
-  Dumbbell,
   Folder,
   Notebook,
   StickyNote,
@@ -13,7 +12,6 @@ import type { ModuleId } from '../../domain/modules'
 
 const ICONS: Record<ModuleId, LucideIcon> = {
   plans: ListTodo,
-  workout: Dumbbell,
   assets: Wallet,
   journal: Notebook,
   goals: Target,

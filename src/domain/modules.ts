@@ -5,7 +5,6 @@ import { isSameLocalDay } from '../lib/format'
 
 export type ModuleId =
   | 'plans'
-  | 'workout'
   | 'assets'
   | 'journal'
   | 'goals'
@@ -22,7 +21,6 @@ export interface LifeModule {
 
 const MODULE_TITLE_KEY: Record<ModuleId, MessageKey> = {
   plans: 'modules.plans',
-  workout: 'modules.workout',
   assets: 'modules.assets',
   journal: 'modules.journal',
   goals: 'modules.goals',
@@ -36,11 +34,6 @@ export const LIFE_MODULES: LifeModule[] = [
     id: 'plans',
     path: '/plans',
     objectType: 'plan',
-  },
-  {
-    id: 'workout',
-    path: '/workout',
-    objectType: 'workout',
   },
   {
     id: 'assets',
@@ -106,13 +99,6 @@ export function getModuleStatus(
       const remaining = today.filter((object) => object.meta.done !== true)
       if (remaining.length === 0) return t('hub.plans.done')
       return t('hub.plans.remaining', { count: remaining.length })
-    }
-    case 'workout': {
-      const today = ofType(objects, 'workout').filter((object) =>
-        isSameLocalDay(object.occurredAt, now),
-      )
-      if (today.length === 0) return t('hub.workout.none')
-      return today[0].title
     }
     case 'assets': {
       const assets = ofType(objects, 'asset')

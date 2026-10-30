@@ -4,7 +4,8 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? ''
 const SUPABASE_KEY = Deno.env.get('SUPABASE_ANON_KEY') ?? ''
 const MCP_URL = `${SUPABASE_URL}/functions/v1/life-mcp`
 const AUTH_ISSUER = `${SUPABASE_URL}/auth/v1`
-const OBJECT_TYPES = ['journal', 'project', 'note', 'workout', 'plan', 'goal', 'asset'] as const
+const OBJECT_TYPES = ['journal', 'project', 'note', 'plan', 'goal', 'asset'] as const
+const OBJECT_TYPE_FILTER = `in.(${OBJECT_TYPES.join(',')})`
 const RELATIONSHIP_KINDS = ['related', 'supports', 'part_of'] as const
 const OBJECT_COLUMNS = 'id,type,title,body,occurred_at,created_at,updated_at,meta,visibility'
 
@@ -45,7 +46,7 @@ const tools: Tool[] = [
   },
   {
     name: 'create_object',
-    description: 'Create a journal, project, note, workout, plan, goal, or asset in LIFE.',
+    description: 'Create a journal, project, note, plan, goal, or asset in LIFE.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -181,7 +182,7 @@ async function findObjects(args: JsonObject, authorization: string) {
   const type = args.type === undefined ? undefined : objectType(args.type)
   const before = optionalIso(args.before, 'before')
 
-  const params = new URLSearchParams({ select: OBJECT_COLUMNS, order: 'occurred_at.desc' })
+  const params = new URLSearchParams({ select: OBJECT_COLUMNS, type: OBJECT_TYPE_FILTER, order: 'occurred_at.desc' })
   if (type) params.set('type', `eq.${type}`)
   if (before) params.set('occurred_at', `lt.${before}`)
   // ponytail: client-side search caps at 1,000 personal objects; add Postgres FTS when an account exceeds that.
@@ -195,7 +196,7 @@ async function findObjects(args: JsonObject, authorization: string) {
 
 async function getObject(args: JsonObject, authorization: string) {
   const id = requiredString(args.id, 'id')
-  const objectParams = new URLSearchParams({ select: OBJECT_COLUMNS, id: `eq.${id}`, limit: '1' })
+  const objectParams = new URLSearchParams({ select: OBJECT_COLUMNS, type: OBJECT_TYPE_FILTER, id: `eq.${id}`, limit: '1' })
   const objects = await rest(`life_objects?${objectParams}`, authorization)
   if (!objects.length) throw new Error('LIFE object not found')
   const relationships = await rest('life_relationships?select=*&order=created_at.desc', authorization)
@@ -239,7 +240,7 @@ async function updateObject(args: JsonObject, authorization: string) {
   const meta = optionalMeta(args.meta)
   if (Object.keys(patch).length === 1 && meta === undefined) throw new Error('Provide at least one field to update')
   if (meta !== undefined) {
-    const currentParams = new URLSearchParams({ select: 'meta', id: `eq.${id}`, limit: '1' })
+    const currentParams = new URLSearchParams({ select: 'meta', type: OBJECT_TYPE_FILTER, id: `eq.${id}`, limit: '1' })
     const current = await rest(`life_objects?${currentParams}`, authorization)
     if (!current.length) throw new Error('LIFE object not found')
     const value = current[0].meta
@@ -248,7 +249,7 @@ async function updateObject(args: JsonObject, authorization: string) {
       : {}
     patch = withMergedMeta(patch, existingMeta, meta)
   }
-  const params = new URLSearchParams({ select: OBJECT_COLUMNS, id: `eq.${id}` })
+  const params = new URLSearchParams({ select: OBJECT_COLUMNS, type: OBJECT_TYPE_FILTER, id: `eq.${id}` })
   const rows = await rest(`life_objects?${params}`, authorization, {
     method: 'PATCH',
     headers: { Prefer: 'return=representation' },
@@ -260,7 +261,7 @@ async function updateObject(args: JsonObject, authorization: string) {
 
 async function deleteObject(args: JsonObject, authorization: string) {
   const id = requiredString(args.id, 'id')
-  const params = new URLSearchParams({ select: OBJECT_COLUMNS, id: `eq.${id}` })
+  const params = new URLSearchParams({ select: OBJECT_COLUMNS, type: OBJECT_TYPE_FILTER, id: `eq.${id}` })
   const rows = await rest(`life_objects?${params}`, authorization, {
     method: 'DELETE',
     headers: { Prefer: 'return=representation' },
@@ -276,8 +277,8 @@ async function linkObjects(args: JsonObject, authorization: string, userId: stri
   if (sourceId === targetId) throw new Error('An object cannot link to itself')
   if (!RELATIONSHIP_KINDS.includes(kind as typeof RELATIONSHIP_KINDS[number])) throw new Error('Invalid relationship kind')
 
-  const source = await rest(`life_objects?${new URLSearchParams({ select: 'id', id: `eq.${sourceId}`, limit: '1' })}`, authorization)
-  const target = await rest(`life_objects?${new URLSearchParams({ select: 'id', id: `eq.${targetId}`, limit: '1' })}`, authorization)
+  const source = await rest(`life_objects?${new URLSearchParams({ select: 'id', type: OBJECT_TYPE_FILTER, id: `eq.${sourceId}`, limit: '1' })}`, authorization)
+  const target = await rest(`life_objects?${new URLSearchParams({ select: 'id', type: OBJECT_TYPE_FILTER, id: `eq.${targetId}`, limit: '1' })}`, authorization)
   if (!source.length || !target.length) throw new Error('Both LIFE objects must exist in this account')
 
   const existingParams = new URLSearchParams({
