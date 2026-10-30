@@ -3701,7 +3701,7 @@ html[data-theme='dark'] .clipboard-image-remove:hover {
     display: none;
   }
 
-  .module-header > .module-heading {
+  .module-header > .back-link--home + .module-heading {
     grid-row: 1;
     grid-column: 1;
   }
