@@ -1,5 +1,5 @@
 import {
-  BookOpen,
+  ListTodo,
   Clipboard,
   Wallet,
   Dumbbell,
@@ -12,7 +12,7 @@ import {
 import type { ModuleId } from '../../domain/modules'
 
 const ICONS: Record<ModuleId, LucideIcon> = {
-  plans: BookOpen,
+  plans: ListTodo,
   workout: Dumbbell,
   assets: Wallet,
   journal: Notebook,
