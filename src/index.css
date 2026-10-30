@@ -3795,6 +3795,17 @@ html[data-theme='dark'] .clipboard-image-remove:hover {
 .note-folder-row > span { flex: 1; overflow-wrap: anywhere; }
 .note-folder-row:hover { background: color-mix(in srgb, var(--muted) 8%, transparent); }
 .note-folder-row:focus-visible { outline: 2px solid var(--accent-note); outline-offset: 2px; }
+.note-folder-item { padding: 0; gap: 0; cursor: default; }
+.note-folder-link { display: flex; align-items: center; gap: 0.75rem; flex: 1; min-width: 0; padding: 0.7rem 0.85rem; color: inherit; text-decoration: none; border-radius: 10px; }
+.note-folder-link svg { flex-shrink: 0; }
+.note-folder-link span { overflow-wrap: anywhere; min-width: 0; }
+.note-folder-link:focus-visible { outline: 2px solid var(--accent-note); outline-offset: -2px; }
+.note-folder-delete { flex-shrink: 0; min-width: 44px; min-height: 44px; margin-right: 0.25rem; }
+.note-folder-delete::after { left: auto; right: 0; transform: none; }
+@media (hover: hover) and (pointer: fine) {
+  .note-folder-delete { opacity: 0; }
+  .note-folder-item:hover .note-folder-delete, .note-folder-item:focus-within .note-folder-delete { opacity: 1; }
+}
 .folder-dialog {
   width: min(440px, calc(100vw - 2rem)); max-height: 80dvh; overflow: auto;
   box-sizing: border-box; padding: 1.25rem; border: 1px solid var(--line); border-radius: 16px;

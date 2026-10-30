@@ -33,5 +33,12 @@ export function useNoteFolders() {
     if (error) throw error
     setFolders((items) => [...items, folder].sort((a, b) => a.name.localeCompare(b.name)))
   }
-  return { folders, loading, error, createFolder }
+  async function deleteFolder(id: string) {
+    if (!user) throw new Error('Authentication required')
+    const { data: parentId, error } = await supabase.rpc('delete_life_note_folder', { target_id: id })
+    if (error) throw error
+    setFolders((items) => items.filter((folder) => folder.id !== id)
+      .map((folder) => folder.parent_id === id ? { ...folder, parent_id: parentId } : folder))
+  }
+  return { folders, loading, error, createFolder, deleteFolder }
 }

@@ -47,6 +47,10 @@ export const en = {
   'folders.empty': 'No folders here',
   'folders.failed': 'Couldn’t save the folder change. Please try again.',
   'folders.notFound': 'Folder not found',
+  'folders.delete': 'Delete folder',
+  'folders.deleteNamed': 'Delete folder: {name}',
+  'folders.deleteConfirm': 'Delete “{name}”? Its folders and notes will move to “{parent}”. Their contents will be preserved.',
+  'folders.refreshFailed': 'The folder was deleted, but the list could not refresh. Please reload the page.',
 
   'modules.clipboard': 'Clipboard',
 
@@ -405,6 +409,10 @@ export const ko: Record<MessageKey, string> = {
   'folders.empty': '이 위치에 폴더가 없습니다',
   'folders.failed': '폴더 변경을 저장하지 못했습니다. 다시 시도해 주세요.',
   'folders.notFound': '폴더를 찾을 수 없습니다',
+  'folders.delete': '폴더 삭제',
+  'folders.deleteNamed': '폴더 삭제: {name}',
+  'folders.deleteConfirm': '“{name}” 폴더를 삭제할까요? 내부 폴더와 노트는 한 단계 상위인 “{parent}”로 이동하며, 내용은 유지됩니다.',
+  'folders.refreshFailed': '폴더는 삭제했지만 목록을 새로 불러오지 못했습니다. 페이지를 새로고침해 주세요.',
 
   'modules.clipboard': '클립보드',
 

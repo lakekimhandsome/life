@@ -130,6 +130,10 @@ export type Database = {
     }
     Views: Record<string, never>
     Functions: {
+      delete_life_note_folder: {
+        Args: { target_id: string }
+        Returns: string | null
+      }
       get_shared_life_object: {
         Args: { p_share_token: string }
         Returns: SharedLifeObjectRow[]
