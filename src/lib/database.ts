@@ -1,5 +1,6 @@
 import type {
   LifeObject,
+  NoteFolder,
   ObjectType,
   ObjectVisibility,
   Relationship,
@@ -18,6 +19,7 @@ export type LifeObjectRow = {
   created_at: string
   updated_at: string
   visibility: ObjectVisibility
+  folder_id?: string | null
   share_token: string | null
   meta: LifeObject['meta']
 }
@@ -83,6 +85,12 @@ export type ClipboardRow = {
 export type Database = {
   public: {
     Tables: {
+      life_note_folders: {
+        Row: NoteFolder & { user_id: string }
+        Insert: NoteFolder & { user_id: string }
+        Update: Partial<NoteFolder>
+        Relationships: []
+      }
       life_objects: {
         Row: LifeObjectRow
         Insert: LifeObjectRow
@@ -143,6 +151,7 @@ export function rowToObject(row: LifeObjectRow): LifeObject {
     updatedAt: row.updated_at,
     visibility: row.visibility,
     shareToken: row.share_token,
+    folderId: row.folder_id ?? null,
     meta: row.meta ?? {},
   }
 }
@@ -171,6 +180,7 @@ export function objectToRow(object: LifeObject, userId: string): LifeObjectRow {
     updated_at: object.updatedAt,
     visibility: object.visibility,
     share_token: object.shareToken,
+    folder_id: object.folderId ?? null,
     meta: object.meta,
   }
 }

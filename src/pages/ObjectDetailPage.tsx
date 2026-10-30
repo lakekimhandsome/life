@@ -8,6 +8,8 @@ import {
 import { BackLink } from '../components/ui/BackLink'
 import { TypeBadge } from '../components/ui/TypeBadge'
 import { ObjectRelations } from '../components/object/ObjectRelations'
+import { NoteFolderControl } from '../components/object/NoteFolderControl'
+import { notesUrl } from '../lib/noteFolders'
 import { ObjectShareControl } from '../components/object/ObjectShareControl'
 import { isShareableObjectType } from '../core/types'
 import { getModuleForObjectType } from '../domain/modules'
@@ -37,7 +39,7 @@ export function ObjectDetailPage() {
   const schema = getSchema(object.type)
   const objectId = object.id
   const module = getModuleForObjectType(object.type)
-  const backTo = module?.path ?? '/'
+  const backTo = object.type === 'note' ? notesUrl(object.folderId) : module?.path ?? '/'
   const supportsMarkdown = supportsMarkdownBody(object.type)
   const goalTargetDate =
     object.type === 'goal' && typeof object.meta.targetDate === 'string' && object.meta.targetDate
@@ -65,6 +67,7 @@ export function ObjectDetailPage() {
         <BackLink to={backTo} />
         {supportsMarkdown ? (
           <div className="object-header-actions">
+            {object.type === 'note' ? <NoteFolderControl key={object.id} object={object} /> : null}
             {isShareableObjectType(object.type) ? (
               <ObjectShareControl object={object} />
             ) : null}

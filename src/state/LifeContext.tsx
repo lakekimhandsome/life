@@ -122,6 +122,7 @@ export function LifeProvider({ children }: { children: ReactNode }) {
 
       const optimistic: LifeObject = {
         ...previous,
+        folderId: input.folderId !== undefined ? input.folderId : previous.folderId,
         title: input.title?.trim() ?? previous.title,
         body: input.body !== undefined ? input.body.trim() : previous.body,
         occurredAt: input.occurredAt ?? previous.occurredAt,

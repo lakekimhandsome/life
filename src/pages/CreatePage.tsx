@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { Navigate, useParams } from 'react-router-dom'
+import { Navigate, useParams, useSearchParams } from 'react-router-dom'
 import {
   InlineMarkdownObject,
   type ObjectSaveState,
@@ -17,6 +17,8 @@ function isObjectType(value: string | undefined): value is ObjectType {
 
 export function CreatePage() {
   const { type } = useParams()
+  const [searchParams] = useSearchParams()
+  const folderId = type === 'note' ? searchParams.get('folder') : null
   const { createObject, updateObject } = useLife()
   const [saveState, setSaveState] = useState<ObjectSaveState>('saved')
   const createdIdRef = useRef<string | null>(null)
@@ -25,7 +27,7 @@ export function CreatePage() {
     return <Navigate to="/" replace />
   }
 
-  const backTo = getModuleForObjectType(type)?.path ?? '/'
+  const backTo = type === 'note' && folderId ? `/notes?folder=${encodeURIComponent(folderId)}` : getModuleForObjectType(type)?.path ?? '/'
   const now = new Date().toISOString()
   const draft: LifeObject = {
     id: 'new',
@@ -62,6 +64,7 @@ export function CreatePage() {
           }
           const created = await createObject({
             type,
+            folderId,
             ...input,
           })
           createdIdRef.current = created.id

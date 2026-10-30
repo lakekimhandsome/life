@@ -10,6 +10,7 @@ import { CreatePage } from './pages/CreatePage'
 import { EditPage } from './pages/EditPage'
 import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
+import { NotesPage } from './pages/NotesPage'
 import { ModulePage } from './pages/ModulePage'
 import { ObjectDetailPage } from './pages/ObjectDetailPage'
 import { OAuthConsentDemoPage, OAuthConsentPage } from './pages/OAuthConsentPage'
@@ -45,7 +46,7 @@ export default function App() {
                       <Route path="journal" element={<ModulePage />} />
                       <Route path="goals" element={<ModulePage />} />
                       <Route path="projects" element={<ModulePage />} />
-                      <Route path="notes" element={<ModulePage />} />
+                      <Route path="notes" element={<NotesPage />} />
                       <Route path="clipboard" element={<ClipboardPage />} />
                       <Route path="assets" element={<AssetsPage />} />
                       <Route path="assets/history" element={<AssetHistoryPage />} />

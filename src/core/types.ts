@@ -38,6 +38,7 @@ export interface LifeObject {
   updatedAt: string
   visibility: ObjectVisibility
   shareToken: string | null
+  folderId?: string | null
   meta: Record<string, string | number | boolean | null>
 }
 
@@ -60,7 +61,14 @@ export interface Relationship {
   createdAt: string
 }
 
+export type NoteFolder = {
+  id: string
+  name: string
+  parent_id: string | null
+}
+
 export interface CreateObjectInput {
+  folderId?: string | null
   type: ObjectType
   title: string
   body?: string
@@ -69,6 +77,7 @@ export interface CreateObjectInput {
 }
 
 export interface UpdateObjectInput {
+  folderId?: string | null
   title?: string
   body?: string
   occurredAt?: string

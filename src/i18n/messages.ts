@@ -40,6 +40,15 @@ export const en = {
   'modules.goals': 'Goals',
   'modules.projects': 'Projects',
   'modules.notes': 'Notes',
+  'folders.create': 'Create folder',
+  'folders.name': 'Folder name',
+  'folders.move': 'Move to folder',
+  'folders.moveHere': 'Move here',
+  'folders.up': 'Parent folder',
+  'folders.empty': 'No folders here',
+  'folders.failed': 'Couldn’t save the folder change. Please try again.',
+  'folders.notFound': 'Folder not found',
+
   'modules.clipboard': 'Clipboard',
 
   'object.journal': 'Journal',
@@ -402,6 +411,15 @@ export const ko: Record<MessageKey, string> = {
   'modules.goals': '목표',
   'modules.projects': '프로젝트',
   'modules.notes': '노트',
+  'folders.create': '폴더 만들기',
+  'folders.name': '폴더 이름',
+  'folders.move': '폴더로 이동',
+  'folders.moveHere': '여기로 이동',
+  'folders.up': '상위 폴더',
+  'folders.empty': '이 위치에 폴더가 없습니다',
+  'folders.failed': '폴더 변경을 저장하지 못했습니다. 다시 시도해 주세요.',
+  'folders.notFound': '폴더를 찾을 수 없습니다',
+
   'modules.clipboard': '클립보드',
 
   'object.journal': '일기',

@@ -87,6 +87,7 @@ export async function createObject(input: CreateObjectInput): Promise<LifeObject
     updatedAt: timestamp,
     visibility: 'private',
     shareToken: null,
+    folderId: input.folderId ?? null,
     meta: input.meta ?? {},
   }
 
@@ -107,6 +108,7 @@ export async function updateObject(
 
   const next: LifeObject = {
     ...existing,
+    folderId: input.folderId !== undefined ? input.folderId : existing.folderId,
     title: input.title?.trim() ?? existing.title,
     body: input.body !== undefined ? input.body.trim() : existing.body,
     occurredAt: input.occurredAt ?? existing.occurredAt,
