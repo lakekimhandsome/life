@@ -3643,7 +3643,8 @@ html[data-theme='dark'] .clipboard-image-remove:hover {
     border-top: 1px solid var(--line);
   }
 
-  .user-menu--sidebar .user-menu-trigger {
+  .user-menu--sidebar .user-menu-trigger,
+  html[data-theme='dark'] .user-menu--sidebar .user-menu-trigger {
     width: 100%;
     height: auto;
     justify-content: flex-start;
