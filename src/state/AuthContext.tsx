@@ -95,7 +95,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { error: new Error(t('error.noSupabase')) }
     }
 
-    const { error } = await supabase.auth.signOut()
+    const { error } = await supabase.auth.signOut({ scope: 'local' })
     return { error: error ? new Error(error.message) : null }
   }, [configured])
 
