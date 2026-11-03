@@ -2,7 +2,7 @@ import {
   ListTodo,
   Clipboard,
   Wallet,
-  Folder,
+  FolderClosed,
   Notebook,
   StickyNote,
   Target,
@@ -15,7 +15,7 @@ const ICONS: Record<ModuleId, LucideIcon> = {
   assets: Wallet,
   journal: Notebook,
   goals: Target,
-  projects: Folder,
+  projects: FolderClosed,
   notes: StickyNote,
   clipboard: Clipboard,
 }
