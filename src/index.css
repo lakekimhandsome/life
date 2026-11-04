@@ -3559,11 +3559,6 @@ html[data-theme='dark'] .clipboard-image-remove:hover {
     z-index: 22;
     cursor: col-resize;
     touch-action: none;
-  }
-
-  .sidebar-resizer:focus-visible,
-  .is-resizing-sidebar .sidebar-resizer {
-    background: color-mix(in srgb, var(--accent) 30%, transparent);
     outline: none;
   }
 
