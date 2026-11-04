@@ -44,6 +44,20 @@ import { BodyImagePlaceholder, BodyImageToolbar } from './BodyImageControls'
 import { ImageGallery } from './ImageGallery'
 import { resolveBodyImage } from '../../lib/bodyImages'
 
+import { registerFormatExit } from './formatExit'
+
+function FormatExitPlugin() {
+  const [editor] = useLexicalComposerContext()
+  useEffect(() => registerFormatExit(editor), [editor])
+  return null
+}
+
+const formatExitPlugin = realmPlugin({
+  init(realm) {
+    realm.pub(addComposerChild$, FormatExitPlugin)
+  },
+})
+
 const MAX_SWIPE_DURATION_MS = 500
 
 function splitTableRow(value: string) {
@@ -397,6 +411,7 @@ export function MarkdownEditor({
       bodyImageInsertPlugin(),
       listsPlugin(),
       quotePlugin(),
+      formatExitPlugin(),
       thematicBreakPlugin(),
       linkPlugin(),
       tablePlugin(),
