@@ -96,6 +96,8 @@ export function SettingsPage() {
       </nav>
 
       <footer className="settings-commit" title={`Commit ${__COMMIT_HASH__}`}>
+        Lake's Interface For Everything™
+        <br />
         {__COMMIT_HASH__}
       </footer>
     </div>
