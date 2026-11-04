@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Plus } from 'lucide-react'
+import { ChevronRight, Plus } from 'lucide-react'
 import { Link, Navigate, useLocation } from 'react-router-dom'
 import { ObjectCard } from '../components/object/ObjectCard'
 import { BackLink } from '../components/ui/BackLink'
@@ -80,11 +80,12 @@ export function ModulePage() {
       ) : isProject ? (
         <div className="object-groups">
           {projectGroups.map((group) => (
-            <section key={group.value} className="object-group" aria-label={group.label}>
-              <header className="object-group-header">
+            <details key={group.value} className="object-group" open>
+              <summary className="object-group-header">
+                <ChevronRight size={18} aria-hidden="true" />
                 <h2>{group.label}</h2>
                 <strong>{group.items.length}</strong>
-              </header>
+              </summary>
               {group.items.length === 0 ? (
                 <p className="object-group-empty">{t('common.none')}</p>
               ) : (
@@ -94,7 +95,7 @@ export function ModulePage() {
                   ))}
                 </div>
               )}
-            </section>
+            </details>
           ))}
         </div>
       ) : (

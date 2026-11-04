@@ -2014,12 +2014,21 @@ button.assets-row-title:focus-visible {
 
 .object-group-header {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
+  align-items: center;
   gap: 1rem;
   margin-bottom: 0;
   padding: 0 0.1rem 0.55rem;
   border-bottom: 1px solid var(--line-strong);
+  cursor: pointer;
+  list-style: none;
+}
+
+.object-group-header::-webkit-details-marker {
+  display: none;
+}
+
+.object-group[open] > .object-group-header svg {
+  transform: rotate(90deg);
 }
 
 .object-group-header h2 {
@@ -2029,6 +2038,7 @@ button.assets-row-title:focus-visible {
 }
 
 .object-group-header strong {
+  margin-left: auto;
   color: var(--ink-soft);
   font-size: 0.95rem;
 }
