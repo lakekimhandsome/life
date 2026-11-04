@@ -66,7 +66,7 @@ export function NotesPage() {
           <h1 className="notes-path"><Link to="/notes">{t('modules.notes')}</Link><span>
             {path.map((folder) => <span key={folder.id}>{' / '}<Link to={notesUrl(folder.id)}>{folder.name}</Link></span>)}
           </span></h1>
-          {current && <button type="button" className="object-header-action note-folder-delete"
+          {current && <button type="button" className="module-header-btn note-folder-delete"
             aria-label={t('folders.deleteNamed', { name: current.name })} title={t('folders.delete')}
             disabled={saving || loading || error} onClick={() => { setDeleteError(false); setDeleting(current) }}>
             <FolderX size={20} strokeWidth={1.75} aria-hidden="true" />
