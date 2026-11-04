@@ -3444,16 +3444,24 @@ html[data-theme='dark'] select option {
   font-size: 0.78rem;
 }
 
-.clipboard-image-copied {
+.clipboard-image-copy-icon {
   position: absolute;
   inset: auto 0.35rem 0.35rem auto;
-  padding: 0.18rem 0.4rem;
+  display: grid;
+  place-items: center;
+  width: 1.45rem;
+  height: 1.45rem;
   border-radius: 999px;
   background: rgba(18, 32, 39, 0.72);
   color: #fff;
-  font-size: 0.65rem;
-  font-weight: 700;
+  opacity: 0;
   pointer-events: none;
+}
+
+.clipboard-image-copy:enabled:hover .clipboard-image-copy-icon,
+.clipboard-image-copy:focus-visible .clipboard-image-copy-icon,
+.clipboard-image-copy-icon.is-copied {
+  opacity: 1;
 }
 
 .clipboard-image-remove {
@@ -3501,7 +3509,7 @@ html[data-theme='dark'] select option {
   color: var(--muted);
 }
 
-html[data-theme='dark'] .clipboard-image-copied,
+html[data-theme='dark'] .clipboard-image-copy-icon,
 html[data-theme='dark'] .clipboard-image-remove {
   background: rgba(0, 0, 0, 0.72);
 }

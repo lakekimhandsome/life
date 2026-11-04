@@ -5,7 +5,7 @@ import {
   useState,
   type DragEvent as ReactDragEvent,
 } from 'react'
-import { X } from 'lucide-react'
+import { Check, Copy, X } from 'lucide-react'
 import { BackLink } from '../components/ui/BackLink'
 import { createId } from '../core/id'
 import type { ClipboardImage } from '../lib/database'
@@ -364,9 +364,13 @@ export function ClipboardPage() {
                 ) : (
                   <span className="clipboard-image-missing">{t('clipboard.image')}</span>
                 )}
-                {copiedId === image.id ? (
-                  <span className="clipboard-image-copied">{t('clipboard.copied')}</span>
-                ) : null}
+                <span className={`clipboard-image-copy-icon${copiedId === image.id ? ' is-copied' : ''}`}>
+                  {copiedId === image.id ? (
+                    <Check size={15} strokeWidth={2.2} aria-hidden="true" />
+                  ) : (
+                    <Copy size={15} strokeWidth={2.2} aria-hidden="true" />
+                  )}
+                </span>
               </button>
               <button
                 type="button"
