@@ -366,9 +366,9 @@ export function ClipboardPage() {
                 )}
                 <span className={`clipboard-image-copy-icon${copiedId === image.id ? ' is-copied' : ''}`}>
                   {copiedId === image.id ? (
-                    <Check size={15} strokeWidth={2.2} aria-hidden="true" />
+                    <Check size={22} strokeWidth={2.2} aria-hidden="true" />
                   ) : (
-                    <Copy size={15} strokeWidth={2.2} aria-hidden="true" />
+                    <Copy size={22} strokeWidth={2.2} aria-hidden="true" />
                   )}
                 </span>
               </button>
