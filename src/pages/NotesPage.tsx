@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { ChevronRight, FolderPlus, FolderX, Plus } from 'lucide-react'
+import { ChevronRight, Folder, FolderPlus, FolderX, Plus } from 'lucide-react'
 import type { NoteFolder } from '../core/types'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { ObjectCard } from '../components/object/ObjectCard'
@@ -94,8 +94,9 @@ export function NotesPage() {
                 ...allNotes.filter((note) => note.folderId === folder.id).map((note) => note.title)].join(', ')
               return <Link key={folder.id} to={notesUrl(folder.id)} className="object-row note-folder-item">
                 <div className="object-row-main">
-                  <div className="object-row-meta"><span className="type-badge">Folder</span></div>
-                  <h3>{folder.name}</h3>
+                  <h3><Folder size={20} strokeWidth={1.5} aria-hidden="true" />
+                    <span><span className="sr-only">Folder: </span>{folder.name}</span>
+                  </h3>
                   {preview && <p>{preview}</p>}
                 </div>
                 <ChevronRight className="object-row-arrow" size={18} strokeWidth={2} aria-hidden="true" />
