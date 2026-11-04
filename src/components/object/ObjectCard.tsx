@@ -35,20 +35,15 @@ export function ObjectCard({ object }: { object: LifeObject }) {
       style={{ '--row-accent': schema.accent } as CSSProperties}
     >
       <div className="object-row-main">
-        {shownDate && object.type !== 'project' ? (
-          <div className="object-row-meta">
+        <h3>{object.title}</h3>
+        {bodyPreview ? <p>{bodyPreview}</p> : null}
+        {shownDate ? (
+          <div className="object-row-tags">
             <time dateTime={shownDate}>
               {object.type === 'goal'
                 ? formatDate(fromDateInputValue(shownDate.slice(0, 10)))
                 : formatDate(shownDate)}
             </time>
-          </div>
-        ) : null}
-        <h3>{object.title}</h3>
-        {bodyPreview ? <p>{bodyPreview}</p> : null}
-        {shownDate && object.type === 'project' ? (
-          <div className="object-row-tags">
-            <time dateTime={shownDate}>{formatDate(shownDate)}</time>
           </div>
         ) : null}
         {metaBits.length > 0 ? (
