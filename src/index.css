@@ -2103,7 +2103,8 @@ button.assets-row-title:focus-visible {
   margin-top: 0.65rem;
 }
 
-.object-row-tags span {
+.object-row-tags span,
+.object-row-tags time {
   font-size: 0.78rem;
   color: var(--muted);
 }
