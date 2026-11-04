@@ -6,7 +6,6 @@ import { stripMarkdown } from '../../lib/markdown'
 import { formatMetaValue, getSchema, supportsMarkdownBody } from '../../domain/schemas'
 import type { LifeObject } from '../../core/types'
 import { useT } from '../../state/LocaleContext'
-import { TypeBadge } from '../ui/TypeBadge'
 
 export function ObjectCard({ object }: { object: LifeObject }) {
   useT()
@@ -35,16 +34,15 @@ export function ObjectCard({ object }: { object: LifeObject }) {
       style={{ '--row-accent': schema.accent } as CSSProperties}
     >
       <div className="object-row-main">
-        <div className="object-row-meta">
-          <TypeBadge type={object.type} />
-          {shownDate ? (
+        {shownDate ? (
+          <div className="object-row-meta">
             <time dateTime={shownDate}>
               {object.type === 'goal'
                 ? formatDate(fromDateInputValue(shownDate.slice(0, 10)))
                 : formatDate(shownDate)}
             </time>
-          ) : null}
-        </div>
+          </div>
+        ) : null}
         <h3>{object.title}</h3>
         {bodyPreview ? <p>{bodyPreview}</p> : null}
         {metaBits.length > 0 ? (
