@@ -436,6 +436,7 @@ export function MarkdownEditor({
         className="inline-markdown-editor"
         contentEditableClassName="markdown-content inline-markdown-content"
         markdown={value}
+        suppressHtmlProcessing
         placeholder={placeholder}
         onChange={(markdown, initialMarkdownNormalize) => {
           if (!initialMarkdownNormalize) onChange(markdown)

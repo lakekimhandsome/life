@@ -30,6 +30,9 @@ export function Check() {
       <MarkdownEditor value={tableValue} onChange={setTableValue} />
       <pre aria-label="Serialized table markdown">{tableValue}</pre>
     </section>
+    <section aria-label="Comparison check">
+      <MarkdownEditor value={'η<0.3이면 x>1.5W\n\nx<3.75W → η>0.15'} onChange={() => {}} onError={setResult} />
+    </section>
   </>
 }
 createRoot(document.getElementById('root')!).render(<AuthProvider><LocaleProvider><Check /></LocaleProvider></AuthProvider>)
