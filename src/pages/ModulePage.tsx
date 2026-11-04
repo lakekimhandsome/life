@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { ChevronRight, Plus } from 'lucide-react'
 import { Link, Navigate, useLocation } from 'react-router-dom'
 import { ObjectCard } from '../components/object/ObjectCard'
@@ -11,6 +11,7 @@ import { useLife } from '../state/LifeContext'
 import { useT } from '../state/LocaleContext'
 
 const PROJECT_STATUS_VALUES = ['active', 'idea', 'paused', 'done'] as const
+const PROJECT_GROUP_STORAGE_KEY = 'life-project-group-'
 const PROJECT_STATUS_KEYS: Record<(typeof PROJECT_STATUS_VALUES)[number], MessageKey> = {
   active: 'status.active',
   idea: 'status.idea',
@@ -30,6 +31,13 @@ export function ModulePage() {
   const t = useT()
   const { pathname } = useLocation()
   const { ready, listByType } = useLife()
+  const [closedGroups, setClosedGroups] = useState(() => {
+    try {
+      return PROJECT_STATUS_VALUES.filter((status) => localStorage.getItem(PROJECT_GROUP_STORAGE_KEY + status) === 'closed')
+    } catch {
+      return []
+    }
+  })
 
   const moduleId = pathname.replace(/^\//, '') as ModuleId
   const module = LIFE_MODULES.find((item) => item.id === moduleId)
@@ -80,7 +88,15 @@ export function ModulePage() {
       ) : isProject ? (
         <div className="object-groups">
           {projectGroups.map((group) => (
-            <details key={group.value} className="object-group" open>
+            <details key={group.value} className="object-group" open={!closedGroups.includes(group.value)}
+              onToggle={(event) => {
+                const closed = !event.currentTarget.open
+                setClosedGroups((previous) => previous.includes(group.value) === closed ? previous
+                  : closed ? [...previous, group.value] : previous.filter((status) => status !== group.value))
+                try {
+                  localStorage.setItem(PROJECT_GROUP_STORAGE_KEY + group.value, closed ? 'closed' : 'open')
+                } catch { /* Keep toggling available when storage is blocked. */ }
+              }}>
               <summary className="object-group-header">
                 <ChevronRight size={18} aria-hidden="true" />
                 <h2>{group.label}</h2>

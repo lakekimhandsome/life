@@ -46,12 +46,30 @@ async function check(engine) {
       await summary.click()
       assert.equal(await page.locator('.object-group[open]').count(), 4)
     }
+    await page.setViewportSize({ width: 1024, height: 900 })
+    await page.locator('.object-group summary').nth(0).click()
+    await page.locator('.object-group summary').nth(2).click()
+    await page.waitForFunction(() => localStorage.getItem('life-project-group-active') === 'closed'
+      && localStorage.getItem('life-project-group-paused') === 'closed')
+    await page.locator('.sidebar-nav a[href="/notes"]').click()
+    await page.locator('.object-row').first().waitFor()
+    await page.locator('.sidebar-nav a[href="/projects"]').click()
+    await page.locator('.object-group').first().waitFor()
+    assert.deepEqual(await page.locator('.object-group').evaluateAll((groups) => groups.map((group) => group.open)), [false, true, false, true])
+    await page.reload()
+    await page.locator('.object-group').first().waitFor()
+    assert.deepEqual(await page.locator('.object-group').evaluateAll((groups) => groups.map((group) => group.open)), [false, true, false, true])
+    await page.locator('.object-group summary').first().click()
+    await page.waitForFunction(() => localStorage.getItem('life-project-group-active') === 'open')
+    await page.reload()
+    await page.locator('.object-group').first().waitFor()
+    assert.deepEqual(await page.locator('.object-group').evaluateAll((groups) => groups.map((group) => group.open)), [true, true, false, true])
     for (const path of ['notes', 'journal', 'goals']) {
       await page.goto(`${base}/${path}`)
       await page.locator('.object-row').first().waitFor()
       assert.equal(await page.locator('.object-group').count(), 0)
     }
-    console.log(`${engine.name()}: independent groups, counts, click/Enter/Space and other lists passed`)
+    console.log(`${engine.name()}: toggling, navigation/reload persistence and other lists passed`)
   } finally { await browser.close() }
 }
 ;(async () => { await check(chromium); await check(webkit) })().catch((error) => { console.error(error); process.exitCode = 1 })
