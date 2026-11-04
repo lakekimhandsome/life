@@ -48,7 +48,7 @@ export function Sidebar() {
   }, [getObject, pathname])
 
   return (
-    <aside className="app-sidebar">
+    <aside id="app-sidebar" className="app-sidebar">
       <NavLink to="/" className="sidebar-brand" aria-label={t('nav.lifeHome')} end>
         <LifeMark size={28} />
         <span>LIFE</span>

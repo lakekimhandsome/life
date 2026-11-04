@@ -30,6 +30,7 @@ export const en = {
   'common.none': 'None',
 
   'nav.main': 'Main menu',
+  'nav.resizeSidebar': 'Resize sidebar',
   'nav.lifeHome': 'LIFE home',
   'nav.userMenu': 'User menu',
 
@@ -406,6 +407,7 @@ export const ko: Record<MessageKey, string> = {
   'common.none': '없음',
 
   'nav.main': '주요 메뉴',
+  'nav.resizeSidebar': '사이드바 너비 조절',
   'nav.lifeHome': 'LIFE 홈',
   'nav.userMenu': '사용자 메뉴',
 

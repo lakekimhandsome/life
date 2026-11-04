@@ -106,7 +106,8 @@ select {
   min-width: 0;
 }
 
-.app-sidebar {
+.app-sidebar,
+.sidebar-resizer {
   display: none;
 }
 
@@ -3523,7 +3524,7 @@ html[data-theme='dark'] .clipboard-image-remove:hover {
 @media (min-width: 800px) {
   .app-shell {
     display: grid;
-    grid-template-columns: 15.5rem minmax(0, 1fr);
+    grid-template-columns: var(--sidebar-width, 248px) minmax(0, 1fr);
     height: 100vh;
     overflow: hidden;
   }
@@ -3546,6 +3547,31 @@ html[data-theme='dark'] .clipboard-image-remove:hover {
 
   html[data-theme='dark'] .app-sidebar {
     background: rgba(0, 0, 0, 0.72);
+  }
+
+  .sidebar-resizer {
+    display: block;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: calc(var(--sidebar-width, 248px) - 4px);
+    width: 8px;
+    z-index: 22;
+    cursor: col-resize;
+    touch-action: none;
+  }
+
+  .sidebar-resizer:hover,
+  .sidebar-resizer:focus-visible,
+  .is-resizing-sidebar .sidebar-resizer {
+    background: color-mix(in srgb, var(--accent) 30%, transparent);
+    outline: none;
+  }
+
+  .is-resizing-sidebar,
+  .is-resizing-sidebar * {
+    cursor: col-resize !important;
+    user-select: none !important;
   }
 
   .sidebar-brand {
