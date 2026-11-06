@@ -20,6 +20,11 @@ export function startVerticalReorder({
   const draggedRow = rows[draggedIndex]
   if (!draggedRow) return
 
+  const list = draggedRow.parentElement
+  if (!list) return
+  const listTop = list.getBoundingClientRect().top
+  list.classList.add('is-reordering')
+
   const rects = rows.map((row) => row.getBoundingClientRect())
   const draggedRect = rects[draggedIndex]
   const height = draggedRect.height
@@ -29,6 +34,14 @@ export function startVerticalReorder({
   let targetIndex = draggedIndex
 
   const moveRows = (dragOffset: number) => {
+    const draggedTop = draggedRect.top + dragOffset
+    const separators = rects.slice(0, -1).filter((rect, index) =>
+      index !== targetIndex - 1 && index !== targetIndex &&
+      (rect.bottom < draggedTop || rect.bottom > draggedTop + height),
+    )
+    list.style.backgroundImage = separators.map(() => 'linear-gradient(var(--line), var(--line))').join(', ') || 'none'
+    list.style.backgroundPosition = separators.map((rect) => `0 ${rect.bottom - listTop}px`).join(', ')
+
     rows.forEach((row, index) => {
       let offset = 0
       if (index === draggedIndex) offset = dragOffset
@@ -71,6 +84,9 @@ export function startVerticalReorder({
         row.style.transition = 'none'
         row.style.transform = ''
       })
+      list.classList.remove('is-reordering')
+      list.style.backgroundImage = ''
+      list.style.backgroundPosition = ''
       flushSync(() => onDrop(targetIndex))
       window.requestAnimationFrame(() => {
         rows.forEach((row) => {
@@ -80,6 +96,7 @@ export function startVerticalReorder({
     }, 160)
   }
 
+  moveRows(0)
   handle.setPointerCapture(pointerId)
   handle.addEventListener('pointermove', onMove)
   handle.addEventListener('pointerup', finish)

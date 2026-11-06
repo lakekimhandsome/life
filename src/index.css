@@ -3202,6 +3202,17 @@ select.inline-meta-control {
   box-shadow: 0 1px 0 var(--line);
 }
 
+.todo-list.is-reordering,
+.card-edit-list.is-reordering {
+  background-repeat: no-repeat;
+  background-size: 100% 1px;
+}
+
+.todo-list.is-reordering > .todo-item,
+.card-edit-list.is-reordering > .card-edit-row {
+  box-shadow: none;
+}
+
 .card-edit-row {
   display: flex;
   align-items: center;
