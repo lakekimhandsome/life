@@ -3577,6 +3577,10 @@ html[data-theme='dark'] .clipboard-image-remove:hover {
     padding-inline: 0.45rem;
   }
 
+  .is-sidebar-collapsed .user-menu--sidebar {
+    border-top: 0;
+  }
+
   .is-sidebar-collapsed .sidebar-brand,
   .is-sidebar-collapsed .sidebar-link,
   .is-sidebar-collapsed .user-menu--sidebar .user-menu-trigger {
