@@ -2,7 +2,7 @@ import { $createImageNode, addComposerChild$, realmPlugin } from '@mdxeditor/edi
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { $createParagraphNode, $getNodeByKey, $getSelection, $isRangeSelection, $insertNodes, $isRootOrShadowRoot, $setSelection } from 'lexical'
 import { useEffect, useRef, useState } from 'react'
-import { ImagePlus } from 'lucide-react'
+import { Image as ImageIcon } from 'lucide-react'
 import { imageFilesFromDataTransfer } from '../../lib/clipboard'
 import { uploadBodyImage } from '../../lib/bodyImages'
 import { useT } from '../../state/LocaleContext'
@@ -78,13 +78,13 @@ function BodyImageInsert() {
   }, [editor])
 
   return <div className="body-image-insert" contentEditable={false}>
-    <button type="button" className="btn" disabled={uploading}
+    <button type="button" className="body-image-insert-button" disabled={uploading}
       onPointerDown={(event) => {
         if (event.pointerType === 'mouse') event.preventDefault()
         rememberSelection()
       }}
       onClick={() => { rememberSelection(); input.current?.click() }}>
-      <ImagePlus size={16} aria-hidden="true" /> {t(uploading ? 'bodyImage.uploading' : 'bodyImage.insert')}
+      <ImageIcon size={16} aria-hidden="true" /> {t(uploading ? 'bodyImage.uploading' : 'bodyImage.insert')}
     </button>
     <input ref={input} type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple hidden
       onChange={(event) => { void insert([...event.target.files ?? []]); event.target.value = '' }} />

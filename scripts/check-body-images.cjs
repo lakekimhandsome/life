@@ -41,6 +41,13 @@ async function check(engine) {
     await page.goto(`${process.env.TEST_BASE_URL || 'http://127.0.0.1:5173'}/body-image-check.html`)
     const images = page.locator('.inline-markdown-content img[src]')
     await images.nth(1).waitFor()
+    const addPhoto = page.getByRole('button', { name: '사진 추가', exact: true })
+    assert((await addPhoto.boundingBox()).height >= 44, 'Photo button keeps a mobile touch target')
+    await addPhoto.focus()
+    assert(await addPhoto.evaluate((button) => button.matches(':focus-visible')), 'Photo button supports keyboard focus')
+    const [chooser] = await Promise.all([page.waitForEvent('filechooser'), addPhoto.click()])
+    assert(chooser.isMultiple(), 'Photo button opens the multiple-file picker')
+    await chooser.setFiles([])
     const dimensions = await images.evaluateAll((items) => items.map((image) => {
       const rect = image.getBoundingClientRect()
       return { width: rect.width, height: rect.height }
@@ -208,7 +215,7 @@ async function check(engine) {
     await pendingTap
     await page.locator('dialog').waitFor({ state: 'detached' })
     const pendingChooser = page.waitForEvent('filechooser')
-    await page.getByRole('button', { name: '이미지 넣기', exact: true }).tap()
+    await page.getByRole('button', { name: '사진 추가', exact: true }).tap()
     await (await pendingChooser).setFiles([])
     assert.deepEqual(errors, [])
     console.log(`PASS ${engine.name()}: compact thumbnails, pinch zoom/pan/swipe, gallery menu, copy/download/share, fetch errors, read-only safety, confirmed removal and native picker`)
