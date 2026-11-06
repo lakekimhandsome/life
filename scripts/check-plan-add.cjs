@@ -79,7 +79,7 @@ async function check(engine) {
     await until(() => inserts.length === 1)
     assert.equal(rows.length, 0, 'Plan must be visible before server saves it')
     await page.locator('.todo-toggle').first().click()
-    assert.equal(await page.locator('.todo-toggle').first().getAttribute('aria-pressed'), 'true')
+    await page.waitForFunction(() => document.querySelector('.todo-toggle')?.getAttribute('aria-pressed') === 'true')
     assert.equal(patches.length, 0)
     await add('두 번째 계획')
     await until(() => inserts.length === 2)
@@ -109,7 +109,7 @@ async function check(engine) {
     await page.reload()
     await page.getByRole('button', { name: '첫 계획', exact: true }).waitFor()
     assert.equal(await page.locator('.todo-item').count(), 2)
-    assert.equal(await page.locator('.todo-toggle').first().getAttribute('aria-pressed'), 'true')
+    await page.waitForFunction(() => document.querySelector('.todo-toggle')?.getAttribute('aria-pressed') === 'true')
     async function remove(title) {
       const row = page.locator('.todo-item').filter({ has: page.getByRole('button', { name: title, exact: true }) })
       const box = await row.boundingBox()
