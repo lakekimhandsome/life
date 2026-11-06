@@ -39,8 +39,8 @@ export function startVerticalReorder({
       index !== targetIndex - 1 && index !== targetIndex &&
       (rect.bottom < draggedTop || rect.bottom > draggedTop + height),
     )
-    list.style.backgroundImage = separators.map(() => 'linear-gradient(var(--line), var(--line))').join(', ') || 'none'
-    list.style.backgroundPosition = separators.map((rect) => `0 ${rect.bottom - listTop}px`).join(', ')
+    list.style.setProperty('--reorder-lines', separators.map(() => 'linear-gradient(var(--line), var(--line))').join(', ') || 'none')
+    list.style.setProperty('--reorder-line-positions', separators.map((rect) => `0 ${rect.bottom - listTop}px`).join(', '))
 
     rows.forEach((row, index) => {
       let offset = 0
@@ -85,8 +85,8 @@ export function startVerticalReorder({
         row.style.transform = ''
       })
       list.classList.remove('is-reordering')
-      list.style.backgroundImage = ''
-      list.style.backgroundPosition = ''
+      list.style.removeProperty('--reorder-lines')
+      list.style.removeProperty('--reorder-line-positions')
       flushSync(() => onDrop(targetIndex))
       window.requestAnimationFrame(() => {
         rows.forEach((row) => {

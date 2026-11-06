@@ -1,12 +1,13 @@
-// Start npm run dev first. Run with Playwright available in NODE_PATH.
+// Start npm run dev first. Run with Playwright and pngjs available in NODE_PATH.
 const { chromium, webkit } = require('playwright')
 const assert = require('node:assert/strict')
+const { PNG } = require('pngjs')
 const { readFileSync } = require('node:fs')
 
-async function check(engine) {
+async function check(engine, scale) {
   const browser = await engine.launch({ headless: true })
   try {
-    const page = await browser.newPage({ viewport: { width: 900, height: 1000 } })
+    const page = await browser.newPage({ deviceScaleFactor: scale, viewport: { width: 900, height: 1000 } })
     page.setDefaultTimeout(10000)
     const errors = []
     page.on('pageerror', (error) => errors.push(error.message))
@@ -39,6 +40,7 @@ async function check(engine) {
       const list = page.locator(selector).first()
       const rows = list.locator(`:scope > [${attribute}]`)
       await rows.nth(4).waitFor()
+      await page.evaluate(() => document.fonts.ready)
       await page.evaluate(() => Promise.all(document.getAnimations().filter((animation) => animation.effect.getTiming().iterations !== Infinity).map((animation) => animation.finished.catch(() => {}))))
       for (const theme of ['light', 'dark']) {
         await page.evaluate((theme) => { document.documentElement.dataset.theme = theme }, theme)
@@ -60,7 +62,7 @@ async function check(engine) {
           const result = await list.evaluate((list) => {
             const rect = list.getBoundingClientRect()
             const dragged = list.querySelector('.is-dragging').getBoundingClientRect()
-            return { lines: list.style.backgroundImage === 'none' ? [] : list.style.backgroundPosition.split(',').map((position) => parseFloat(position.trim().split(' ')[1]) + rect.top),
+            return { lines: list.style.getPropertyValue('--reorder-lines') === 'none' ? [] : list.style.getPropertyValue('--reorder-line-positions').split(',').map((position) => parseFloat(position.trim().split(' ')[1]) + rect.top),
               shadows: [...list.children].map((row) => getComputedStyle(row).boxShadow), top: dragged.top, bottom: dragged.bottom }
           })
           assert(result.shadows.every((shadow) => shadow === 'none'), 'No row carries a separator during drag')
@@ -75,22 +77,39 @@ async function check(engine) {
         await checkLines(1)
         await page.mouse.move(x, y + initial[1].height * 1.5, { steps: 8 })
         await checkLines(2)
+        await page.waitForTimeout(200)
+        const geometry = await list.evaluate((list) => ({
+          top: list.getBoundingClientRect().top,
+          x: list.getBoundingClientRect().right - 20,
+          positions: list.style.getPropertyValue('--reorder-line-positions'),
+          paper: getComputedStyle(list).backgroundColor.match(/\d+/g).slice(0, 3).map(Number),
+        }))
+        const screenshot = PNG.sync.read(await page.screenshot())
+        for (const position of geometry.positions.split(',')) {
+          const y = (geometry.top + parseFloat(position.trim().split(' ')[1])) * scale
+          let thickness = 0
+          for (let pixelY = Math.floor(y) - 2 * scale; pixelY <= Math.ceil(y) + 2 * scale; pixelY++) {
+            const offset = (pixelY * screenshot.width + Math.round(geometry.x * scale)) * 4
+            if (geometry.paper.some((channel, index) => Math.abs(channel - screenshot.data[offset + index]) > 12)) thickness++
+          }
+          assert.equal(thickness, scale, `${path}: every separator is 1 CSS pixel thick at ${scale}x`)
+        }
         await page.mouse.move(x, initial[0].top + 2, { steps: 8 })
         await checkLines(0)
         if (process.env.SCREENSHOT_DIR) await page.screenshot({ path: `${process.env.SCREENSHOT_DIR}/${path.includes('cards') ? 'cards' : 'plans'}-${theme}-${engine.name()}.png` })
         await page.mouse.up()
         await page.waitForFunction((selector) => !document.querySelector(selector).classList.contains('is-reordering'), selector)
         assert.equal(await rows.first().getAttribute(attribute), ids[1], 'Drop still changes the order')
-        assert.equal(await list.evaluate((list) => list.style.backgroundImage), '')
+        assert.equal(await list.evaluate((list) => list.style.getPropertyValue('--reorder-lines')), '')
         assert(await rows.first().evaluate((row) => getComputedStyle(row).boxShadow !== 'none'), 'Normal separators return after drop')
         assert(await rows.evaluateAll((rows) => rows.every((row) => !row.style.transform)), 'Transforms are cleaned up')
       }
     }
     assert.deepEqual(errors, [])
-    console.log(`PASS ${engine.name()}: plans/cards, light/dark, stationary separators, clear item/gap edges, reorder and cleanup`)
+    console.log(`PASS ${engine.name()} ${scale}x: plans/cards, light/dark, stationary separators, clear item/gap edges, reorder and cleanup`)
   } finally {
     await browser.close()
   }
 }
-;(async () => { for (const engine of [chromium, webkit]) await check(engine) })()
+;(async () => { for (const engine of [chromium, webkit]) for (const scale of [1, 2]) await check(engine, scale) })()
   .catch((error) => { console.error(error); process.exitCode = 1 })

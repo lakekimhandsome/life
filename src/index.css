@@ -3204,6 +3204,19 @@ select.inline-meta-control {
 
 .todo-list.is-reordering,
 .card-edit-list.is-reordering {
+  position: relative;
+}
+
+/* Draw above row backgrounds so fractional transforms cannot clip the lines. */
+.todo-list.is-reordering::after,
+.card-edit-list.is-reordering::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background-image: var(--reorder-lines, none);
+  background-position: var(--reorder-line-positions);
   background-repeat: no-repeat;
   background-size: 100% 1px;
 }
