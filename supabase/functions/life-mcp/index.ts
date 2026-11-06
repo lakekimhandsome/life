@@ -63,13 +63,13 @@ const tools: Tool[] = [
   },
   {
     name: 'update_object',
-    description: 'Update an existing LIFE object. Omitted top-level fields stay unchanged. Supplied meta keys are shallow-merged; omitted meta keys stay unchanged, and an empty meta object does not change meta.',
+    description: 'Update an existing LIFE object in the signed-in account. Omitted top-level fields stay unchanged. A supplied body replaces the entire body; read the current object and retain its content when making a partial edit. Supplied meta keys are shallow-merged; omitted meta keys stay unchanged, and an empty meta object does not change meta.',
     inputSchema: {
       type: 'object',
       properties: {
         id: { type: 'string' },
         title: { type: 'string', minLength: 1 },
-        body: { type: 'string' },
+        body: { type: 'string', description: 'Complete replacement Markdown body, preserved verbatim. Omit to leave the body unchanged.' },
         occurredAt: { type: 'string', format: 'date-time' },
         meta: {
           type: 'object',
@@ -80,7 +80,7 @@ const tools: Tool[] = [
       required: ['id'],
       additionalProperties: false,
     },
-    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false },
+    annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: false },
   },
   {
     name: 'delete_object',
@@ -234,7 +234,7 @@ async function updateObject(args: JsonObject, authorization: string) {
   if (args.title !== undefined) patch.title = requiredString(args.title, 'title')
   if (args.body !== undefined) {
     if (typeof args.body !== 'string') throw new Error('body must be a string')
-    patch.body = args.body.trim()
+    patch.body = args.body
   }
   if (args.occurredAt !== undefined) patch.occurred_at = optionalIso(args.occurredAt, 'occurredAt')
   const meta = optionalMeta(args.meta)
@@ -331,8 +331,6 @@ Deno.serve(async (req) => {
   if (new URL(req.url).pathname.endsWith('/.well-known/oauth-protected-resource')) {
     return json(protectedResourceMetadata())
   }
-  if (req.method !== 'POST') return new Response('Method not allowed', { status: 405 })
-
   const authorization = bearer(req)
   const user = authorization ? await getUser(authorization) : null
   if (!authorization || !user) {
@@ -342,6 +340,8 @@ Deno.serve(async (req) => {
       { 'WWW-Authenticate': `Bearer resource_metadata="${MCP_URL}/.well-known/oauth-protected-resource"` },
     )
   }
+
+  if (req.method !== 'POST') return new Response('Method not allowed', { status: 405 })
 
   let request: JsonObject
   try {
@@ -373,13 +373,18 @@ Deno.serve(async (req) => {
   const args = params.arguments && typeof params.arguments === 'object' && !Array.isArray(params.arguments)
     ? params.arguments as JsonObject
     : {}
+  const callId = crypto.randomUUID()
+  const tool = tools.find((tool) => tool.name === params.name)?.name ?? 'unknown'
+  console.info(JSON.stringify({ event: 'life_mcp_call', callId, tool, outcome: 'received' }))
   try {
     const result = await callTool(params.name, args, authorization, user.id)
+    console.info(JSON.stringify({ event: 'life_mcp_call', callId, tool, outcome: 'success' }))
     return rpc(id, {
       content: [{ type: 'text', text: JSON.stringify(result) }],
       structuredContent: result,
     })
   } catch (error) {
+    console.info(JSON.stringify({ event: 'life_mcp_call', callId, tool, outcome: 'error' }))
     const message = error instanceof Error ? error.message : 'Tool call failed'
     return rpc(id, { content: [{ type: 'text', text: message }], isError: true })
   }
