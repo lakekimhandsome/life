@@ -892,7 +892,7 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
 
 .todo-item.is-dragging {
   z-index: 2;
-  background: color-mix(in srgb, var(--ink) 3%, var(--paper));
+  background: color-mix(in srgb, color-mix(in srgb, var(--ink) 3%, var(--paper)) 96%, transparent);
   transition: opacity 160ms ease, background 160ms ease;
   will-change: transform;
 }
@@ -3214,7 +3214,7 @@ select.inline-meta-control {
 
 .card-edit-row.is-dragging {
   z-index: 2;
-  background: color-mix(in srgb, var(--ink) 3%, var(--paper));
+  background: color-mix(in srgb, color-mix(in srgb, var(--ink) 3%, var(--paper)) 96%, transparent);
   transition: opacity 160ms ease, background 160ms ease;
   will-change: transform;
 }
@@ -3336,7 +3336,7 @@ html[data-theme='dark'] .assets-row.is-dragging {
 
 html[data-theme='dark'] .todo-item.is-dragging,
 html[data-theme='dark'] .card-edit-row.is-dragging {
-  background: color-mix(in srgb, var(--ink) 6%, var(--paper));
+  background: color-mix(in srgb, color-mix(in srgb, var(--ink) 6%, var(--paper)) 96%, transparent);
 }
 
 html[data-theme='dark'] .settings-theme:hover {
