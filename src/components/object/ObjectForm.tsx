@@ -70,8 +70,8 @@ export function ObjectForm({
     try {
       await onSubmit({
         title: title.trim(),
-        body: body.trim(),
-        occurredAt: fromDateInputValue(occurredAt),
+        body,
+        occurredAt: initial && occurredAt === toDateInputValue(initial.occurredAt) ? initial.occurredAt : fromDateInputValue(occurredAt),
         meta,
         linkedGoalId: canLinkGoal && linkedGoalId ? linkedGoalId : null,
       })

@@ -25,7 +25,7 @@ test('update discovery describes replacement and its safety boundaries', async (
   t.mock.method(globalThis, 'fetch', async () => Response.json({ id: 'test-user' }))
   const { tools } = await request('tools/list')
   const update = tools.find((tool: { name: string }) => tool.name === 'update_object')
-  assert.deepEqual(update.inputSchema.required, ['id'])
+  assert.deepEqual(update.inputSchema.required, ['id', 'expectedUpdatedAt'])
   assert.equal(update.inputSchema.additionalProperties, false)
   assert.match(update.description, /replaces the entire body/)
   assert.deepEqual(update.annotations, {
@@ -60,14 +60,14 @@ test('update preserves exact Markdown, omitted fields and meta through authentic
   })
   const markdown = '\n  ## 오답 분석\n- SiO₂ < 52%, Ω ∝ → 🔴\n\n| 항목 | 값 |\n| --- | --- |\n| 판 | `이동` |\n\n'
   for (const body of ['a', markdown, markdown.repeat(1000), '']) {
-    const result = await request('tools/call', { name: 'update_object', arguments: { id: 'test-note', body } })
+    const result = await request('tools/call', { name: 'update_object', arguments: { id: 'test-note', expectedUpdatedAt: '2026-11-07T00:00:00Z', body } })
     assert.equal(result.isError, undefined)
     assert.equal(result.structuredContent.body, body)
     assert.equal(result.structuredContent.title, existing.title)
     assert.deepEqual(result.structuredContent.meta, existing.meta)
   }
   const result = await request('tools/call', {
-    name: 'update_object', arguments: { id: 'test-note', title: 'New title', meta: { status: null } },
+    name: 'update_object', arguments: { id: 'test-note', expectedUpdatedAt: '2026-11-07T00:00:00Z', title: 'New title', meta: { status: null } },
   })
   assert.equal(result.structuredContent.body, '')
   assert.deepEqual(result.structuredContent.meta, { folderId: 'keep-folder', status: null })
@@ -96,15 +96,15 @@ test('invalid input never writes and missing/denied rows return server tool erro
   }
   assert.equal(databaseCalls, 0)
   const missing = await request('tools/call', {
-    name: 'update_object', arguments: { id: 'test-note', body: 'Content' },
+    name: 'update_object', arguments: { id: 'test-note', expectedUpdatedAt: '2026-11-07T00:00:00Z', body: 'Content' },
   })
   assert.equal(missing.isError, true)
-  assert.equal(missing.content[0].text, 'LIFE object not found')
+  assert.match(missing.content[0].text, /Record changed or was deleted/)
   t.mock.method(globalThis, 'fetch', async (input: string) => input.endsWith('/auth/v1/user')
     ? Response.json({ id: 'test-user' })
     : new Response('permission denied', { status: 403 }))
   const denied = await request('tools/call', {
-    name: 'update_object', arguments: { id: 'test-note', body: 'Content' },
+    name: 'update_object', arguments: { id: 'test-note', expectedUpdatedAt: '2026-11-07T00:00:00Z', body: 'Content' },
   })
   assert.equal(denied.isError, true)
   assert.match(denied.content[0].text, /LIFE data request failed \(403\)/)

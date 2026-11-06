@@ -76,6 +76,7 @@ export interface CreateObjectInput {
 }
 
 export interface UpdateObjectInput {
+  expectedUpdatedAt?: string
   folderId?: string | null
   title?: string
   body?: string

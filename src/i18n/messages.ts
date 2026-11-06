@@ -272,6 +272,8 @@ export const en = {
   'clipboard.copyUnsupported': 'This browser doesn’t support copying images.',
 
   'form.needTitle': 'Enter a title.',
+  'form.conflict': 'This record changed elsewhere. Your draft is kept. Copy it before reloading to review the latest version.',
+  'detail.unlink': 'Remove link',
   'form.saveFailed': 'Couldn’t save.',
   'form.title': '{type} title',
   'form.date': 'Date',
@@ -649,6 +651,8 @@ export const ko: Record<MessageKey, string> = {
   'clipboard.copyUnsupported': '이 브라우저에서는 이미지 복사를 지원하지 않습니다.',
 
   'form.needTitle': '제목을 입력해 주세요.',
+  'form.conflict': '다른 곳에서 변경된 기록입니다. 초안은 유지됩니다. 초안을 복사한 뒤 새로고침하여 최신 내용을 확인해 주세요.',
+  'detail.unlink': '연결 해제',
   'form.saveFailed': '저장에 실패했습니다.',
   'form.title': '{type} 제목',
   'form.date': '날짜',

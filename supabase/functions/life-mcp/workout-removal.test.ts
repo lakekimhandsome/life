@@ -40,7 +40,7 @@ test('unfiltered searches exclude stored workouts before pagination', async (t) 
     if (input.endsWith('/auth/v1/user')) return Response.json({ id: 'test-user' })
     const params = new URL(input).searchParams
     assert.equal(params.get('type'), activeTypes)
-    assert.equal(params.get('limit'), '1')
+    assert.equal(params.get('limit'), '2')
     return Response.json([{ id: 'note-id', type: 'note', occurred_at: '2026-10-31T00:00:00Z' }])
   })
   const result = await request('tools/call', { name: 'find_objects', arguments: { limit: 1 } })

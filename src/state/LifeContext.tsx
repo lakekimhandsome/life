@@ -17,10 +17,12 @@ import type {
   RelationshipKind,
   UpdateObjectInput,
 } from '../core/types'
+import { supabase } from '../lib/supabase'
 import { useAuth } from './AuthContext'
 
 interface LifeContextValue {
   ready: boolean
+  dataRevision: number
   objects: LifeObject[]
   counts: Record<ObjectType, number>
   refresh: () => Promise<void>
@@ -51,6 +53,11 @@ const emptyCounts: Record<ObjectType, number> = {
 
 export function LifeProvider({ children }: { children: ReactNode }) {
   const { ready: authReady, user } = useAuth()
+  const userId = user?.id
+  const [dataRevision, setDataRevision] = useState(0)
+  const confirmedVersions = useRef(new Map<string, string>())
+  const sessionGeneration = useRef(0)
+  const refreshSequence = useRef(0)
   const [ready, setReady] = useState(false)
   const [objects, setObjects] = useState<LifeObject[]>([])
   const [counts, setCounts] = useState(emptyCounts)
@@ -66,29 +73,34 @@ export function LifeProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const refresh = useCallback(async () => {
-    const [nextObjects, nextCounts] = await Promise.all([
-      repository.listObjects(),
-      repository.countByType(),
-    ])
+    const generation = sessionGeneration.current
+    const sequence = ++refreshSequence.current
+    const nextObjects = await repository.listObjects()
+    if (generation !== sessionGeneration.current || sequence !== refreshSequence.current) return
+    const busy = (id: string) => pendingCreates.current.has(id) || updateQueues.current.has(id)
     const merged = [
-      ...nextObjects.filter((object) => !pendingCreates.current.has(object.id) && !pendingDeletes.current.has(object.id)),
-      ...objectsRef.current.filter((object) => pendingCreates.current.has(object.id)),
+      ...nextObjects.filter((object) => !busy(object.id) && !pendingDeletes.current.has(object.id)),
+      ...objectsRef.current.filter((object) => busy(object.id) && !pendingDeletes.current.has(object.id)),
     ]
     replaceObjects(merged)
-    setCounts({ ...nextCounts, plan: merged.filter((object) => object.type === 'plan').length })
+    const nextCounts = { ...emptyCounts }
+    for (const object of merged) nextCounts[object.type]++
+    setCounts(nextCounts)
   }, [replaceObjects])
 
   useEffect(() => {
     if (!authReady) return
 
     let active = true
+    const generation = ++sessionGeneration.current
 
-    if (!user) {
+    if (!userId) {
       replaceObjects([])
       setCounts(emptyCounts)
       setReady(true)
       return () => {
         active = false
+        sessionGeneration.current = generation + 1
       }
     }
 
@@ -105,8 +117,35 @@ export function LifeProvider({ children }: { children: ReactNode }) {
 
     return () => {
       active = false
+      sessionGeneration.current = generation + 1
     }
-  }, [authReady, user, refresh, replaceObjects])
+  }, [authReady, userId, refresh, replaceObjects])
+
+  useEffect(() => {
+    if (!user?.id) return
+    let active = true
+    let timer: number | undefined
+    function reload() {
+      window.clearTimeout(timer)
+      timer = window.setTimeout(() => {
+        if (!active) return
+        setDataRevision((value) => value + 1)
+        void refresh().catch((error) => console.error('Failed to sync LIFE data', error))
+      }, 100)
+    }
+    const channel = supabase.channel(`life_objects:${user.id}`, { config: { private: true } })
+      .on('broadcast', { event: 'change' }, reload)
+      .subscribe((status) => { if (status === 'SUBSCRIBED') reload() })
+    window.addEventListener('focus', reload)
+    window.addEventListener('online', reload)
+    return () => {
+      active = false
+      window.clearTimeout(timer)
+      window.removeEventListener('focus', reload)
+      window.removeEventListener('online', reload)
+      void supabase.removeChannel(channel)
+    }
+  }, [user?.id, refresh])
 
   const createObject = useCallback(
     async (input: CreateObjectInput) => {
@@ -147,22 +186,28 @@ export function LifeProvider({ children }: { children: ReactNode }) {
         ...previous,
         folderId: input.folderId !== undefined ? input.folderId : previous.folderId,
         title: input.title?.trim() ?? previous.title,
-        body: input.body !== undefined ? input.body.trim() : previous.body,
+        body: input.body !== undefined ? input.body : previous.body,
         occurredAt: input.occurredAt ?? previous.occurredAt,
         visibility: input.visibility ?? previous.visibility,
         meta: input.meta ?? previous.meta,
-        updatedAt: new Date().toISOString(),
       }
       replaceObjects(
         objectsRef.current.map((object) => (object.id === id ? optimistic : object)),
       )
 
-      const pending = updateQueues.current.get(id) ?? Promise.resolve()
+      const queued = updateQueues.current.get(id)
+      const pending = queued ?? Promise.resolve()
       const operation = pending
         .catch(() => undefined)
         .then(async () => {
           await pendingCreates.current.get(id)
-          return repository.updateObject(id, input)
+          const updated = await repository.updateObject(id, {
+            ...input,
+            expectedUpdatedAt: input.expectedUpdatedAt ?? (queued ? confirmedVersions.current.get(id) ?? previous.updatedAt : previous.updatedAt),
+          })
+          if (!updated) throw new Error('Record was deleted')
+          confirmedVersions.current.set(id, updated.updatedAt)
+          return updated
         })
       const queueTail = operation.then(
         () => undefined,
@@ -264,6 +309,7 @@ export function LifeProvider({ children }: { children: ReactNode }) {
   const value = useMemo(
     () => ({
       ready,
+      dataRevision,
       objects,
       counts,
       refresh,
@@ -278,6 +324,7 @@ export function LifeProvider({ children }: { children: ReactNode }) {
     }),
     [
       ready,
+      dataRevision,
       objects,
       counts,
       refresh,

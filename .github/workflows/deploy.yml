@@ -34,12 +34,11 @@ jobs:
 
       - name: Check build secrets
         env:
-          VITE_ALPHA_VANTAGE_API_KEY: ${{ secrets.ALPHA_VANTAGE_API_KEY }}
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
         run: |
           missing=0
-          for name in VITE_ALPHA_VANTAGE_API_KEY VITE_SUPABASE_URL VITE_SUPABASE_ANON_KEY; do
+          for name in VITE_SUPABASE_URL VITE_SUPABASE_ANON_KEY; do
             value="${!name}"
             if [ -z "$value" ]; then
               echo "::error::$name secret is empty."
@@ -57,7 +56,6 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          VITE_ALPHA_VANTAGE_API_KEY: ${{ secrets.ALPHA_VANTAGE_API_KEY }}
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 

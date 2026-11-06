@@ -7,7 +7,7 @@ const AUTH_ISSUER = `${SUPABASE_URL}/auth/v1`
 const OBJECT_TYPES = ['journal', 'project', 'note', 'plan', 'goal', 'asset'] as const
 const OBJECT_TYPE_FILTER = `in.(${OBJECT_TYPES.join(',')})`
 const RELATIONSHIP_KINDS = ['related', 'supports', 'part_of'] as const
-const OBJECT_COLUMNS = 'id,type,title,body,occurred_at,created_at,updated_at,meta,visibility'
+const OBJECT_COLUMNS = 'id,type,title,body,occurred_at,created_at,updated_at,meta,visibility,folder_id'
 
 type JsonObject = Record<string, unknown>
 type Tool = {
@@ -26,7 +26,8 @@ const tools: Tool[] = [
       properties: {
         query: { type: 'string', description: 'Optional text to find in titles or bodies.' },
         type: { type: 'string', enum: OBJECT_TYPES },
-        before: { type: 'string', format: 'date-time', description: 'Pagination cursor using occurredAt.' },
+        before: { type: 'string', description: 'Pass nextBefore from the preceding response unchanged. Legacy ISO date-time cursors are accepted.' },
+        folderId: { type: ['string', 'null'], description: 'Filter notes by folder; null selects notes at the root.' },
         limit: { type: 'integer', minimum: 1, maximum: 50, default: 20 },
       },
       additionalProperties: false,
@@ -53,6 +54,7 @@ const tools: Tool[] = [
         type: { type: 'string', enum: OBJECT_TYPES },
         title: { type: 'string', minLength: 1 },
         body: { type: 'string', default: '' },
+        folderId: { type: ['string', 'null'], description: 'Note folder ID; omit or use null for root.' },
         occurredAt: { type: 'string', format: 'date-time' },
         meta: { type: 'object', additionalProperties: true },
       },
@@ -63,11 +65,13 @@ const tools: Tool[] = [
   },
   {
     name: 'update_object',
-    description: 'Update an existing LIFE object in the signed-in account. Omitted top-level fields stay unchanged. A supplied body replaces the entire body; read the current object and retain its content when making a partial edit. Supplied meta keys are shallow-merged; omitted meta keys stay unchanged, and an empty meta object does not change meta.',
+    description: 'Update an existing LIFE object in the signed-in account. Supply the exact updated_at from your last read as expectedUpdatedAt; a conflict leaves the stored record unchanged. On conflict, read again and reconcile your edit; never retry a stale replacement body unchanged. Omitted top-level fields stay unchanged. A supplied body replaces the entire body; read the current object and retain its content when making a partial edit. Supplied meta keys are shallow-merged; omitted meta keys stay unchanged, and an empty meta object does not change meta.',
     inputSchema: {
       type: 'object',
       properties: {
         id: { type: 'string' },
+        expectedUpdatedAt: { type: 'string', description: 'Exact updated_at returned by the last read. Required to prevent overwriting another edit.' },
+        folderId: { type: ['string', 'null'], description: 'Move a note to this folder; null moves it to root.' },
         title: { type: 'string', minLength: 1 },
         body: { type: 'string', description: 'Complete replacement Markdown body, preserved verbatim. Omit to leave the body unchanged.' },
         occurredAt: { type: 'string', format: 'date-time' },
@@ -77,14 +81,14 @@ const tools: Tool[] = [
           additionalProperties: true,
         },
       },
-      required: ['id'],
+      required: ['id', 'expectedUpdatedAt'],
       additionalProperties: false,
     },
     annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: false },
   },
   {
     name: 'delete_object',
-    description: 'Permanently delete one LIFE object and its relationships.',
+    description: 'Delete one LIFE object. Journals, projects, notes, and goals move to trash; use list_deleted_objects and restore_object to inspect or recover them with their links. Plans and assets are permanently deleted. This tool does not permanently erase items from trash.',
     inputSchema: {
       type: 'object',
       properties: { id: { type: 'string' } },
@@ -92,6 +96,25 @@ const tools: Tool[] = [
       additionalProperties: false,
     },
     annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: false },
+  },
+  {
+    name: 'list_deleted_objects',
+    description: 'List the signed-in user’s trash, newest deletion first, with the archived object contents. Only journals, projects, notes, and goals enter trash; permanently deleted plans and assets cannot be listed or restored.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        before: { type: 'string', description: 'Pass nextBefore from the preceding trash response unchanged.' },
+        limit: { type: 'integer', minimum: 1, maximum: 50, default: 20 },
+      },
+      additionalProperties: false,
+    },
+    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true },
+  },
+  {
+    name: 'restore_object',
+    description: 'Restore one object from the signed-in user’s trash by its archived ID. Restored objects are private, with sharing disabled. If its note folder no longer exists, it returns to the root. Saved relationships return when both endpoints exist. Permanently erased items cannot be restored.',
+    inputSchema: { type: 'object', properties: { id: { type: 'string' } }, required: ['id'], additionalProperties: false },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false },
   },
   {
     name: 'link_objects',
@@ -107,6 +130,21 @@ const tools: Tool[] = [
       additionalProperties: false,
     },
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true },
+  },
+  {
+    name: 'list_note_folders', description: 'List all note folders, including parent IDs, in the signed-in account.',
+    inputSchema: { type: 'object', properties: {}, additionalProperties: false },
+    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true },
+  },
+  {
+    name: 'create_note_folder', description: 'Create a note folder, optionally inside another folder.',
+    inputSchema: { type: 'object', properties: { name: { type: 'string', minLength: 1, maxLength: 200 }, parentId: { type: ['string', 'null'] } }, required: ['name'], additionalProperties: false },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false },
+  },
+  {
+    name: 'unlink_objects', description: 'Remove one relationship by its ID, without deleting either object.',
+    inputSchema: { type: 'object', properties: { id: { type: 'string' } }, required: ['id'], additionalProperties: false },
+    annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true },
   },
 ]
 
@@ -176,22 +214,71 @@ async function rest(path: string, authorization: string, init: RequestInit = {})
   return response.status === 204 ? null : response.json()
 }
 
-async function findObjects(args: JsonObject, authorization: string) {
-  const limit = Math.min(50, Math.max(1, Number(args.limit) || 20))
-  const query = typeof args.query === 'string' ? args.query.trim().toLocaleLowerCase() : ''
-  const type = args.type === undefined ? undefined : objectType(args.type)
-  const before = optionalIso(args.before, 'before')
+function nullableFolder(value: unknown) {
+  if (value === undefined || value === null) return value
+  const id = requiredString(value, 'folderId')
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) throw new Error('Invalid folder ID')
+  return id
+}
 
-  const params = new URLSearchParams({ select: OBJECT_COLUMNS, type: OBJECT_TYPE_FILTER, order: 'occurred_at.desc' })
+function paginationFilter(value: unknown, params: URLSearchParams, column: 'occurred_at' | 'deleted_at') {
+  if (value === undefined) return null
+  const before = requiredString(value, 'before')
+  if (!Number.isNaN(Date.parse(before))) {
+    params.set(column, `lt.${optionalIso(before, 'before')}`)
+    return null
+  }
+  let cursor: JsonObject
+  try { cursor = JSON.parse(atob(before)) } catch { throw new Error('Invalid pagination cursor') }
+  const timestamp = cursor && (column === 'occurred_at' ? cursor.occurredAt : cursor.deletedAt)
+  if (typeof timestamp !== 'string' || Number.isNaN(Date.parse(timestamp)) || typeof cursor.id !== 'string') throw new Error('Invalid pagination cursor')
+  const time = JSON.stringify(timestamp)
+  return `or(${column}.lt.${time},and(${column}.eq.${time},id.lt.${JSON.stringify(cursor.id)}))`
+}
+
+async function listDeletedObjects(args: JsonObject, authorization: string, userId: string) {
+  const limit = Math.min(50, Math.max(1, Math.trunc(Number(args.limit) || 20)))
+  const params = new URLSearchParams({ select: 'id,deleted_at,object_data', user_id: `eq.${userId}`, order: 'deleted_at.desc,id.desc', limit: String(limit + 1) })
+  const before = paginationFilter(args.before, params, 'deleted_at')
+  if (before) params.set('and', `(${before})`)
+  const rows = await rest(`life_deleted_objects?${params}`, authorization)
+  const page = rows.slice(0, limit)
+  const last = page.at(-1)
+  return {
+    objects: page.map((row: JsonObject) => ({
+      id: row.id,
+      deletedAt: row.deleted_at,
+      object: Object.fromEntries(OBJECT_COLUMNS.split(',').map((column) => [column, (row.object_data as JsonObject)[column]])),
+    })),
+    nextBefore: rows.length > limit && last ? btoa(JSON.stringify({ deletedAt: last.deleted_at, id: last.id })) : null,
+  }
+}
+
+async function findObjects(args: JsonObject, authorization: string) {
+  const limit = Math.min(50, Math.max(1, Math.trunc(Number(args.limit) || 20)))
+  const query = typeof args.query === 'string' ? args.query.trim() : ''
+  const type = args.type === undefined ? undefined : objectType(args.type)
+  const params = new URLSearchParams({ select: OBJECT_COLUMNS, type: OBJECT_TYPE_FILTER, order: 'occurred_at.desc,id.desc', limit: String(limit + 1) })
   if (type) params.set('type', `eq.${type}`)
-  if (before) params.set('occurred_at', `lt.${before}`)
-  // ponytail: client-side search caps at 1,000 personal objects; add Postgres FTS when an account exceeds that.
-  params.set('limit', query ? '1000' : String(limit))
+  const folder = nullableFolder(args.folderId)
+  if (folder !== undefined) {
+    if (type && type !== 'note') throw new Error('Only notes can belong to folders')
+    params.set('type', 'eq.note')
+    params.set('folder_id', folder === null ? 'is.null' : `eq.${folder}`)
+  }
+  const filters: string[] = []
+  const before = paginationFilter(args.before, params, 'occurred_at')
+  if (before) filters.push(before)
+  if (query) {
+    const escaped = query.replace(/[\\%_*]/g, '\\$&')
+    const pattern = JSON.stringify(`%${escaped}%`)
+    filters.push(`or(title.ilike.${pattern},body.ilike.${pattern})`)
+  }
+  if (filters.length) params.set('and', `(${filters.join(',')})`)
   const rows = await rest(`life_objects?${params}`, authorization)
-  const matches = query
-    ? rows.filter((row: JsonObject) => `${row.title ?? ''}\n${row.body ?? ''}`.toLocaleLowerCase().includes(query)).slice(0, limit)
-    : rows
-  return { objects: matches, nextBefore: matches.length === limit ? matches.at(-1)?.occurred_at : null }
+  const objects = rows.slice(0, limit)
+  const last = objects.at(-1)
+  return { objects, nextBefore: rows.length > limit && last ? btoa(JSON.stringify({ occurredAt: last.occurred_at, id: last.id })) : null }
 }
 
 async function getObject(args: JsonObject, authorization: string) {
@@ -199,7 +286,7 @@ async function getObject(args: JsonObject, authorization: string) {
   const objectParams = new URLSearchParams({ select: OBJECT_COLUMNS, type: OBJECT_TYPE_FILTER, id: `eq.${id}`, limit: '1' })
   const objects = await rest(`life_objects?${objectParams}`, authorization)
   if (!objects.length) throw new Error('LIFE object not found')
-  const relationships = await rest('life_relationships?select=*&order=created_at.desc', authorization)
+  const relationships = await rest(`life_relationships?${new URLSearchParams({ select: '*', or: `(source_id.eq.${JSON.stringify(id)},target_id.eq.${JSON.stringify(id)})`, order: 'created_at.desc' })}`, authorization)
   return {
     object: objects[0],
     relationships: relationships.filter((item: JsonObject) => item.source_id === id || item.target_id === id),
@@ -208,13 +295,16 @@ async function getObject(args: JsonObject, authorization: string) {
 
 async function createObject(args: JsonObject, authorization: string, userId: string) {
   const type = objectType(args.type)
+  if (args.body !== undefined && typeof args.body !== 'string') throw new Error('body must be a string')
+  if (args.folderId != null && type !== 'note') throw new Error('Only notes can belong to folders')
   const timestamp = new Date().toISOString()
   const row = {
     id: crypto.randomUUID(),
     user_id: userId,
     type,
     title: requiredString(args.title, 'title'),
-    body: typeof args.body === 'string' ? args.body.trim() : '',
+    body: args.body === undefined ? '' : args.body,
+    folder_id: nullableFolder(args.folderId) ?? null,
     occurred_at: optionalIso(args.occurredAt, 'occurredAt') ?? timestamp,
     created_at: timestamp,
     updated_at: timestamp,
@@ -230,7 +320,10 @@ async function createObject(args: JsonObject, authorization: string, userId: str
 
 async function updateObject(args: JsonObject, authorization: string) {
   const id = requiredString(args.id, 'id')
+  const expected = requiredString(args.expectedUpdatedAt, 'expectedUpdatedAt')
+  if (Number.isNaN(Date.parse(expected))) throw new Error('Invalid expectedUpdatedAt')
   let patch: JsonObject = { updated_at: new Date().toISOString() }
+  if (args.folderId !== undefined) patch.folder_id = nullableFolder(args.folderId)
   if (args.title !== undefined) patch.title = requiredString(args.title, 'title')
   if (args.body !== undefined) {
     if (typeof args.body !== 'string') throw new Error('body must be a string')
@@ -240,22 +333,22 @@ async function updateObject(args: JsonObject, authorization: string) {
   const meta = optionalMeta(args.meta)
   if (Object.keys(patch).length === 1 && meta === undefined) throw new Error('Provide at least one field to update')
   if (meta !== undefined) {
-    const currentParams = new URLSearchParams({ select: 'meta', type: OBJECT_TYPE_FILTER, id: `eq.${id}`, limit: '1' })
+    const currentParams = new URLSearchParams({ select: 'meta,updated_at', type: OBJECT_TYPE_FILTER, id: `eq.${id}`, updated_at: `eq.${expected}`, limit: '1' })
     const current = await rest(`life_objects?${currentParams}`, authorization)
-    if (!current.length) throw new Error('LIFE object not found')
+    if (!current.length) throw new Error('Record changed or was deleted. Read it again before editing; your changes were not saved.')
     const value = current[0].meta
     const existingMeta = value && typeof value === 'object' && !Array.isArray(value)
       ? value as JsonObject
       : {}
     patch = withMergedMeta(patch, existingMeta, meta)
   }
-  const params = new URLSearchParams({ select: OBJECT_COLUMNS, type: OBJECT_TYPE_FILTER, id: `eq.${id}` })
+  const params = new URLSearchParams({ select: OBJECT_COLUMNS, type: OBJECT_TYPE_FILTER, id: `eq.${id}`, updated_at: `eq.${expected}` })
   const rows = await rest(`life_objects?${params}`, authorization, {
     method: 'PATCH',
     headers: { Prefer: 'return=representation' },
     body: JSON.stringify(patch),
   })
-  if (!rows.length) throw new Error('LIFE object not found')
+  if (!rows.length) throw new Error('Record changed or was deleted. Read it again before editing; your changes were not saved.')
   return rows[0]
 }
 
@@ -307,6 +400,23 @@ async function linkObjects(args: JsonObject, authorization: string, userId: stri
 
 async function callTool(name: string, args: JsonObject, authorization: string, userId: string) {
   switch (name) {
+    case 'list_note_folders': return { folders: await rest('life_note_folders?select=id,name,parent_id&order=name', authorization) }
+    case 'create_note_folder': {
+      const name = requiredString(args.name, 'name')
+      if (name.length > 200) throw new Error('Folder name must be at most 200 characters')
+      return (await rest('life_note_folders?select=id,name,parent_id', authorization, { method: 'POST', headers: { Prefer: 'return=representation' }, body: JSON.stringify({ id: crypto.randomUUID(), user_id: userId, name, parent_id: nullableFolder(args.parentId) ?? null }) }))[0]
+    }
+    case 'unlink_objects': {
+      const id = requiredString(args.id, 'id')
+      await rest(`life_relationships?${new URLSearchParams({ id: `eq.${id}` })}`, authorization, { method: 'DELETE' })
+      return { id, removed: true }
+    }
+    case 'list_deleted_objects': return listDeletedObjects(args, authorization, userId)
+    case 'restore_object': {
+      const id = requiredString(args.id, 'id')
+      const restoredId = await rest('rpc/restore_deleted_life_object', authorization, { method: 'POST', body: JSON.stringify({ target_id: id }) })
+      return { id: restoredId, restored: true }
+    }
     case 'find_objects': return findObjects(args, authorization)
     case 'get_object': return getObject(args, authorization)
     case 'create_object': return createObject(args, authorization, userId)
@@ -350,6 +460,7 @@ Deno.serve(async (req) => {
     return rpcError(null, -32700, 'Parse error')
   }
 
+  if (!request || typeof request !== 'object' || Array.isArray(request)) return rpcError(null, -32600, 'Invalid Request')
   const id = request.id ?? null
   if (request.jsonrpc !== '2.0' || typeof request.method !== 'string') {
     return rpcError(id, -32600, 'Invalid Request')

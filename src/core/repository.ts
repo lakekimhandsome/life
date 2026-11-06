@@ -9,6 +9,7 @@ import {
 } from '../lib/database'
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
 import { t } from '../i18n'
+import type { LifeObjectRow } from '../lib/database'
 import type {
   CreateObjectInput,
   LifeObject,
@@ -82,7 +83,7 @@ export function prepareObject(input: CreateObjectInput): LifeObject {
     id: createId(),
     type: input.type,
     title: input.title.trim(),
-    body: (input.body ?? '').trim(),
+    body: input.body ?? '',
     occurredAt: input.occurredAt ?? timestamp,
     createdAt: timestamp,
     updatedAt: timestamp,
@@ -113,27 +114,21 @@ export async function updateObject(
   const existing = await getObject(id)
   if (!existing) return undefined
 
-  const next: LifeObject = {
-    ...existing,
-    folderId: input.folderId !== undefined ? input.folderId : existing.folderId,
-    title: input.title?.trim() ?? existing.title,
-    body: input.body !== undefined ? input.body.trim() : existing.body,
-    occurredAt: input.occurredAt ?? existing.occurredAt,
-    visibility: input.visibility ?? existing.visibility,
-    meta: input.meta ?? existing.meta,
-    updatedAt: nowIso(),
-  }
-
+  const patch: Partial<LifeObjectRow> = {}
+  if (input.folderId !== undefined) patch.folder_id = input.folderId
+  if (input.title !== undefined) patch.title = input.title.trim()
+  if (input.body !== undefined) patch.body = input.body
+  if (input.occurredAt !== undefined) patch.occurred_at = input.occurredAt
+  if (input.visibility !== undefined) patch.visibility = input.visibility
+  if (input.meta !== undefined) patch.meta = input.meta
   const userId = await requireUserId()
-  const { data, error } = await supabase
-    .from('life_objects')
-    .update(objectToRow(next, userId))
-    .eq('user_id', userId)
-    .eq('id', id)
-    .select('*')
-    .maybeSingle()
+  const { data, error } = await supabase.from('life_objects')
+    .update(patch).eq('user_id', userId).eq('id', id)
+    .eq('updated_at', input.expectedUpdatedAt ?? existing.updatedAt)
+    .select('*').maybeSingle()
   if (error) throw error
-  return data ? rowToObject(data) : undefined
+  if (!data) throw new Error(t('form.conflict'))
+  return rowToObject(data)
 }
 
 export async function getSharedObject(token: string): Promise<SharedLifeObject | undefined> {

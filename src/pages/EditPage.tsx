@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Save } from 'lucide-react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { ObjectForm } from '../components/object/ObjectForm'
@@ -11,6 +11,7 @@ export function EditPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { ready, getObject, updateObject } = useLife()
+  const originalVersion = useRef<string | null>(null)
   const [saving, setSaving] = useState(false)
 
   const t = useT()
@@ -28,6 +29,7 @@ export function EditPage() {
     return <Navigate to={`/object/${object.id}`} replace />
   }
 
+  originalVersion.current ??= object.updatedAt
   const schema = getSchema(object.type)
 
   return (
@@ -63,6 +65,7 @@ export function EditPage() {
         submitLabel={t('edit.save')}
         onSubmit={async ({ title, body, occurredAt, meta }) => {
           await updateObject(object.id, {
+            expectedUpdatedAt: originalVersion.current!,
             title,
             body,
             occurredAt,

@@ -38,13 +38,13 @@ function InlineDateInput({
   onChange: (value: string) => void
   onBlur: () => void
 }) {
-  const iso = value ? fromDateInputValue(value) : null
+  const iso = value ? (value.includes('T') ? value : fromDateInputValue(value)) : null
   return (
     <label className="inline-date-picker">
       <span>{iso ? (includeTime ? formatDateTime(iso) : formatDate(iso)) : '—'}</span>
       <input
         type="date"
-        value={value}
+        value={value.includes('T') ? toDateInputValue(value) : value}
         onChange={(event) => onChange(event.target.value)}
         onBlur={onBlur}
         aria-label={label}
@@ -62,7 +62,8 @@ export function InlineMarkdownObject({
   const t = useT()
   const { updateObject } = useLife()
   const schema = getSchema(object.type)
-  const initialOccurredAt = toDateInputValue(object.occurredAt)
+  const initialOccurredAt = object.occurredAt
+  const baseVersionRef = useRef(object.updatedAt)
   const draftRef = useRef<Draft>({
     title: object.title,
     body: object.body,
@@ -105,10 +106,12 @@ export function InlineMarkdownObject({
       const nextDraft = { ...draft, title: draft.title.trim() }
       if (onSaveRef.current) await onSaveRef.current(nextDraft)
       else {
-        await updateObject(object.id, {
+        const updated = await updateObject(object.id, {
           ...nextDraft,
-          occurredAt: fromDateInputValue(nextDraft.occurredAt),
+          expectedUpdatedAt: baseVersionRef.current,
         })
+        if (!updated) throw new Error(t('form.conflict'))
+        baseVersionRef.current = updated.updatedAt
       }
       onSaveStateChange('saved')
       setError(null)
@@ -157,6 +160,23 @@ export function InlineMarkdownObject({
     }
   }, [flushSave])
 
+  useEffect(() => {
+    if (object.id === 'new' || savingRef.current) return
+    if (dirtyRef.current) {
+      if (object.updatedAt !== baseVersionRef.current) {
+        onSaveStateChange('error')
+        setError(t('form.conflict'))
+      }
+      return
+    }
+    baseVersionRef.current = object.updatedAt
+    draftRef.current = { title: object.title, body: object.body, occurredAt: object.occurredAt, meta: object.meta }
+    setTitle(object.title)
+    setBody(object.body)
+    setOccurredAt(object.occurredAt)
+    setMeta(object.meta)
+  }, [object, onSaveStateChange, t])
+
   function changeTitle(value: string) {
     draftRef.current = { ...draftRef.current, title: value }
     setTitle(value)
@@ -170,8 +190,10 @@ export function InlineMarkdownObject({
   }
 
   function changeOccurredAt(value: string) {
-    draftRef.current = { ...draftRef.current, occurredAt: value }
-    setOccurredAt(value)
+    if (!value || value === toDateInputValue(draftRef.current.occurredAt)) return
+    const iso = fromDateInputValue(value)
+    draftRef.current = { ...draftRef.current, occurredAt: iso }
+    setOccurredAt(iso)
     queueSave()
   }
 

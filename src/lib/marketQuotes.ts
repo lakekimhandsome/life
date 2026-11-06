@@ -63,27 +63,3 @@ export async function getLatestMarketQuotes(
   }
   return result
 }
-
-export async function saveMarketQuote(cacheKey: string, value: number): Promise<void> {
-  if (!isSupabaseConfigured()) return
-
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
-  if (!session) return
-
-  const today = marketDayKey()
-  const { error } = await supabase.from('life_market_quotes').upsert(
-    {
-      cache_key: cacheKey,
-      value,
-      fetched_on: today,
-      updated_at: new Date().toISOString(),
-    },
-    { onConflict: 'cache_key' },
-  )
-
-  if (error) {
-    console.warn('life_market_quotes write failed', error.message)
-  }
-}

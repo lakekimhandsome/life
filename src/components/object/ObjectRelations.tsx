@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { Link2 } from 'lucide-react'
+import { Link2, Unlink } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import type { LifeObject, Relationship } from '../../core/types'
 import { getSchema } from '../../domain/schemas'
@@ -8,7 +8,7 @@ import { useT } from '../../state/LocaleContext'
 import { TypeBadge } from '../ui/TypeBadge'
 
 export function ObjectRelations({ object }: { object: LifeObject }) {
-  const { objects, getObject, getRelationships, linkObjects } = useLife()
+  const { objects, getObject, getRelationships, linkObjects, unlink, dataRevision } = useLife()
   const t = useT()
   const [relationships, setRelationships] = useState<Relationship[]>([])
   const [loaded, setLoaded] = useState(false)
@@ -26,7 +26,7 @@ export function ObjectRelations({ object }: { object: LifeObject }) {
       if (active) setError('load')
     })
     return () => { active = false }
-  }, [object.id, getRelationships])
+  }, [object.id, getRelationships, dataRevision])
 
   const linkedIds = new Set(relationships.flatMap((rel) => [rel.sourceId, rel.targetId]))
   const candidates = objects.filter((other) => other.type !== 'plan' && other.id !== object.id && !linkedIds.has(other.id))
@@ -48,6 +48,16 @@ export function ObjectRelations({ object }: { object: LifeObject }) {
     }
   }
 
+  async function removeLink(id: string) {
+    setSaving(true)
+    setError(null)
+    try {
+      await unlink(id)
+      setRelationships((items) => items.filter((item) => item.id !== id))
+    } catch { setError('save') }
+    finally { setSaving(false) }
+  }
+
   return (
     <section className="detail-relations">
       <h2>{t('detail.links')}</h2>
@@ -63,6 +73,9 @@ export function ObjectRelations({ object }: { object: LifeObject }) {
                 <span>{other.title}</span>
                 <em>{rel.kind}</em>
               </Link>
+              <button type="button" className="object-header-action" disabled={saving}
+                aria-label={t('detail.unlink')} title={t('detail.unlink')}
+                onClick={() => void removeLink(rel.id)}><Unlink size={18} aria-hidden="true" /></button>
             </li>
           ) : null
         })}

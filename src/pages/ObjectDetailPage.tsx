@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Trash2 } from 'lucide-react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import {
@@ -11,7 +11,7 @@ import { ObjectRelations } from '../components/object/ObjectRelations'
 import { NoteFolderControl } from '../components/object/NoteFolderControl'
 import { notesUrl } from '../lib/noteFolders'
 import { ObjectShareControl } from '../components/object/ObjectShareControl'
-import { isShareableObjectType } from '../core/types'
+import { isShareableObjectType, type LifeObject } from '../core/types'
 import { getModuleForObjectType } from '../domain/modules'
 import { formatMetaValue, getSchema, supportsMarkdownBody } from '../domain/schemas'
 import { formatDate, formatDateTime, fromDateInputValue } from '../lib/format'
@@ -26,7 +26,11 @@ export function ObjectDetailPage() {
   const [saveState, setSaveState] = useState<ObjectSaveState>('saved')
   const [deleting, setDeleting] = useState(false)
 
-  const object = id ? getObject(id) : undefined
+  const currentObject = id ? getObject(id) : undefined
+  const lastObject = useRef<LifeObject | undefined>(undefined)
+  if (currentObject) lastObject.current = currentObject
+  // Keep the editor available to copy a draft if another client deletes its record.
+  const object = currentObject ?? (lastObject.current?.id === id ? lastObject.current : undefined)
 
   if (ready && id && !object) {
     return <Navigate to="/" replace />
@@ -63,6 +67,7 @@ export function ObjectDetailPage() {
 
   return (
     <article className="detail">
+      {ready && !currentObject ? <p className="form-error" role="alert">{t('form.conflict')}</p> : null}
       <div className="object-page-toolbar">
         <BackLink to={backTo} />
         {supportsMarkdown ? (
@@ -75,7 +80,7 @@ export function ObjectDetailPage() {
               type="button"
               className="object-header-action"
               aria-label={t('detail.deleteAria', { type: schema.label })}
-              disabled={deleting}
+              disabled={deleting || !currentObject}
               onClick={() => void handleDelete()}
             >
               <Trash2 size={20} strokeWidth={1.75} aria-hidden="true" />
@@ -142,7 +147,7 @@ export function ObjectDetailPage() {
         </>
       )}
 
-      <ObjectRelations key={object.id} object={object} />
+      <ObjectRelations key={`relationships:${object.id}`} object={object} />
 
       {!supportsMarkdown ? (
         <div className="detail-actions">
@@ -152,7 +157,7 @@ export function ObjectDetailPage() {
           <button
             type="button"
             className="btn btn-danger"
-            disabled={deleting}
+            disabled={deleting || !currentObject}
             onClick={() => void handleDelete()}
           >
             {t('common.delete')}

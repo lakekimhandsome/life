@@ -15,6 +15,7 @@ import {
   useCodeBlockEditorContext,
   type CodeBlockEditorDescriptor,
   type CodeBlockEditorProps,
+  type MDXEditorMethods,
 } from '@mdxeditor/editor'
 import { $isListItemNode } from '@lexical/list'
 import { STRIKETHROUGH } from '@lexical/markdown'
@@ -404,6 +405,10 @@ export function MarkdownEditor({
   onError,
   placeholder,
 }: MarkdownEditorProps) {
+  const editorRef = useRef<MDXEditorMethods>(null)
+  useEffect(() => {
+    if (editorRef.current?.getMarkdown() !== value) editorRef.current?.setMarkdown(value)
+  }, [value])
   const plugins = useMemo(
     () => [
       headingsPlugin(),
@@ -433,6 +438,7 @@ export function MarkdownEditor({
       window.open(link.href, '_blank', 'noopener,noreferrer')
     }}>
       <MDXEditor
+        ref={editorRef}
         className="inline-markdown-editor"
         contentEditableClassName="markdown-content inline-markdown-content"
         markdown={value}

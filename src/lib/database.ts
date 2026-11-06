@@ -143,6 +143,7 @@ export type Database = {
     }
     Views: Record<string, never>
     Functions: {
+      get_life_market_quote: { Args: { p_cache_key: string }; Returns: number }
       restore_deleted_life_object: {
         Args: { target_id: string }
         Returns: string

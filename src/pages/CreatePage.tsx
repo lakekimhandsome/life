@@ -8,8 +8,8 @@ import { BackLink } from '../components/ui/BackLink'
 import { OBJECT_TYPES, type LifeObject, type ObjectType } from '../core/types'
 import { getModuleForObjectType } from '../domain/modules'
 import { defaultMeta } from '../domain/schemas'
-import { fromDateInputValue } from '../lib/format'
 import { useLife } from '../state/LifeContext'
+import { useT } from '../state/LocaleContext'
 
 function isObjectType(value: string | undefined): value is ObjectType {
   return !!value && (OBJECT_TYPES as readonly string[]).includes(value)
@@ -22,6 +22,8 @@ export function CreatePage() {
   const { createObject, updateObject } = useLife()
   const [saveState, setSaveState] = useState<ObjectSaveState>('saved')
   const createdIdRef = useRef<string | null>(null)
+  const createdVersionRef = useRef<string | undefined>(undefined)
+  const t = useT()
 
   if (!isObjectType(type)) {
     return <Navigate to="/" replace />
@@ -55,11 +57,13 @@ export function CreatePage() {
           const input = {
             title,
             body,
-            occurredAt: fromDateInputValue(occurredAt),
+            occurredAt,
             meta,
           }
           if (createdIdRef.current) {
-            await updateObject(createdIdRef.current, input)
+            const updated = await updateObject(createdIdRef.current, { ...input, expectedUpdatedAt: createdVersionRef.current })
+            if (!updated) throw new Error(t('form.conflict'))
+            createdVersionRef.current = updated.updatedAt
             return
           }
           const created = await createObject({
@@ -68,6 +72,7 @@ export function CreatePage() {
             ...input,
           })
           createdIdRef.current = created.id
+          createdVersionRef.current = created.updatedAt
           window.history.replaceState(window.history.state, '', `/object/${created.id}`)
         }}
       />

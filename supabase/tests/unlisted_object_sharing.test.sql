@@ -1,4 +1,6 @@
 begin;
+create extension if not exists pgtap with schema extensions;
+set local search_path = public, extensions;
 
 select plan(13);
 
@@ -150,8 +152,8 @@ select ok(
   'authenticated users can execute the shared-object lookup'
 );
 
-select unlike(
-  pg_get_function_result('public.get_shared_life_object(uuid)'::regprocedure),
+select ok(
+  pg_get_function_result('public.get_shared_life_object(uuid)'::regprocedure) !~
   '(user_id|share_token|(^|[ (])id text)',
   'the public result exposes no internal identifiers'
 );
