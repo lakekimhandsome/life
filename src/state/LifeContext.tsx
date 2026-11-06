@@ -56,6 +56,7 @@ export function LifeProvider({ children }: { children: ReactNode }) {
   const [counts, setCounts] = useState(emptyCounts)
   const objectsRef = useRef<LifeObject[]>([])
   const pendingCreates = useRef(new Map<string, Promise<LifeObject>>())
+  const pendingDeletes = useRef(new Set<string>())
   const updateQueues = useRef(new Map<string, Promise<void>>())
   const updateVersions = useRef(new Map<string, number>())
 
@@ -70,7 +71,7 @@ export function LifeProvider({ children }: { children: ReactNode }) {
       repository.countByType(),
     ])
     const merged = [
-      ...nextObjects.filter((object) => !pendingCreates.current.has(object.id)),
+      ...nextObjects.filter((object) => !pendingCreates.current.has(object.id) && !pendingDeletes.current.has(object.id)),
       ...objectsRef.current.filter((object) => pendingCreates.current.has(object.id)),
     ]
     replaceObjects(merged)
@@ -118,8 +119,10 @@ export function LifeProvider({ children }: { children: ReactNode }) {
         try {
           return await operation
         } catch (error) {
-          replaceObjects(objectsRef.current.filter((object) => object.id !== optimistic.id))
-          setCounts((current) => ({ ...current, plan: Math.max(0, current.plan - 1) }))
+          if (objectsRef.current.some((object) => object.id === optimistic.id)) {
+            replaceObjects(objectsRef.current.filter((object) => object.id !== optimistic.id))
+            setCounts((current) => ({ ...current, plan: Math.max(0, current.plan - 1) }))
+          }
           throw error
         } finally {
           pendingCreates.current.delete(optimistic.id)
@@ -193,11 +196,35 @@ export function LifeProvider({ children }: { children: ReactNode }) {
 
   const deleteObject = useCallback(
     async (id: string) => {
-      await pendingCreates.current.get(id)
-      await repository.deleteObject(id)
-      await refresh()
+      const previous = objectsRef.current.find((object) => object.id === id)
+      if (!previous) return
+      if (previous.type !== 'plan') {
+        await repository.deleteObject(id)
+        await refresh()
+        return
+      }
+
+      pendingDeletes.current.add(id)
+      replaceObjects(objectsRef.current.filter((object) => object.id !== id))
+      setCounts((current) => ({ ...current, plan: Math.max(0, current.plan - 1) }))
+      try {
+        try {
+          await pendingCreates.current.get(id)
+        } catch {
+          // A failed creation has no saved plan to delete or restore.
+          return
+        }
+        await updateQueues.current.get(id)
+        await repository.deleteObject(id)
+      } catch (error) {
+        replaceObjects([...objectsRef.current, previous])
+        setCounts((current) => ({ ...current, plan: current.plan + 1 }))
+        throw error
+      } finally {
+        pendingDeletes.current.delete(id)
+      }
     },
-    [refresh],
+    [refresh, replaceObjects],
   )
 
   const getObject = useCallback(

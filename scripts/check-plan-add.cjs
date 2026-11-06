@@ -28,6 +28,7 @@ async function check(engine) {
     let rows = []
     const inserts = []
     const patches = []
+    const deletes = []
     await page.route('**/auth/v1/user', (route) => route.fulfill({ json: user }))
     await page.route('**/rest/v1/**', async (route) => {
       const request = route.request()
@@ -51,7 +52,14 @@ async function check(engine) {
         assert(rows.some((row) => row.id === id), 'Update must wait for creation')
         rows = rows.map((row) => row.id === id ? { ...row, ...request.postDataJSON() } : row)
       }
-      if (method === 'DELETE') rows = rows.filter((row) => row.id !== id)
+      if (method === 'DELETE') {
+        deletes.push({ id, finish: async (fail = false) => {
+          if (fail) return route.fulfill({ status: 400, json: { message: 'test delete failure' } })
+          rows = rows.filter((row) => row.id !== id)
+          return route.fulfill({ status: 204, body: '' })
+        } })
+        return
+      }
       const result = id ? rows.filter((row) => row.id === id) : rows
       return route.fulfill({ json: request.headers().accept?.includes('vnd.pgrst.object') ? result[0] ?? null : result })
     })
@@ -102,8 +110,51 @@ async function check(engine) {
     await page.getByRole('button', { name: '첫 계획', exact: true }).waitFor()
     assert.equal(await page.locator('.todo-item').count(), 2)
     assert.equal(await page.locator('.todo-toggle').first().getAttribute('aria-pressed'), 'true')
+    async function remove(title) {
+      const row = page.locator('.todo-item').filter({ has: page.getByRole('button', { name: title, exact: true }) })
+      const box = await row.boundingBox()
+      page.once('dialog', (dialog) => dialog.accept())
+      const x = box.x + box.width * 0.65
+      const y = box.y + box.height / 2
+      await page.mouse.move(x, y)
+      await page.mouse.down()
+      await page.mouse.move(x - 120, y, { steps: 6 })
+      await page.mouse.up()
+      await row.waitFor({ state: 'hidden' })
+    }
+    await remove('첫 계획')
+    await until(() => deletes.length === 1)
+    assert.equal(rows.length, 2, 'Deleted plan disappears before the server response')
+    await add('삭제 중 추가')
+    await until(() => inserts.length === 5)
+    await inserts[4].finish()
+    await deletes[0].finish(true)
+    await page.getByRole('button', { name: '첫 계획', exact: true }).waitFor()
+    await page.getByRole('alert').waitFor()
+    assert.deepEqual(await page.locator('.todo-title').allTextContents(), ['첫 계획', '두 번째 계획', '삭제 중 추가'], 'Rollback preserves concurrent additions and order')
+    await remove('첫 계획')
+    await until(() => deletes.length === 2)
+    await deletes[1].finish()
+    await add('추가 직후 삭제')
+    await until(() => inserts.length === 6)
+    await remove('추가 직후 삭제')
+    assert.equal(deletes.length, 2, 'Delete waits for the pending creation')
+    await inserts[5].finish()
+    await until(() => deletes.length === 3)
+    assert.equal(deletes[2].id, inserts[5].row.id)
+    await deletes[2].finish()
+    await add('생성도 실패')
+    await until(() => inserts.length === 7)
+    await remove('생성도 실패')
+    await inserts[6].finish(true)
+    await page.getByRole('alert').waitFor()
+    assert.equal(await page.locator('.todo-item').count(), 2, 'Failed creation must not resurrect a deleted plan')
+    assert.equal(deletes.length, 3)
+    await page.reload()
+    await page.getByRole('button', { name: '두 번째 계획', exact: true }).waitFor()
+    assert.deepEqual(await page.locator('.todo-title').allTextContents(), ['두 번째 계획', '삭제 중 추가'])
     assert.deepEqual(errors, [])
-    console.log(`PASS ${engine.name()}: immediate add, consecutive adds, queued check, out-of-order saves, draft preservation, rollback, retry and reload`)
+    console.log(`PASS ${engine.name()}: immediate add, consecutive adds, queued check, out-of-order saves, draft preservation, rollback, retry, optimistic delete, delete rollback, pending-create delete and reload`)
   } finally {
     await browser.close()
   }

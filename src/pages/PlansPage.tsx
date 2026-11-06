@@ -329,6 +329,15 @@ export function PlansPage() {
     }
   }
 
+  async function removeTodo(todo: LifeObject) {
+    setSaveError('')
+    try {
+      await deleteObject(todo.id)
+    } catch {
+      setSaveError(`${todo.title}: ${t('plans.deleteFailed')}`)
+    }
+  }
+
   async function toggleDone(todo: LifeObject) {
     try {
       await updateObject(todo.id, {
@@ -458,7 +467,7 @@ export function PlansPage() {
               todo={todo}
               dragging={dragId === todo.id}
               onToggle={() => void toggleDone(todo)}
-              onDelete={() => void deleteObject(todo.id)}
+              onDelete={() => void removeTodo(todo)}
               onRename={(title) => void renameTodo(todo, title)}
               onReorderStart={(event) => onReorderStart(todo.id, event)}
             />

@@ -158,6 +158,7 @@ export const en = {
   'avatar.inspectFailed': 'Couldn’t inspect the image.',
 
   'plans.add': 'Add a task',
+  'plans.deleteFailed': 'Couldn’t delete the plan. It has been restored.',
   'plans.pickDate': 'Choose a date',
   'plans.prevDate': 'Previous day',
   'plans.nextDate': 'Next day',
@@ -535,6 +536,7 @@ export const ko: Record<MessageKey, string> = {
   'avatar.inspectFailed': '이미지를 확인할 수 없습니다.',
 
   'plans.add': '할 일 추가',
+  'plans.deleteFailed': '계획을 삭제하지 못해 복원했습니다.',
   'plans.pickDate': '날짜 선택',
   'plans.prevDate': '이전 날짜',
   'plans.nextDate': '다음 날짜',
