@@ -244,7 +244,7 @@ export function PlansPage() {
   const { ready, listByType, createObject, updateObject, deleteObject } = useLife()
   const [selectedDay, setSelectedDay] = useState(() => startOfLocalDay())
   const [draft, setDraft] = useState('')
-  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState('')
   const [items, setItems] = useState<LifeObject[]>([])
   const [dragId, setDragId] = useState<string | null>(null)
   const itemsRef = useRef<LifeObject[]>([])
@@ -306,7 +306,7 @@ export function PlansPage() {
   async function handleAdd(event: FormEvent) {
     event.preventDefault()
     const title = draft.trim()
-    if (!title || saving) return
+    if (!title || !ready) return
 
     const nextOrder =
       items.reduce((max, todo) => {
@@ -314,7 +314,8 @@ export function PlansPage() {
         return Math.max(max, value)
       }, -1) + 1
 
-    setSaving(true)
+    setDraft('')
+    setSaveError('')
     try {
       await createObject({
         type: 'plan',
@@ -322,9 +323,9 @@ export function PlansPage() {
         occurredAt: noonOnLocalDay(selectedDay),
         meta: { subject: '', done: false, order: nextOrder },
       })
-      setDraft('')
-    } finally {
-      setSaving(false)
+    } catch (error) {
+      setDraft((current) => current || title)
+      setSaveError(`${title}: ${error instanceof Error ? error.message : t('form.saveFailed')}`)
     }
   }
 
@@ -427,18 +428,20 @@ export function PlansPage() {
           onChange={(event) => setDraft(event.target.value)}
           placeholder={t('plans.add')}
           aria-label={t('plans.add')}
-          disabled={!ready || saving}
+          disabled={!ready}
           autoComplete="off"
         />
         <button
           type="submit"
           className="module-header-btn"
-          disabled={!ready || saving || !draft.trim()}
+          disabled={!ready || !draft.trim()}
           aria-label={t('plans.add')}
         >
           <Plus size={22} strokeWidth={1.75} aria-hidden="true" />
         </button>
       </form>
+
+      {saveError ? <p className="form-error" role="alert">{saveError}</p> : null}
 
       {!ready ? (
         <p className="empty-state">{t('common.loading')}</p>

@@ -55,6 +55,7 @@ export function LifeProvider({ children }: { children: ReactNode }) {
   const [objects, setObjects] = useState<LifeObject[]>([])
   const [counts, setCounts] = useState(emptyCounts)
   const objectsRef = useRef<LifeObject[]>([])
+  const pendingCreates = useRef(new Map<string, Promise<LifeObject>>())
   const updateQueues = useRef(new Map<string, Promise<void>>())
   const updateVersions = useRef(new Map<string, number>())
 
@@ -68,8 +69,12 @@ export function LifeProvider({ children }: { children: ReactNode }) {
       repository.listObjects(),
       repository.countByType(),
     ])
-    replaceObjects(nextObjects)
-    setCounts(nextCounts)
+    const merged = [
+      ...nextObjects.filter((object) => !pendingCreates.current.has(object.id)),
+      ...objectsRef.current.filter((object) => pendingCreates.current.has(object.id)),
+    ]
+    replaceObjects(merged)
+    setCounts({ ...nextCounts, plan: merged.filter((object) => object.type === 'plan').length })
   }, [replaceObjects])
 
   useEffect(() => {
@@ -104,11 +109,27 @@ export function LifeProvider({ children }: { children: ReactNode }) {
 
   const createObject = useCallback(
     async (input: CreateObjectInput) => {
+      if (input.type === 'plan') {
+        const optimistic = repository.prepareObject(input)
+        const operation = repository.insertObject(optimistic)
+        pendingCreates.current.set(optimistic.id, operation)
+        replaceObjects([...objectsRef.current, optimistic])
+        setCounts((current) => ({ ...current, plan: current.plan + 1 }))
+        try {
+          return await operation
+        } catch (error) {
+          replaceObjects(objectsRef.current.filter((object) => object.id !== optimistic.id))
+          setCounts((current) => ({ ...current, plan: Math.max(0, current.plan - 1) }))
+          throw error
+        } finally {
+          pendingCreates.current.delete(optimistic.id)
+        }
+      }
       const created = await repository.createObject(input)
       await refresh()
       return created
     },
-    [refresh],
+    [refresh, replaceObjects],
   )
 
   const updateObject = useCallback(
@@ -136,7 +157,10 @@ export function LifeProvider({ children }: { children: ReactNode }) {
       const pending = updateQueues.current.get(id) ?? Promise.resolve()
       const operation = pending
         .catch(() => undefined)
-        .then(() => repository.updateObject(id, input))
+        .then(async () => {
+          await pendingCreates.current.get(id)
+          return repository.updateObject(id, input)
+        })
       const queueTail = operation.then(
         () => undefined,
         () => undefined,
@@ -169,6 +193,7 @@ export function LifeProvider({ children }: { children: ReactNode }) {
 
   const deleteObject = useCallback(
     async (id: string) => {
+      await pendingCreates.current.get(id)
       await repository.deleteObject(id)
       await refresh()
     },

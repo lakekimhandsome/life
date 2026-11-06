@@ -76,9 +76,9 @@ export async function getObject(id: string): Promise<LifeObject | undefined> {
   return data ? rowToObject(data) : undefined
 }
 
-export async function createObject(input: CreateObjectInput): Promise<LifeObject> {
+export function prepareObject(input: CreateObjectInput): LifeObject {
   const timestamp = nowIso()
-  const object: LifeObject = {
+  return {
     id: createId(),
     type: input.type,
     title: input.title.trim(),
@@ -91,7 +91,13 @@ export async function createObject(input: CreateObjectInput): Promise<LifeObject
     folderId: input.folderId ?? null,
     meta: input.meta ?? {},
   }
+}
 
+export async function createObject(input: CreateObjectInput): Promise<LifeObject> {
+  return insertObject(prepareObject(input))
+}
+
+export async function insertObject(object: LifeObject): Promise<LifeObject> {
   const userId = await requireUserId()
   const { error } = await supabase
     .from('life_objects')
