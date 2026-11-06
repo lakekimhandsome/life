@@ -877,7 +877,7 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
   display: flex;
   flex-direction: column;
   gap: 1px;
-  background: var(--line);
+  background: var(--paper);
 }
 
 .todo-item {
@@ -892,8 +892,7 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
 
 .todo-item.is-dragging {
   z-index: 2;
-  opacity: 0.72;
-  background: color-mix(in srgb, var(--ink) 3%, transparent);
+  background: color-mix(in srgb, var(--ink) 3%, var(--paper));
   transition: opacity 160ms ease, background 160ms ease;
   will-change: transform;
 }
@@ -3194,7 +3193,12 @@ select.inline-meta-control {
   margin: 0;
   padding: 0;
   list-style: none;
-  background: var(--line);
+  background: var(--paper);
+}
+
+.todo-item:not(:last-child),
+.card-edit-row:not(:last-child) {
+  box-shadow: 0 1px 0 var(--line);
 }
 
 .card-edit-row {
@@ -3210,8 +3214,7 @@ select.inline-meta-control {
 
 .card-edit-row.is-dragging {
   z-index: 2;
-  opacity: 0.72;
-  background: color-mix(in srgb, var(--ink) 3%, transparent);
+  background: color-mix(in srgb, var(--ink) 3%, var(--paper));
   transition: opacity 160ms ease, background 160ms ease;
   will-change: transform;
 }
@@ -3327,10 +3330,13 @@ html[data-theme='dark'] .hub-card:hover,
 html[data-theme='dark'] .hub-dday-item:hover,
 html[data-theme='dark'] .object-row:hover,
 html[data-theme='dark'] .settings-menu-item:hover,
-html[data-theme='dark'] .assets-row.is-dragging,
+html[data-theme='dark'] .assets-row.is-dragging {
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+}
+
 html[data-theme='dark'] .todo-item.is-dragging,
 html[data-theme='dark'] .card-edit-row.is-dragging {
-  background: color-mix(in srgb, var(--ink) 6%, transparent);
+  background: color-mix(in srgb, var(--ink) 6%, var(--paper));
 }
 
 html[data-theme='dark'] .settings-theme:hover {
