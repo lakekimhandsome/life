@@ -3867,6 +3867,9 @@ html[data-theme='dark'] .clipboard-image-remove:hover {
 .gallery-close { top: max(12px, env(safe-area-inset-top)); right: 12px; }
 .gallery-previous { left: 4px; top: calc(50% - 22px); }
 .gallery-next { right: 4px; top: calc(50% - 22px); }
+@media (max-width: 800px), (pointer: coarse) {
+  .image-gallery > .gallery-previous, .image-gallery > .gallery-next { display: none; }
+}
 .gallery-count { position: absolute; bottom: max(16px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); }
 
 .gallery-menu-toggle { top: max(12px, env(safe-area-inset-top)); right: 64px; }
