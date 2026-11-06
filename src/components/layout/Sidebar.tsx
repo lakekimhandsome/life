@@ -58,15 +58,19 @@ export function Sidebar() {
         <NavLink
           to="/"
           end
+          aria-label={t('common.home')}
+          title={t('common.home')}
           className={({ isActive }) => `sidebar-link${isActive ? ' is-active' : ''}`}
         >
           <House size={20} strokeWidth={1.7} aria-hidden="true" />
-          {t('common.home')}
+          <span>{t('common.home')}</span>
         </NavLink>
         {modules.map((module) => (
           <NavLink
             key={module.id}
             to={module.path}
+            aria-label={moduleTitle(module.id)}
+            title={moduleTitle(module.id)}
             className={({ isActive }) =>
               `sidebar-link sidebar-link--${module.id}${
                 isActive || activeModuleId === module.id ? ' is-active' : ''
@@ -74,7 +78,7 @@ export function Sidebar() {
             }
           >
             <ModuleIcon id={module.id} />
-            {moduleTitle(module.id)}
+            <span>{moduleTitle(module.id)}</span>
           </NavLink>
         ))}
       </nav>

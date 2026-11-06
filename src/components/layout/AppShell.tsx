@@ -6,10 +6,13 @@ import { UserMenu } from './UserMenu'
 import { useT } from '../../state/LocaleContext'
 
 const WIDTH_KEY = 'life-sidebar-width'
+const COLLAPSED_WIDTH = 64
+const COLLAPSE_THRESHOLD = 160
 const MIN_WIDTH = 200
 const MAX_WIDTH = 400
 const DEFAULT_WIDTH = 248
-const clampWidth = (width: number) => Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, width))
+const clampWidth = (width: number) =>
+  width < COLLAPSE_THRESHOLD ? COLLAPSED_WIDTH : Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, width))
 
 function storedWidth() {
   try {
@@ -37,7 +40,7 @@ export function AppShell() {
 
   return (
     <div
-      className={`app-shell${resizing ? ' is-resizing-sidebar' : ''}`}
+      className={`app-shell${sidebarWidth === COLLAPSED_WIDTH ? ' is-sidebar-collapsed' : ''}${resizing ? ' is-resizing-sidebar' : ''}`}
       style={{ '--sidebar-width': `${sidebarWidth}px` } as CSSProperties}
     >
       <div className="atmosphere" aria-hidden="true" />
@@ -49,7 +52,7 @@ export function AppShell() {
         aria-label={t('nav.resizeSidebar')}
         aria-orientation="vertical"
         aria-controls="app-sidebar"
-        aria-valuemin={MIN_WIDTH}
+        aria-valuemin={COLLAPSED_WIDTH}
         aria-valuemax={MAX_WIDTH}
         aria-valuenow={sidebarWidth}
         onPointerDown={(event) => {
@@ -74,10 +77,13 @@ export function AppShell() {
         onKeyDown={(event) => {
           if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
             event.preventDefault()
-            setSidebarWidth((width) => clampWidth(width + (event.key === 'ArrowLeft' ? -10 : 10)))
+            setSidebarWidth((width) => {
+              if (event.key === 'ArrowRight') return width === COLLAPSED_WIDTH ? MIN_WIDTH : clampWidth(width + 10)
+              return width <= MIN_WIDTH ? COLLAPSED_WIDTH : clampWidth(width - 10)
+            })
           } else if (event.key === 'Home' || event.key === 'End') {
             event.preventDefault()
-            setSidebarWidth(event.key === 'Home' ? MIN_WIDTH : MAX_WIDTH)
+            setSidebarWidth(event.key === 'Home' ? COLLAPSED_WIDTH : MAX_WIDTH)
           }
         }}
       />

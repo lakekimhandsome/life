@@ -3565,6 +3565,29 @@ html[data-theme='dark'] .clipboard-image-remove:hover {
     background: rgba(0, 0, 0, 0.72);
   }
 
+  .is-sidebar-collapsed .app-sidebar {
+    padding-inline: 0.45rem;
+  }
+
+  .is-sidebar-collapsed .sidebar-brand,
+  .is-sidebar-collapsed .sidebar-link,
+  .is-sidebar-collapsed .user-menu--sidebar .user-menu-trigger {
+    justify-content: center;
+    gap: 0;
+    padding-inline: 0;
+  }
+
+  .is-sidebar-collapsed .sidebar-brand span,
+  .is-sidebar-collapsed .sidebar-link span,
+  .is-sidebar-collapsed .user-menu--sidebar .user-menu-trigger-copy {
+    display: none;
+  }
+
+  .is-sidebar-collapsed .user-menu--sidebar .user-menu-panel {
+    right: auto;
+    width: 240px;
+  }
+
   .sidebar-resizer {
     display: block;
     position: absolute;
