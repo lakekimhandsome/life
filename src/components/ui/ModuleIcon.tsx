@@ -4,7 +4,7 @@ import {
   Wallet,
   FolderKanban,
   Notebook,
-  StickyNote,
+  SquareText,
   Target,
   type LucideIcon,
 } from 'lucide-react'
@@ -16,7 +16,7 @@ const ICONS: Record<ModuleId, LucideIcon> = {
   journal: Notebook,
   goals: Target,
   projects: FolderKanban,
-  notes: StickyNote,
+  notes: SquareText,
   clipboard: Clipboard,
 }
 
