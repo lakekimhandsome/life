@@ -39,7 +39,7 @@ export function ObjectDetailPage() {
   }
 
   const schema = getSchema(object.type)
-  const objectId = object.id
+  const { id: objectId, type, title } = object
   const module = getModuleForObjectType(object.type)
   const backTo = object.type === 'note' ? notesUrl(object.folderId) : module?.path ?? '/'
   const supportsMarkdown = supportsMarkdownBody(object.type)
@@ -49,8 +49,11 @@ export function ObjectDetailPage() {
       : null
   const headerDate = object.type === 'goal' ? goalTargetDate : object.occurredAt
   async function handleDelete() {
-    const movesToTrash = object && ['project', 'note', 'journal', 'goal'].includes(object.type)
-    if (!movesToTrash && !window.confirm(t('detail.deleteConfirm'))) return
+    const movesToTrash = ['project', 'note', 'journal', 'goal'].includes(type)
+    const message = movesToTrash
+      ? t('detail.trashConfirm', { title })
+      : t('detail.deleteConfirm')
+    if (!window.confirm(message)) return
     setDeleting(true)
     navigate(backTo, { replace: true, flushSync: true })
     try {
