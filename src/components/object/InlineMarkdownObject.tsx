@@ -5,11 +5,10 @@ import { formatDate, formatDateTime, fromDateInputValue, toDateInputValue } from
 import { useLife } from '../../state/LifeContext'
 import { useT } from '../../state/LocaleContext'
 import { MarkdownEditor } from '../ui/MarkdownEditor'
+import { SaveStatus, type SaveState } from '../ui/SaveStatus'
 import { TypeBadge } from '../ui/TypeBadge'
 
 const SAVE_DEBOUNCE_MS = 500
-
-export type ObjectSaveState = 'saved' | 'saving' | 'error'
 
 interface Draft {
   title: string
@@ -20,8 +19,8 @@ interface Draft {
 
 interface InlineMarkdownObjectProps {
   object: LifeObject
-  saveState: ObjectSaveState
-  onSaveStateChange: (state: ObjectSaveState) => void
+  saveState: SaveState
+  onSaveStateChange: (state: SaveState) => void
   onSave?: (draft: Draft) => Promise<void>
 }
 
@@ -208,13 +207,6 @@ export function InlineMarkdownObject({
     object.type === 'goal' && typeof meta.targetDate === 'string' && meta.targetDate
       ? meta.targetDate
       : null
-  const saveLabel =
-    saveState === 'saving'
-      ? t('clipboard.saving')
-      : saveState === 'error'
-        ? t('clipboard.saveError')
-        : t('clipboard.saved')
-
   return (
     <>
       <header className="detail-header">
@@ -235,12 +227,7 @@ export function InlineMarkdownObject({
               includeTime
             />
           )}
-          <span
-            className={`clipboard-save${saveState === 'error' ? ' is-error' : ''}`}
-            aria-live="polite"
-          >
-            {saveLabel}
-          </span>
+          <SaveStatus state={saveState} />
         </div>
         <input
           className="inline-title-input"

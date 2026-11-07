@@ -1,9 +1,7 @@
 import { useRef, useState } from 'react'
 import { Navigate, useParams, useSearchParams } from 'react-router-dom'
-import {
-  InlineMarkdownObject,
-  type ObjectSaveState,
-} from '../components/object/InlineMarkdownObject'
+import { InlineMarkdownObject } from '../components/object/InlineMarkdownObject'
+import type { SaveState } from '../components/ui/SaveStatus'
 import { BackLink } from '../components/ui/BackLink'
 import { OBJECT_TYPES, type LifeObject, type ObjectType } from '../core/types'
 import { getModuleForObjectType } from '../domain/modules'
@@ -20,7 +18,7 @@ export function CreatePage() {
   const [searchParams] = useSearchParams()
   const folderId = type === 'note' ? searchParams.get('folder') : null
   const { createObject, updateObject } = useLife()
-  const [saveState, setSaveState] = useState<ObjectSaveState>('saved')
+  const [saveState, setSaveState] = useState<SaveState>('saved')
   const createdIdRef = useRef<string | null>(null)
   const createdVersionRef = useRef<string | undefined>(undefined)
   const t = useT()

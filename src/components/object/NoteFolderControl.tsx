@@ -6,6 +6,7 @@ import { useLife } from '../../state/LifeContext'
 import { useT } from '../../state/LocaleContext'
 import { useNoteFolders } from '../../state/useNoteFolders'
 import { FolderDialog } from '../ui/FolderDialog'
+import { SavingIcon } from '../ui/SaveStatus'
 
 function MoveDialog({ object, onClose }: { object: LifeObject; onClose: () => void }) {
   const t = useT()
@@ -45,7 +46,7 @@ function MoveDialog({ object, onClose }: { object: LifeObject; onClose: () => vo
       {failed && <p role="alert">{t('folders.failed')}</p>}
       <div className="folder-dialog-actions"><button type="button" className="btn btn-ghost" disabled={saving} onClick={onClose}>{t('common.cancel')}</button>
         <button type="button" className="btn" disabled={saving || same || Boolean(location && !current)} onClick={() => void move()}>
-          {same && <Check size={16} />}{t(saving ? 'common.saving' : 'folders.moveHere')}
+          {saving ? <SavingIcon /> : <>{same && <Check size={16} />}{t('folders.moveHere')}</>}
         </button></div>
     </>}
   </FolderDialog>

@@ -5,6 +5,7 @@ import type { LifeObject, Relationship } from '../../core/types'
 import { getSchema } from '../../domain/schemas'
 import { useLife } from '../../state/LifeContext'
 import { useT } from '../../state/LocaleContext'
+import { SavingIcon } from '../ui/SaveStatus'
 import { TypeBadge } from '../ui/TypeBadge'
 
 export function ObjectRelations({ object }: { object: LifeObject }) {
@@ -100,7 +101,7 @@ export function ObjectRelations({ object }: { object: LifeObject }) {
               title={saving ? t('common.saving') : t('detail.addLink')}
               aria-busy={saving}
             >
-              <Link2 size={20} strokeWidth={1.75} aria-hidden="true" />
+              {saving ? <SavingIcon size={20} /> : <Link2 size={20} strokeWidth={1.75} aria-hidden="true" />}
             </button>
           </div>
         </form>

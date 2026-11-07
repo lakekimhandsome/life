@@ -1,10 +1,8 @@
 import { useRef, useState } from 'react'
 import { Trash2 } from 'lucide-react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
-import {
-  InlineMarkdownObject,
-  type ObjectSaveState,
-} from '../components/object/InlineMarkdownObject'
+import { InlineMarkdownObject } from '../components/object/InlineMarkdownObject'
+import type { SaveState } from '../components/ui/SaveStatus'
 import { BackLink } from '../components/ui/BackLink'
 import { TypeBadge } from '../components/ui/TypeBadge'
 import { ObjectRelations } from '../components/object/ObjectRelations'
@@ -23,7 +21,7 @@ export function ObjectDetailPage() {
   const navigate = useNavigate()
   const { ready, getObject, deleteObject } = useLife()
   const t = useT()
-  const [saveState, setSaveState] = useState<ObjectSaveState>('saved')
+  const [saveState, setSaveState] = useState<SaveState>('saved')
   const [deleting, setDeleting] = useState(false)
 
   const currentObject = id ? getObject(id) : undefined

@@ -5,6 +5,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { ObjectCard } from '../components/object/ObjectCard'
 import { BackLink } from '../components/ui/BackLink'
 import { FolderDialog } from '../components/ui/FolderDialog'
+import { SavingIcon } from '../components/ui/SaveStatus'
 import { folderPath, notesUrl } from '../lib/noteFolders'
 import { useLife } from '../state/LifeContext'
 import { useT } from '../state/LocaleContext'
@@ -125,7 +126,9 @@ export function NotesPage() {
           {saveError && <p role="alert">{t('folders.failed')}</p>}
           <div className="folder-dialog-actions">
             <button type="button" className="btn btn-ghost" disabled={saving} onClick={() => setCreating(false)}>{t('common.cancel')}</button>
-            <button type="submit" className="btn" disabled={saving || !name.trim()}>{t(saving ? 'common.saving' : 'common.add')}</button>
+            <button type="submit" className="btn" disabled={saving || !name.trim()}>
+              {saving ? <SavingIcon /> : t('common.add')}
+            </button>
           </div>
         </form>
       </FolderDialog>}

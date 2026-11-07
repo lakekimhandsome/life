@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { LifeMark } from '../components/ui/LifeMark'
+import { SavingIcon } from '../components/ui/SaveStatus'
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
 import { useAuth } from '../state/AuthContext'
 import { useT } from '../state/LocaleContext'
@@ -65,7 +66,7 @@ function ConnectionView({
             {t('oauth.deny')}
           </button>
           <button className="btn btn-primary" type="button" disabled={busy} onClick={() => onDecide(true)}>
-            {busy ? t('common.saving') : t('oauth.approve')}
+            {busy ? <SavingIcon /> : t('oauth.approve')}
           </button>
         </div>
       </main>

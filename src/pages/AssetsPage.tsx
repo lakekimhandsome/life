@@ -12,6 +12,7 @@ import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { AssetsPieChart } from '../components/assets/AssetsPieChart'
 import { BackLink } from '../components/ui/BackLink'
+import { SavingIcon } from '../components/ui/SaveStatus'
 import * as repository from '../core/repository'
 import type { LifeObject } from '../core/types'
 import {
@@ -893,7 +894,7 @@ export function AssetsPage() {
                       className="btn btn-primary"
                       disabled={!ready || saving}
                     >
-                      {saving ? t('common.saving') : t('common.save')}
+                      {saving ? <SavingIcon /> : t('common.save')}
                     </button>
                   </div>
                 </form>

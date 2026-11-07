@@ -5,6 +5,7 @@ import type { LifeObject, ObjectType } from '../../core/types'
 import { useLife } from '../../state/LifeContext'
 import { useT } from '../../state/LocaleContext'
 import { MarkdownEditor } from '../ui/MarkdownEditor'
+import { SavingIcon } from '../ui/SaveStatus'
 
 interface ObjectFormProps {
   type: ObjectType
@@ -231,7 +232,7 @@ export function ObjectForm({
       {showSubmitButton ? (
         <div className="form-actions">
           <button type="submit" className="btn btn-primary" disabled={saving}>
-            {saving ? t('common.saving') : submitLabel}
+            {saving ? <SavingIcon /> : submitLabel}
           </button>
         </div>
       ) : null}

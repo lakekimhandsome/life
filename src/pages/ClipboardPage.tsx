@@ -7,6 +7,7 @@ import {
 } from 'react'
 import { Check, Copy, X } from 'lucide-react'
 import { BackLink } from '../components/ui/BackLink'
+import { SaveStatus, type SaveState } from '../components/ui/SaveStatus'
 import { createId } from '../core/id'
 import type { ClipboardImage } from '../lib/database'
 import {
@@ -32,7 +33,6 @@ type DisplayImage = ClipboardImage & {
   uploading?: boolean
 }
 
-type SaveState = 'saved' | 'saving' | 'error'
 
 function persistedImages(images: DisplayImage[]): ClipboardImage[] {
   return images
@@ -314,13 +314,6 @@ export function ClipboardPage() {
     void addImages(imageFilesFromDataTransfer(event.dataTransfer))
   }
 
-  const saveLabel =
-    saveState === 'saving'
-      ? t('clipboard.saving')
-      : saveState === 'error'
-        ? t('clipboard.saveError')
-        : t('clipboard.saved')
-
   return (
     <div
       className={`module-page clipboard-page module-heading--clipboard${dragging ? ' is-dragging' : ''}`}
@@ -334,12 +327,7 @@ export function ClipboardPage() {
           <h1>{t('modules.clipboard')}</h1>
         </div>
         <div className="module-header-actions">
-          <span
-            className={`clipboard-save${saveState === 'error' ? ' is-error' : ''}`}
-            aria-live="polite"
-          >
-            {ready ? saveLabel : t('clipboard.loading')}
-          </span>
+          <SaveStatus state={ready ? saveState : 'loading'} />
         </div>
       </div>
 

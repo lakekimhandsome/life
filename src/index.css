@@ -3478,6 +3478,8 @@ html[data-theme='dark'] select option {
 }
 
 .clipboard-save {
+  display: inline-flex;
+  align-items: center;
   color: var(--muted);
   font-size: 0.82rem;
   font-weight: 600;
@@ -3485,6 +3487,20 @@ html[data-theme='dark'] select option {
 
 .clipboard-save.is-error {
   color: var(--danger);
+}
+
+.saving-spinner {
+  display: inline-flex;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .saving-spinner {
+    animation: saving-spin 800ms linear infinite;
+  }
+}
+
+@keyframes saving-spin {
+  to { transform: rotate(1turn); }
 }
 
 .clipboard-error {

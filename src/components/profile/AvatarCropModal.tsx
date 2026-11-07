@@ -8,6 +8,7 @@ import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 import { t as translate } from '../../i18n'
 import { useT } from '../../state/LocaleContext'
+import { SavingIcon } from '../ui/SaveStatus'
 
 const OUTPUT = 512
 const ZOOM_MIN = 1
@@ -315,7 +316,7 @@ export function AvatarCropModal({
             disabled={saving || !image || Boolean(loadError)}
             onClick={() => void handleConfirm()}
           >
-            {busy || exporting ? t('common.saving') : t('avatar.apply')}
+            {saving ? <SavingIcon /> : t('avatar.apply')}
           </button>
         </div>
       </div>

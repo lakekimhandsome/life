@@ -3,6 +3,7 @@ import { Save } from 'lucide-react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { ObjectForm } from '../components/object/ObjectForm'
 import { BackLink } from '../components/ui/BackLink'
+import { SavingIcon } from '../components/ui/SaveStatus'
 import { getSchema, supportsMarkdownBody } from '../domain/schemas'
 import { useLife } from '../state/LifeContext'
 import { useT } from '../state/LocaleContext'
@@ -45,7 +46,7 @@ export function EditPage() {
               disabled={saving}
               aria-label={saving ? t('common.saving') : t('edit.save')}
             >
-              <Save size={20} strokeWidth={1.75} aria-hidden="true" />
+              {saving ? <SavingIcon size={20} /> : <Save size={20} strokeWidth={1.75} aria-hidden="true" />}
             </button>
           </div>
         </div>
