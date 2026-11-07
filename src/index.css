@@ -406,20 +406,53 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
   cursor: not-allowed;
 }
 
-.login-btn-google {
+/* Google HTML button configurator, light rectangular variant. */
+.gsi-material-button {
+  position: relative;
+  background: #fff;
+  color: #1f1f1f;
+  padding-inline: 12px;
+  border: 1px solid #747775;
+  border-radius: 4px;
+  font: 500 14px / 20px 'Google Sans', system-ui, sans-serif;
+  letter-spacing: 0.25px;
+  user-select: none;
+}
+
+.gsi-material-button-content-wrapper {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 10px;
-  background: #fff;
-  color: #1f1f1f;
-  padding-inline: 11px;
-  border: 1px solid #747775;
-  border-radius: 999px;
-  font: 500 14px / 20px 'Google Sans', system-ui, sans-serif;
 }
 
-.login-btn-google:hover:not(:disabled) {
-  background: #f8f9fa;
+.gsi-material-button-icon {
+  flex: none;
+}
+
+.gsi-material-button-contents {
+  flex: 1;
+}
+
+.gsi-material-button-state {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: #303030;
+  opacity: 0;
+  transition: opacity .218s;
+}
+
+.gsi-material-button:not(:disabled):hover {
+  box-shadow: 0 1px 2px rgb(60 64 67 / 30%), 0 1px 3px 1px rgb(60 64 67 / 15%);
+}
+
+.gsi-material-button:not(:disabled):hover .gsi-material-button-state {
+  opacity: 0.08;
+}
+
+.gsi-material-button:not(:disabled):is(:active, :focus-visible) .gsi-material-button-state {
+  opacity: 0.12;
 }
 
 .login-btn-kakao {

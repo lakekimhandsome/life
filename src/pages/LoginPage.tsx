@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Navigate, useSearchParams } from 'react-router-dom'
-import googleMark from '../assets/google-signin.png'
+import googleMark from '../assets/google-signin.svg'
 import kakaoButtonEn from '../assets/kakao-signin-en.svg'
 import kakaoButtonKo from '../assets/kakao-signin-ko.svg'
 import { LifeMark } from '../components/ui/LifeMark'
@@ -64,12 +64,15 @@ export function LoginPage() {
           <div className="login-actions">
             <button
               type="button"
-              className="login-btn login-btn-google"
+              className="login-btn gsi-material-button"
               disabled={busy}
               onClick={() => void handleGoogle()}
             >
-              <img src={googleMark} alt="" width={20} height={20} />
-              {t('login.google')}
+              <span className="gsi-material-button-state" aria-hidden="true" />
+              <span className="gsi-material-button-content-wrapper">
+                <img className="gsi-material-button-icon" src={googleMark} alt="" width={20} height={20} />
+                <span className="gsi-material-button-contents">{t('login.google')}</span>
+              </span>
             </button>
             <button
               type="button"
