@@ -324,6 +324,7 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
 .auth-callback,
 .auth-gate {
   min-height: 100vh;
+  min-height: 100dvh;
   display: grid;
   place-content: center;
   gap: 1rem;
