@@ -1,0 +1,8 @@
+{
+  "name": "life-share-preview",
+  "main": "workers/share-preview.js",
+  "compatibility_date": "2026-11-06",
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [{ "pattern": "life.lakekim.com/share/*", "zone_name": "lakekim.com" }]
+}

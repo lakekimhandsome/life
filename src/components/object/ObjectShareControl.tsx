@@ -11,7 +11,7 @@ export function ObjectShareControl({ object }: { object: LifeObject }) {
   const [copied, setCopied] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const shareUrl = object.shareToken
-    ? `https://life-share-preview.vercel.app/share/${object.shareToken}`
+    ? new URL(`/share/${object.shareToken}`, window.location.origin).href
     : null
 
   async function changeVisibility(visibility: ObjectVisibility) {

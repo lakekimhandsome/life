@@ -28,6 +28,7 @@ dist-ssr
 .env.*
 !.env.example
 .vercel
+.wrangler
 
 # Local code analysis outputs
 /graphify-out/
