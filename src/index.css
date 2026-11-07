@@ -356,8 +356,9 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
 
 .login-brand {
   margin: 0;
-  display: grid;
-  justify-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   gap: 0.45rem;
   font-family: var(--font-display);
   font-size: 1.65rem;
