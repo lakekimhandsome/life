@@ -4,7 +4,7 @@ import { stripMarkdown } from '../src/lib/markdown.ts'
 
 const lifeOrigin = 'https://life.lakekim.com'
 const imageBucket = 'body-images'
-const fallbackImage = `${lifeOrigin}/icon-512.png`
+const fallbackImage = `${lifeOrigin}/life-share-cover.png`
 const redirectScript = "location.replace(document.getElementById('open').href)"
 const scriptHash = createHash('sha256').update(redirectScript).digest('base64')
 const headers = {
