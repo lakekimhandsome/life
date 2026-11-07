@@ -10,6 +10,9 @@ export function ObjectShareControl({ object }: { object: LifeObject }) {
   const [saving, setSaving] = useState(false)
   const [copied, setCopied] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const shareUrl = object.shareToken
+    ? `https://life-share-preview.vercel.app/share/${object.shareToken}`
+    : null
 
   async function changeVisibility(visibility: ObjectVisibility) {
     setSaving(true)
@@ -26,18 +29,16 @@ export function ObjectShareControl({ object }: { object: LifeObject }) {
   }
 
   async function shareLink() {
-    if (!object.shareToken) return
-    const url = new URL(`/share/${object.shareToken}`, window.location.origin)
-    const shareText = `Lake's Interface For Everything™\n\n${object.title}\n${url}`
+    if (!shareUrl) return
     setCopied(false)
     try {
       if (navigator.share) {
-        await navigator.share({ text: shareText })
+        await navigator.share({ url: shareUrl })
         setError(null)
         return
       }
 
-      await navigator.clipboard.writeText(url.toString())
+      await navigator.clipboard.writeText(shareUrl)
       setCopied(true)
       window.setTimeout(() => setCopied(false), 1500)
       setError(null)
@@ -49,14 +50,13 @@ export function ObjectShareControl({ object }: { object: LifeObject }) {
 
   async function copyLink() {
     setCopied(false)
-    if (!object.shareToken || !navigator.clipboard?.writeText) {
+    if (!shareUrl || !navigator.clipboard?.writeText) {
       setError(t('share.copyFailed'))
       return
     }
 
     try {
-      const url = new URL(`/share/${object.shareToken}`, window.location.origin)
-      await navigator.clipboard.writeText(url.toString())
+      await navigator.clipboard.writeText(shareUrl)
       setCopied(true)
       window.setTimeout(() => setCopied(false), 1500)
       setError(null)

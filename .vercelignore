@@ -1,0 +1,5 @@
+.env*
+.github
+dist
+graphify-out
+supabase
