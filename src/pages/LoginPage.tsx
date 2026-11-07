@@ -76,7 +76,7 @@ export function LoginPage() {
               disabled={busy}
               onClick={() => void handleKakao()}
             >
-              <img src={kakaoMark} alt="" width={20} height={20} />
+              <img src={kakaoMark} alt="" width={14} height={14} />
               {t('login.kakao')}
             </button>
           </div>

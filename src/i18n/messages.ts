@@ -82,7 +82,7 @@ export const en = {
 
   'login.copy': 'Sign in to keep your life data in one place.',
   'login.google': 'Continue with Google',
-  'login.kakao': 'Continue with Kakao',
+  'login.kakao': 'Login with Kakao',
   'login.checking': 'Checking session…',
   'login.needSupabase': 'Set the Supabase environment variables.',
 
@@ -462,7 +462,7 @@ export const ko: Record<MessageKey, string> = {
 
   'login.copy': '로그인 후 삶의 데이터를 이어서 관리하세요.',
   'login.google': 'Google로 로그인',
-  'login.kakao': '카카오로 로그인',
+  'login.kakao': '카카오 로그인',
   'login.checking': '세션 확인 중…',
   'login.needSupabase': 'Supabase 환경 변수를 설정하세요.',
 

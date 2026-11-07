@@ -385,6 +385,13 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
   margin-top: 1.35rem;
 }
 
+@font-face {
+  font-family: 'Google Sans';
+  src: url('./assets/google-sans-medium.woff2') format('woff2');
+  font-weight: 500;
+  font-display: swap;
+}
+
 .login-btn {
   display: flex;
   align-items: center;
@@ -393,9 +400,8 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
   width: 100%;
   min-height: 2.75rem;
   padding: 0 12px;
-  border-radius: 12px;
-  border: 1px solid transparent;
-  font-weight: 700;
+  border: 0;
+  font: 500 14px / 20px system-ui, sans-serif;
   cursor: pointer;
 }
 
@@ -411,7 +417,11 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
 .login-btn-google {
   background: #fff;
   color: #1f1f1f;
-  border-color: #747775;
+  justify-content: flex-start;
+  padding-inline: 11px;
+  border: 1px solid #747775;
+  border-radius: 999px;
+  font-family: 'Google Sans', system-ui, sans-serif;
 }
 
 .login-btn-google:hover:not(:disabled) {
@@ -420,11 +430,8 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
 
 .login-btn-kakao {
   background: #fee500;
-  color: #191919;
-}
-
-.login-btn-kakao:hover:not(:disabled) {
-  background: #f5dc00;
+  color: rgb(0 0 0 / 85%);
+  border-radius: 12px;
 }
 
 .login-hint {
