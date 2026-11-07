@@ -1,3 +1,4 @@
+import { PencilOff } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { LifeMark } from '../components/ui/LifeMark'
@@ -89,7 +90,9 @@ export function SharedObjectPage() {
           <div className="detail-meta">
             <TypeBadge type={object.type} />
             <time dateTime={object.occurredAt}>{formatDateTime(object.occurredAt)}</time>
-            <span>{t('share.readOnly')}</span>
+            <PencilOff size={16} role="img">
+              <title>{t('share.readOnly')}</title>
+            </PencilOff>
           </div>
           <h1>{object.title}</h1>
         </header>
