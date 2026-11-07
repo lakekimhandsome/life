@@ -46,7 +46,7 @@ test('share previews use the existing token checks for record metadata and uploa
 
   record = [{ title: '사진 없는 기록', body: '본문' }]
   const noImage = await GET(new Request(preview))
-  assert.ok((await noImage.text()).includes('property="og:image" content="https://life.lakekim.com/life-share-cover.png?v=3"'))
+  assert.ok((await noImage.text()).includes('property="og:image" content="https://life.lakekim.com/life-share-cover.png?v=4"'))
 
   record = []
   assert.equal((await GET(new Request(preview))).status, 404)
