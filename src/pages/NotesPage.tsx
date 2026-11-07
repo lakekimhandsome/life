@@ -90,20 +90,23 @@ export function NotesPage() {
         : missing ? <p className="empty-state">{t('folders.notFound')}</p>
         : <>
           {children.length > 0 || notes.length > 0 ? <div className="object-stream">
-            {children.map((folder) => {
-              const preview = [...folders.filter((item) => item.parent_id === folder.id).map((item) => item.name),
-                ...allNotes.filter((note) => note.folderId === folder.id).map((note) => note.title)].join(', ')
-              return <Link key={folder.id} to={notesUrl(folder.id)} className="object-row note-folder-item">
-                <div className="object-row-main">
-                  <h3><Folder size={20} strokeWidth={1.5} aria-hidden="true" />
-                    <span><span className="sr-only">Folder: </span>{folder.name}</span>
-                  </h3>
-                  {preview && <p>{preview}</p>}
-                </div>
-                <ChevronRight className="object-row-arrow" size={18} strokeWidth={2} aria-hidden="true" />
-              </Link>
-            })}
-            {notes.map((note) => <ObjectCard key={note.id} object={note} />)}
+            {[
+              ...notes.filter((note) => note.meta.pinned === true).map((note) => <ObjectCard key={note.id} object={note} />),
+              ...children.map((folder) => {
+                const preview = [...folders.filter((item) => item.parent_id === folder.id).map((item) => item.name),
+                  ...allNotes.filter((note) => note.folderId === folder.id).map((note) => note.title)].join(', ')
+                return <Link key={folder.id} to={notesUrl(folder.id)} className="object-row note-folder-item">
+                  <div className="object-row-main">
+                    <h3><Folder size={20} strokeWidth={1.5} aria-hidden="true" />
+                      <span><span className="sr-only">Folder: </span>{folder.name}</span>
+                    </h3>
+                    {preview && <p>{preview}</p>}
+                  </div>
+                  <ChevronRight className="object-row-arrow" size={18} strokeWidth={2} aria-hidden="true" />
+                </Link>
+              }),
+              ...notes.filter((note) => note.meta.pinned !== true).map((note) => <ObjectCard key={note.id} object={note} />),
+            ]}
           </div> : <div className="empty-panel">
             <h3>{t('module.emptyTitle')}</h3><p>{t('module.emptyBody', { type: t('object.note') })}</p>
           </div>}

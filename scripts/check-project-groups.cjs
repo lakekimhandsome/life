@@ -1,4 +1,4 @@
-// Start npm run dev first. Run with Playwright available in NODE_PATH.
+// Start the app first. Run with Playwright available in NODE_PATH.
 const { chromium, webkit } = require('playwright')
 const assert = require('node:assert/strict')
 
@@ -22,10 +22,26 @@ async function check(engine) {
       }))
     }, user)
     await page.route('**/auth/v1/user', (route) => route.fulfill({ json: user }))
+    let rejectPin = false
+    const folders = []
     await page.route('**/rest/v1/**', (route) => {
-      const table = new URL(route.request().url()).pathname.split('/').pop()
+      const request = route.request()
+      const url = new URL(request.url())
+      const table = url.pathname.split('/').pop()
+      const id = url.searchParams.get('id')?.slice(3)
+      if (table === 'life_objects' && id) {
+        const row = objects.find((object) => object.id === id)
+        if (request.method() === 'PATCH') {
+          if (rejectPin || url.searchParams.get('updated_at') !== `eq.${row.updated_at}`) {
+            return route.fulfill({ json: [] })
+          }
+          Object.assign(row, request.postDataJSON(), { updated_at: new Date().toISOString() })
+        }
+        return route.fulfill({ json: row ? [row] : [] })
+      }
       return route.fulfill({ json: table === 'life_objects' ? objects
-        : table === 'life_user_prefs' ? { user_id: user.id, prefs: { locale: 'en' } } : [] })
+        : table === 'life_user_prefs' ? { user_id: user.id, prefs: { locale: 'en' } }
+        : table === 'life_note_folders' ? folders : [] })
     })
     const base = process.env.TEST_BASE_URL || 'http://127.0.0.1:5173'
     await page.goto(`${base}/projects`)
@@ -69,7 +85,35 @@ async function check(engine) {
       await page.locator('.object-row').first().waitFor()
       assert.equal(await page.locator('.object-group').count(), 0)
     }
-    console.log(`${engine.name()}: toggling, navigation/reload persistence and other lists passed`)
+    objects.push({ ...objects[0], id: 'project-to-pin', title: 'Older project' })
+    objects.push({ ...objects[4], id: 'note-to-pin', title: 'Older note' })
+    folders.push({ id: 'child', parent_id: null, user_id: user.id, name: 'Child folder' })
+
+    await page.goto(`${base}/projects`)
+    const projectPin = page.getByRole('button', { name: 'Pin to top: Older project' })
+    await projectPin.press('Space')
+    await page.locator('button[aria-label="Pin to top: Older project"][aria-pressed="true"]:enabled').waitFor()
+    await page.reload()
+    await page.getByRole('button', { name: 'Pin to top: Older project', pressed: true }).waitFor()
+    assert.deepEqual(await page.locator('.object-group').first().locator('h3').allTextContents(), ['Older project', 'active'])
+    assert.equal(objects.at(-2).meta.status, 'active')
+
+    await page.goto(`${base}/notes`)
+    const notePin = page.getByRole('button', { name: 'Pin to top: Older note' })
+    await notePin.click()
+    await page.locator('button[aria-label="Pin to top: Older note"][aria-pressed="true"]:enabled').waitFor()
+    assert.equal(await page.locator('.object-stream > :first-child h3').textContent(), 'Older note')
+    rejectPin = true
+    await notePin.click()
+    await page.getByRole('alert').filter({ hasText: 'Could not save the pin' }).waitFor()
+    assert.equal(await notePin.getAttribute('aria-pressed'), 'true')
+    rejectPin = false
+    await notePin.click()
+    await page.locator('button[aria-label="Pin to top: Older note"][aria-pressed="false"]:enabled').waitFor()
+    await page.reload()
+    await page.getByRole('button', { name: 'Pin to top: Older note', pressed: false }).waitFor()
+    assert.equal(await page.locator('.object-stream > :first-child').getAttribute('href'), '/notes?folder=child')
+    console.log(`${engine.name()}: project groups, pin ordering, reload and failed-save rollback passed`)
   } finally { await browser.close() }
 }
 ;(async () => { await check(chromium); await check(webkit) })().catch((error) => { console.error(error); process.exitCode = 1 })

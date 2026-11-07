@@ -42,7 +42,9 @@ export function ModulePage() {
   const moduleId = pathname.replace(/^\//, '') as ModuleId
   const module = LIFE_MODULES.find((item) => item.id === moduleId)
   const objectType = module?.objectType
-  const items = objectType ? listByType(objectType) : []
+  const items = useMemo(() => objectType
+    ? listByType(objectType).sort((a, b) => Number(b.meta.pinned === true) - Number(a.meta.pinned === true))
+    : [], [listByType, objectType])
   const isProject = objectType === 'project'
 
   const projectGroups = useMemo(() => {

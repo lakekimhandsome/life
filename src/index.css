@@ -2128,6 +2128,33 @@ button.assets-row-title:focus-visible {
   background: color-mix(in srgb, var(--ink) 3%, transparent);
 }
 
+.object-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+}
+
+.object-card .object-row {
+  border-bottom: 0;
+  padding-inline-end: 0.5rem;
+}
+
+.object-card .object-pin:not([aria-pressed='true']) {
+  color: var(--muted);
+}
+
+.object-card .object-pin::after {
+  content: attr(data-tooltip);
+  left: auto;
+  right: 0;
+  transform: none;
+}
+
+.object-pin-error {
+  grid-column: 1 / -1;
+}
+
 .object-row-main {
   min-width: 0;
 }
