@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { Navigate, useSearchParams } from 'react-router-dom'
 import googleMark from '../assets/google-signin.png'
-import kakaoMark from '../assets/kakao-signin.svg'
+import kakaoButtonEn from '../assets/kakao-signin-en.svg'
+import kakaoButtonKo from '../assets/kakao-signin-ko.svg'
 import { LifeMark } from '../components/ui/LifeMark'
 import { useAuth } from '../state/AuthContext'
-import { useT } from '../state/LocaleContext'
+import { useLocale } from '../state/LocaleContext'
 
 export function LoginPage() {
-  const t = useT()
+  const { locale, t } = useLocale()
   const [searchParams] = useSearchParams()
   const { ready, configured, user, signInWithGoogle, signInWithKakao } = useAuth()
   const [busy, setBusy] = useState(false)
@@ -76,8 +77,12 @@ export function LoginPage() {
               disabled={busy}
               onClick={() => void handleKakao()}
             >
-              <img src={kakaoMark} alt="" width={14} height={14} />
-              {t('login.kakao')}
+              <img
+                src={locale === 'ko' ? kakaoButtonKo : kakaoButtonEn}
+                alt={t('login.kakao')}
+                width={224}
+                height={46}
+              />
             </button>
           </div>
         )}
