@@ -355,6 +355,9 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
 
 .login-brand {
   margin: 0;
+  display: grid;
+  justify-items: center;
+  gap: 0.45rem;
   font-family: var(--font-display);
   font-size: 1.65rem;
   font-weight: 800;
@@ -383,12 +386,21 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
 }
 
 .login-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
   width: 100%;
   min-height: 2.75rem;
+  padding: 0 12px;
   border-radius: 12px;
   border: 1px solid transparent;
   font-weight: 700;
   cursor: pointer;
+}
+
+.login-btn img {
+  object-fit: contain;
 }
 
 .login-btn:disabled {
@@ -399,7 +411,7 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
 .login-btn-google {
   background: #fff;
   color: #1f1f1f;
-  border-color: #dadce0;
+  border-color: #747775;
 }
 
 .login-btn-google:hover:not(:disabled) {

@@ -1,5 +1,8 @@
 import { useState } from 'react'
 import { Navigate, useSearchParams } from 'react-router-dom'
+import googleMark from '../assets/google-signin.png'
+import kakaoMark from '../assets/kakao-signin.svg'
+import { LifeMark } from '../components/ui/LifeMark'
 import { useAuth } from '../state/AuthContext'
 import { useT } from '../state/LocaleContext'
 
@@ -47,7 +50,10 @@ export function LoginPage() {
     <div className="login-page">
       <div className="atmosphere" aria-hidden="true" />
       <div className="login-card">
-        <p className="login-brand">LIFE</p>
+        <p className="login-brand">
+          <LifeMark size={48} />
+          LIFE
+        </p>
         <h1 className="login-title">Lake&apos;s Interface For Everything</h1>
         <p className="login-copy">{t('login.copy')}</p>
 
@@ -61,6 +67,7 @@ export function LoginPage() {
               disabled={busy}
               onClick={() => void handleGoogle()}
             >
+              <img src={googleMark} alt="" width={20} height={20} />
               {t('login.google')}
             </button>
             <button
@@ -69,6 +76,7 @@ export function LoginPage() {
               disabled={busy}
               onClick={() => void handleKakao()}
             >
+              <img src={kakaoMark} alt="" width={20} height={20} />
               {t('login.kakao')}
             </button>
           </div>
