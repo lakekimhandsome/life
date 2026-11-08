@@ -92,6 +92,17 @@ export function LoginPage() {
                 height={46}
               />
             </button>
+            {import.meta.env.VITE_NAVER_LOGIN_ENABLED === 'true' ? (
+              <button
+                type="button"
+                className="login-btn login-btn-naver"
+                disabled={busy}
+                onClick={() => void handleLogin('custom:naver')}
+              >
+                <span className="login-naver-mark" aria-hidden="true" />
+                <span>{t('login.naver')}</span>
+              </button>
+            ) : null}
             {discordEnabled ? (
               <button
                 type="button"

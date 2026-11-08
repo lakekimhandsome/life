@@ -478,16 +478,35 @@ html[data-theme='dark'] .topbar {
   height: auto;
 }
 
+.login-btn-naver {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #03a94d;
+}
+
+.login-naver-mark {
+  flex: 0 0 18px;
+  height: 18px;
+  /* Show the N at its original size, without the icon button's padding. */
+  background: url('./assets/naver-signin.png') center / 48px 48px no-repeat;
+}
+
+.login-btn-naver,
+.login-btn-discord {
+  border-radius: 4px;
+  color: #fff;
+  font: 600 14px / 20px system-ui, sans-serif;
+}
+
 .login-btn-discord {
   display: grid;
   grid-template-columns: 20px 1fr;
   align-items: center;
   gap: 11px;
   padding: 11px;
-  border-radius: 4px;
   background: #5865f2;
-  color: #fff;
-  font: 600 14px / 20px system-ui, sans-serif;
 }
 
 @media (hover: hover) and (pointer: fine) {

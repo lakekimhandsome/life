@@ -14,6 +14,22 @@ GitHub Pages 배포에는 `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` reposito
 시세 API 키는 클라이언트에 포함하지 않고 Supabase Vault의 `life_alpha_vantage_api_key`에 저장합니다.
 웹과 macOS는 `get_life_market_quote` RPC로 서버가 검증한 공용 시세를 받습니다.
 
+## 웹 네이버 로그인
+
+1. [네이버 개발자센터](https://developers.naver.com/apps/)에 LIFE 웹 애플리케이션을 등록합니다.
+   서비스 URL은 `https://life.lakekim.com`, Callback URL은 Supabase 제공자 설정에 표시되는
+   `https://<project-ref>.supabase.co/auth/v1/callback`을 사용합니다.
+2. [Supabase Auth Providers](https://supabase.com/docs/guides/auth/custom-oauth-providers)에서
+   OIDC 자동 검색 방식으로 `custom:naver`를 추가합니다. Issuer는 `https://nid.naver.com`,
+   scope는 `openid`로 설정하고 PKCE와 nonce 검증을 유지합니다. 네이버 ID 토큰은 이메일을
+   제공하지 않으므로 **Email optional**을 켭니다. Client ID와 Client Secret은 Supabase에 입력합니다.
+   네이버 로그인은 이메일 기준으로 기존 Google·카카오 계정에 자동 연결되지 않습니다.
+3. 로컬 `.env.local`에 `VITE_NAVER_LOGIN_ENABLED=true`를 넣고
+   `npm run dev -- --port 3000`으로 실행합니다. 테스트에 사용할
+   `http://localhost:3000/auth/callback`이 Supabase Auth Redirect URLs에 있어야 합니다.
+   운영에서는 GitHub Actions의 같은 이름의 **Repository variable**을 `true`로 설정하고
+   Pages를 다시 배포합니다. 일반 사용자에게 공개하려면 네이버의 서비스 검수도 완료해야 합니다.
+
 ## MVP 범위
 
 - 홈 (삶의 영역 허브)
