@@ -1,19 +1,34 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Navigate, useSearchParams } from 'react-router-dom'
+import discordMark from '../assets/discord-signin.svg'
 import googleMark from '../assets/google-signin.svg'
 import kakaoButtonEn from '../assets/kakao-signin-en.svg'
 import kakaoButtonKo from '../assets/kakao-signin-ko.svg'
 import { LifeMark } from '../components/ui/LifeMark'
-import { useAuth } from '../state/AuthContext'
+import { isDiscordLoginEnabled } from '../lib/supabase'
+import { useAuth, type LoginProvider } from '../state/AuthContext'
 import { useLocale } from '../state/LocaleContext'
 
 export function LoginPage() {
   const { locale, t } = useLocale()
   const [searchParams] = useSearchParams()
-  const { ready, configured, user, signInWithGoogle, signInWithKakao } = useAuth()
+  const { ready, configured, user, signIn } = useAuth()
+  const [discordEnabled, setDiscordEnabled] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const next = searchParams.get('next') ?? '/'
+  const showLogin = ready && configured && !user
+
+  useEffect(() => {
+    if (!showLogin) return
+    const controller = new AbortController()
+    void isDiscordLoginEnabled(controller.signal)
+      .then((enabled) => {
+        if (!controller.signal.aborted) setDiscordEnabled(enabled)
+      })
+      .catch(() => {})
+    return () => controller.abort()
+  }, [showLogin])
 
   if (!ready) {
     return (
@@ -27,20 +42,10 @@ export function LoginPage() {
     return <Navigate to="/" replace />
   }
 
-  async function handleGoogle() {
+  async function handleLogin(provider: LoginProvider) {
     setError(null)
     setBusy(true)
-    const { error: nextError } = await signInWithGoogle(next)
-    if (nextError) {
-      setError(nextError.message)
-      setBusy(false)
-    }
-  }
-
-  async function handleKakao() {
-    setError(null)
-    setBusy(true)
-    const { error: nextError } = await signInWithKakao(next)
+    const { error: nextError } = await signIn(provider, next)
     if (nextError) {
       setError(nextError.message)
       setBusy(false)
@@ -66,7 +71,7 @@ export function LoginPage() {
               type="button"
               className="login-btn gsi-material-button"
               disabled={busy}
-              onClick={() => void handleGoogle()}
+              onClick={() => void handleLogin('google')}
             >
               <span className="gsi-material-button-state" aria-hidden="true" />
               <span className="gsi-material-button-content-wrapper">
@@ -78,7 +83,7 @@ export function LoginPage() {
               type="button"
               className="login-btn login-btn-kakao"
               disabled={busy}
-              onClick={() => void handleKakao()}
+              onClick={() => void handleLogin('kakao')}
             >
               <img
                 src={locale === 'ko' ? kakaoButtonKo : kakaoButtonEn}
@@ -87,6 +92,17 @@ export function LoginPage() {
                 height={46}
               />
             </button>
+            {discordEnabled ? (
+              <button
+                type="button"
+                className="login-btn login-btn-discord"
+                disabled={busy}
+                onClick={() => void handleLogin('discord')}
+              >
+                <img src={discordMark} alt="" width={20} height={15} />
+                <span>{t('login.discord')}</span>
+              </button>
+            ) : null}
           </div>
         )}
 

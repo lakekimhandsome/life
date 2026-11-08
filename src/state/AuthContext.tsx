@@ -11,13 +11,14 @@ import type { Session, User } from '@supabase/supabase-js'
 import { t } from '../i18n'
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
 
+export type LoginProvider = 'google' | 'kakao' | 'discord'
+
 type AuthContextValue = {
   ready: boolean
   configured: boolean
   session: Session | null
   user: User | null
-  signInWithKakao: (next?: string) => Promise<{ error: Error | null }>
-  signInWithGoogle: (next?: string) => Promise<{ error: Error | null }>
+  signIn: (provider: LoginProvider, next?: string) => Promise<{ error: Error | null }>
   signOut: () => Promise<{ error: Error | null }>
 }
 
@@ -60,28 +61,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [configured])
 
-  const signInWithKakao = useCallback(async (next = '/') => {
+  const signIn = useCallback(async (provider: LoginProvider, next = '/') => {
     if (!configured) {
       return { error: new Error(t('error.noSupabase')) }
     }
 
     const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'kakao',
-      options: {
-        redirectTo: authRedirectTo(next),
-      },
-    })
-
-    return { error: error ? new Error(error.message) : null }
-  }, [configured])
-
-  const signInWithGoogle = useCallback(async (next = '/') => {
-    if (!configured) {
-      return { error: new Error(t('error.noSupabase')) }
-    }
-
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
+      provider,
       options: {
         redirectTo: authRedirectTo(next),
       },
@@ -105,11 +91,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       configured,
       session,
       user: session?.user ?? null,
-      signInWithKakao,
-      signInWithGoogle,
+      signIn,
       signOut,
     }),
-    [ready, configured, session, signInWithGoogle, signInWithKakao, signOut],
+    [ready, configured, session, signIn, signOut],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

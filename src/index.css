@@ -467,6 +467,25 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
   height: auto;
 }
 
+.login-btn-discord {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-inline: 13px;
+  border-radius: 4px;
+  background: #5865f2;
+  color: #fff;
+  font: 600 14px / 20px system-ui, sans-serif;
+}
+
+.login-btn-discord span {
+  flex: 1;
+}
+
+.login-btn-discord:not(:disabled):hover {
+  background: #4752c4;
+}
+
 .login-hint {
   margin: 1rem 0 0;
   color: var(--muted);
