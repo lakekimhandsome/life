@@ -84,6 +84,7 @@ export const en = {
   'login.google': 'Continue with Google',
   'login.kakao': 'Login with Kakao',
   'login.discord': 'Continue with Discord',
+  'login.discordAction': 'Continue with',
   'login.checking': 'Checking session…',
   'login.needSupabase': 'Set the Supabase environment variables.',
 
@@ -467,6 +468,7 @@ export const ko: Record<MessageKey, string> = {
   'login.google': 'Google로 로그인',
   'login.kakao': '카카오 로그인',
   'login.discord': 'Discord로 로그인',
+  'login.discordAction': '로 로그인',
   'login.checking': '세션 확인 중…',
   'login.needSupabase': 'Supabase 환경 변수를 설정하세요.',
 
