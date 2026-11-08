@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>개인정보처리방침 | LIFE</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/legal.css">
+</head>
+<body>
+  <main>
+    <nav aria-label="LIFE 문서">
+      <a href="/">LIFE 홈</a>
+      <a href="/terms/">서비스 약관</a>
+    </nav>
+    <h1>개인정보처리방침</h1>
+    <p class="document-date">시행일 <time datetime="2026-11-09">2026년 11월 9일</time></p>
+    <p>LIFE(Lake’s Interface For Everything)는 노트, 일기, 프로젝트, 목표, 계획, 자산 등을 기록하고 기기 간에 동기화하는 서비스입니다. 이 방침은 LIFE가 계정과 기록에 관한 개인정보를 어떻게 처리하는지 설명합니다.</p>
+
+    <h2>1. 처리하는 개인정보와 이용 목적</h2>
+    <ul>
+      <li><strong>계정과 로그인.</strong> 소셜 로그인 시 로그인 제공자가 전달하는 계정 식별자와 이메일, 표시 이름, 프로필 사진 등 제공자와 사용자 설정에 따라 전달되는 기본 프로필 정보를 처리합니다. 계정을 식별하고 로그인 상태를 유지하며 서비스에 프로필을 표시하는 데 사용합니다.</li>
+      <li><strong>사용자가 입력한 기록.</strong> 작성하거나 업로드한 노트, 일기, 프로젝트, 목표, 계획, 자산, 클립보드 내용, 이미지, 프로필 사진과 설정을 처리합니다. 해당 데이터를 저장하고, 표시하고, 기기 간에 동기화하는 데 사용합니다.</li>
+      <li><strong>문의와 접속 정보.</strong> 문의 시 보낸 이메일 주소와 내용을 응대에 사용합니다. 웹 호스팅과 인증 인프라는 접속 IP, 요청 시각 등의 정보를 보안과 장애 대응을 위해 처리할 수 있습니다.</li>
+    </ul>
+
+    <h2>2. Google 로그인 데이터</h2>
+    <p>Google 로그인을 선택하면 LIFE는 Supabase Auth를 통해 Google 계정 식별자, 이메일, 기본 프로필 정보(예: 이름과 프로필 사진)를 받아 LIFE 계정을 만들거나 확인하고 프로필을 표시합니다. 해당 정보는 Supabase의 인증 계정에 저장됩니다. 이 로그인 흐름에서 Gmail, Google Drive, Google Calendar 데이터에는 접근하지 않습니다.</p>
+    <p>Google 로그인 데이터는 인증, 계정 관리 및 프로필 표시에 사용합니다. 광고 타기팅이나 판매에 사용하지 않습니다. Google 데이터의 사용 및 전송에는 <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>의 Limited Use 요건을 적용합니다. 사용자는 <a href="https://myaccount.google.com/connections">Google 계정의 서드 파티 연결</a>에서 권한을 철회할 수 있습니다. LIFE에 이미 저장된 계정 정보는 아래 연락처로 별도 삭제를 요청할 수 있습니다.</p>
+
+    <h2>3. 외부 서비스 및 국외 처리</h2>
+    <ul>
+      <li><strong>GitHub Pages 및 Cloudflare.</strong> LIFE 웹 페이지의 호스팅과 전송에 사용합니다. 호스팅 제공자는 웹 요청의 IP 주소를 보안 목적으로 처리할 수 있습니다.</li>
+      <li><strong>공유 링크 미리보기.</strong> 사용자가 공유한 노트, 프로젝트 또는 일기의 링크를 열면 Cloudflare와 Vercel을 거쳐 제목, 본문 일부와 대표 이미지가 미리보기로 제공될 수 있습니다. 링크를 받은 사람은 별도 로그인 없이 공유 기록을 볼 수 있고, 메신저 등 외부 서비스는 미리보기를 저장할 수 있습니다.</li>
+      <li><strong>선택적 외부 앱 연결.</strong> 사용자가 LIFE에 외부 앱 연결을 승인하면, 연결된 앱은 승인된 기능을 통해 LIFE 기록을 읽거나 수정할 수 있습니다. 외부 앱에 전달된 정보는 해당 앱의 개인정보처리방침이 적용됩니다.</li>
+    </ul>
+    <p>서비스 제공에 필요한 처리, 사용자가 선택한 공유 또는 연결, 법령에 따른 제공 요청이 있는 경우에 해당 범위의 개인정보를 전달할 수 있습니다.</p>
+    <h3>Supabase 인증 및 저장 위탁</h3>
+    <p>LIFE는 계정 인증, 기록 저장 및 기기 간 동기화에 필요한 처리를 Supabase에 위탁합니다. 이는 서비스 계약의 체결 및 이행에 필요한 처리위탁과 보관으로, 개인정보 보호법 제28조의8 제1항 제3호 가목에 따라 이전 사항을 공개합니다.</p>
+    <ul>
+      <li><strong>이전받는 자와 연락처.</strong> Supabase Pte. Ltd. (<a href="mailto:privacy@supabase.com">privacy@supabase.com</a>).</li>
+      <li><strong>이전 항목.</strong> 로그인 식별자, 이메일, 기본 프로필 및 인증 정보, 사용자가 저장한 기록과 설정, 업로드 파일.</li>
+      <li><strong>이전 국가·시기·방법.</strong> 계정 인증, 저장, 조회 및 동기화 시 암호화된 네트워크 연결을 통해 호주 시드니 리전으로 전송합니다. Supabase의 운영 지원에 필요한 경우 싱가포르와 미국에서 처리될 수 있습니다. 관련 정보는 <a href="https://supabase.com/legal/privacy-resources/data-residency-and-transfers-faq">Supabase의 데이터 저장 위치와 이전 안내</a>에서 확인할 수 있습니다.</li>
+      <li><strong>이용 목적과 보유 기간.</strong> 로그인, 데이터베이스 및 파일 저장, 동기화와 장애 대응에 사용합니다. 계정과 저장 데이터는 삭제될 때까지, 운영 로그는 인프라 제공자의 보존 기간까지 처리합니다.</li>
+      <li><strong>이전 거부 방법과 영향.</strong> 로그인과 기록 저장을 하지 않거나 아래 문의처를 통해 계정 삭제를 요청할 수 있습니다. 이전을 거부하면 계정 인증과 클라우드 저장·동기화 기능을 이용할 수 없습니다.</li>
+    </ul>
+
+    <h2>4. 보유 기간과 삭제</h2>
+    <p>계정 정보와 동기화된 기록은 서비스 이용 중 보관합니다. 노트, 일기, 프로젝트, 목표를 휴지통으로 이동하면 복원할 수 있도록 보관되며, 설정의 휴지통에서 영구 삭제할 수 있습니다. 계정과 연결된 데이터 전체의 삭제는 아래 이메일로 요청할 수 있습니다.</p>
+    <p>보유 목적이 끝나면 해당 계정 정보와 기록을 운영 데이터베이스와 파일 저장소에서 삭제합니다. LIFE 운영자는 별도의 데이터 백업을 보관하지 않습니다. 법령상 보관이 필요한 정보는 해당 기간까지 별도로 보관한 뒤 삭제합니다.</p>
+
+    <h2>5. 브라우저 저장소와 보호 조치</h2>
+    <p>LIFE 웹은 로그인 세션과 언어·테마 설정을 브라우저의 로컬 저장소에 저장합니다. 브라우저에서 사이트 데이터를 지우면 저장된 로그인 상태와 설정이 초기화됩니다. LIFE는 HTTPS와 사용자별 접근 제어를 사용해 비공개 기록에 대한 접근을 제한합니다.</p>
+
+    <h2>6. 권리 행사와 문의</h2>
+    <p>개인정보의 열람, 정정, 삭제, 처리 정지, 동의 철회 또는 계정 삭제를 요청하려면 LIFE 운영 담당자에게 <a href="mailto:contact@lakekim.com">contact@lakekim.com</a>으로 문의해 주세요. 계정 보호를 위해 필요한 범위에서 본인 여부를 확인할 수 있습니다. 개인정보 침해 신고와 분쟁 조정은 <a href="https://privacy.kisa.or.kr/">개인정보침해 신고센터</a>와 <a href="https://www.kopico.go.kr/">개인정보분쟁조정위원회</a>를 이용할 수 있습니다.</p>
+    <p>개인정보 처리 방식이 변경되면 이 페이지에 개정 내용을 공개하고, 필요한 경우 별도로 알리거나 동의를 받습니다.</p>
+  </main>
+</body>
+</html>

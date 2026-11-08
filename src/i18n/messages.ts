@@ -80,7 +80,9 @@ export const en = {
   'hub.clipboard.imageMany': '{count} Images',
   'hub.clipboard.previewWithImages': '{preview} · {count} Images',
 
-  'login.copy': 'Sign in to keep your life data in one place.',
+  'login.copy': 'Keep notes, journals, projects, goals, and assets in one place and sync them across your devices.',
+  'legal.privacy': 'Privacy Policy',
+  'legal.terms': 'Terms of Service',
   'login.google': 'Sign in with Google',
   'login.kakao': 'Login with Kakao',
   'login.naver': 'Login with NAVER',
@@ -464,7 +466,9 @@ export const ko: Record<MessageKey, string> = {
   'hub.clipboard.imageMany': '이미지 {count}장',
   'hub.clipboard.previewWithImages': '{preview} · 이미지 {count}장',
 
-  'login.copy': '로그인 후 삶의 데이터를 이어서 관리하세요.',
+  'login.copy': '노트, 일기, 프로젝트, 목표, 자산을 한곳에 기록하고 여러 기기에서 이어서 관리하세요.',
+  'legal.privacy': '개인정보처리방침',
+  'legal.terms': '서비스 약관',
   'login.google': 'Google로 로그인',
   'login.kakao': '카카오 로그인',
   'login.naver': '네이버 로그인',

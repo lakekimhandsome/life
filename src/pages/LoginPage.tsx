@@ -102,6 +102,10 @@ export function LoginPage() {
         )}
 
         {error ? <p className="login-hint is-error">{error}</p> : null}
+        <footer className="legal-links">
+          <a href="/privacy/">{t('legal.privacy')}</a>
+          <a href="/terms/">{t('legal.terms')}</a>
+        </footer>
       </div>
     </div>
   )

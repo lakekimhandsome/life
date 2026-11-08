@@ -96,6 +96,10 @@ export function SettingsPage() {
       </nav>
 
       <footer className="settings-commit" title={`Commit ${__COMMIT_HASH__}`}>
+        <div className="legal-links">
+          <a href="/privacy/">{t('legal.privacy')}</a>
+          <a href="/terms/">{t('legal.terms')}</a>
+        </div>
         Lake's Interface For Everything
         <br />
         {__COMMIT_HASH__}

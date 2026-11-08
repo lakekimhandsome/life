@@ -390,6 +390,20 @@ html[data-theme='dark'] .topbar {
   line-height: 1.45;
 }
 
+.legal-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem 1rem;
+  margin-block: 1rem 0.5rem;
+  font-size: 0.82rem;
+}
+
+.legal-links a {
+  color: var(--ink-soft);
+  text-decoration: underline;
+}
+
 .login-actions {
   display: grid;
   gap: 0.55rem;
