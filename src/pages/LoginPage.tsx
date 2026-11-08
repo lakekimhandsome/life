@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Navigate, useSearchParams } from 'react-router-dom'
-import discordLogo from '../assets/discord-signin.svg'
+import discordMark from '../assets/discord-signin.svg'
 import googleMark from '../assets/google-signin.svg'
 import kakaoButtonEn from '../assets/kakao-signin-en.svg'
 import kakaoButtonKo from '../assets/kakao-signin-ko.svg'
@@ -96,12 +96,11 @@ export function LoginPage() {
               <button
                 type="button"
                 className="login-btn login-btn-discord"
-                aria-label={t('login.discord')}
                 disabled={busy}
                 onClick={() => void handleLogin('discord')}
               >
-                <img src={discordLogo} alt="" width={96} />
-                <span aria-hidden="true">{t('login.discordAction')}</span>
+                <img src={discordMark} alt="" width={20} height={15} />
+                <span>{t('login.discord')}</span>
               </button>
             ) : null}
           </div>

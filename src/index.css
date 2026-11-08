@@ -468,26 +468,15 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
 }
 
 .login-btn-discord {
-  display: flex;
+  display: grid;
+  grid-template-columns: 20px 1fr 20px;
   align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-  /* Discord's clearspace diagram uses the height of the wordmark's D. */
   gap: 11px;
   padding: 11px;
   border-radius: 4px;
   background: #5865f2;
   color: #fff;
   font: 600 14px / 20px system-ui, sans-serif;
-}
-
-.login-btn-discord img {
-  flex: none;
-  height: auto;
-}
-
-.login-btn-discord:lang(en) img {
-  order: 1;
 }
 
 .login-btn-discord:not(:disabled):hover {
