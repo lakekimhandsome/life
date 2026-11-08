@@ -27,13 +27,3 @@ export const supabase = createClient<Database>(
 export function isSupabaseConfigured() {
   return Boolean(supabaseUrl && supabaseAnonKey)
 }
-
-export async function isDiscordLoginEnabled(signal: AbortSignal): Promise<boolean> {
-  const response = await fetch(new URL('/auth/v1/settings', supabaseUrl), {
-    headers: { apikey: supabaseAnonKey },
-    signal,
-  })
-  if (!response.ok) return false
-  const settings = await response.json()
-  return settings?.external?.discord === true
-}

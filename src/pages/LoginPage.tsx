@@ -1,11 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Navigate, useSearchParams } from 'react-router-dom'
 import discordMark from '../assets/discord-signin.svg'
 import googleMark from '../assets/google-signin.svg'
 import kakaoButtonEn from '../assets/kakao-signin-en.svg'
 import kakaoButtonKo from '../assets/kakao-signin-ko.svg'
 import { LifeMark } from '../components/ui/LifeMark'
-import { isDiscordLoginEnabled } from '../lib/supabase'
 import { useAuth, type LoginProvider } from '../state/AuthContext'
 import { useLocale } from '../state/LocaleContext'
 
@@ -13,22 +12,9 @@ export function LoginPage() {
   const { locale, t } = useLocale()
   const [searchParams] = useSearchParams()
   const { ready, configured, user, signIn } = useAuth()
-  const [discordEnabled, setDiscordEnabled] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const next = searchParams.get('next') ?? '/'
-  const showLogin = ready && configured && !user
-
-  useEffect(() => {
-    if (!showLogin) return
-    const controller = new AbortController()
-    void isDiscordLoginEnabled(controller.signal)
-      .then((enabled) => {
-        if (!controller.signal.aborted) setDiscordEnabled(enabled)
-      })
-      .catch(() => {})
-    return () => controller.abort()
-  }, [showLogin])
 
   if (!ready) {
     return (
@@ -103,17 +89,15 @@ export function LoginPage() {
                 <span>{t('login.naver')}</span>
               </button>
             ) : null}
-            {discordEnabled ? (
-              <button
-                type="button"
-                className="login-btn login-btn-discord"
-                disabled={busy}
-                onClick={() => void handleLogin('discord')}
-              >
-                <img src={discordMark} alt="" width={20} height={15} />
-                <span>{t('login.discord')}</span>
-              </button>
-            ) : null}
+            <button
+              type="button"
+              className="login-btn login-btn-discord"
+              disabled={busy}
+              onClick={() => void handleLogin('discord')}
+            >
+              <img src={discordMark} alt="" width={20} height={15} />
+              <span>{t('login.discord')}</span>
+            </button>
           </div>
         )}
 
