@@ -211,7 +211,14 @@ html[data-theme='dark'] .topbar {
   transition: background 160ms ease, border-color 160ms ease;
 }
 
-.user-menu-trigger:hover,
+@media (hover: hover) and (pointer: fine) {
+  .user-menu-trigger:hover {
+    background: #fff;
+    border-color: color-mix(in srgb, var(--accent) 35%, white);
+    color: var(--ink);
+  }
+}
+
 .user-menu-trigger[aria-expanded='true'] {
   background: #fff;
   border-color: color-mix(in srgb, var(--accent) 35%, white);
@@ -292,12 +299,14 @@ html[data-theme='dark'] .topbar {
   color: var(--ink);
 }
 
-.user-menu-item.is-action:hover:not(:disabled) {
-  background: rgba(18, 32, 39, 0.05);
-}
+@media (hover: hover) and (pointer: fine) {
+  .user-menu-item.is-action:hover:not(:disabled) {
+    background: rgba(18, 32, 39, 0.05);
+  }
 
-html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
-  background: rgba(231, 239, 237, 0.07);
+  html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
+    background: rgba(231, 239, 237, 0.07);
+  }
 }
 
 .user-menu-item.is-action:disabled {
@@ -445,12 +454,14 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
   transition: opacity .218s;
 }
 
-.gsi-material-button:not(:disabled):hover {
-  box-shadow: 0 1px 2px rgb(60 64 67 / 30%), 0 1px 3px 1px rgb(60 64 67 / 15%);
-}
+@media (hover: hover) and (pointer: fine) {
+  .gsi-material-button:not(:disabled):hover {
+    box-shadow: 0 1px 2px rgb(60 64 67 / 30%), 0 1px 3px 1px rgb(60 64 67 / 15%);
+  }
 
-.gsi-material-button:not(:disabled):hover .gsi-material-button-state {
-  opacity: 0.08;
+  .gsi-material-button:not(:disabled):hover .gsi-material-button-state {
+    opacity: 0.08;
+  }
 }
 
 .gsi-material-button:not(:disabled):is(:active, :focus-visible) .gsi-material-button-state {
@@ -479,8 +490,10 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
   font: 600 14px / 20px system-ui, sans-serif;
 }
 
-.login-btn-discord:not(:disabled):hover {
-  box-shadow: inset 0 0 0 1px #e0e3ff;
+@media (hover: hover) and (pointer: fine) {
+  .login-btn-discord:not(:disabled):hover {
+    box-shadow: inset 0 0 0 1px #e0e3ff;
+  }
 }
 
 .login-hint {
@@ -644,8 +657,10 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
   transition: background 160ms ease;
 }
 
-.hub-dday-item:hover {
-  background: color-mix(in srgb, var(--ink) 3%, transparent);
+@media (hover: hover) and (pointer: fine) {
+  .hub-dday-item:hover {
+    background: color-mix(in srgb, var(--ink) 3%, transparent);
+  }
 }
 
 .hub-dday-item.is-today {
@@ -713,8 +728,10 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
 .hub-card:nth-child(7) { animation-delay: 280ms; }
 .hub-card:nth-child(8) { animation-delay: 320ms; }
 
-.hub-card:hover {
-  background: color-mix(in srgb, var(--ink) 3%, transparent);
+@media (hover: hover) and (pointer: fine) {
+  .hub-card:hover {
+    background: color-mix(in srgb, var(--ink) 3%, transparent);
+  }
 }
 
 .hub-card-icon {
@@ -877,8 +894,10 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
   transition: color 160ms ease;
 }
 
-.day-nav-btn:hover {
-  color: var(--ink);
+@media (hover: hover) and (pointer: fine) {
+  .day-nav-btn:hover {
+    color: var(--ink);
+  }
 }
 
 .day-nav-label {
@@ -1258,9 +1277,11 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
   cursor: pointer;
 }
 
-.assets-composer-close:hover {
-  color: var(--ink);
-  background: color-mix(in srgb, var(--ink) 6%, transparent);
+@media (hover: hover) and (pointer: fine) {
+  .assets-composer-close:hover {
+    color: var(--ink);
+    background: color-mix(in srgb, var(--ink) 6%, transparent);
+  }
 }
 
 .assets-composer-grid {
@@ -1465,8 +1486,10 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
   cursor: pointer;
 }
 
-.assets-chart-other-toggle:hover {
-  background: color-mix(in srgb, var(--accent-asset) 8%, transparent);
+@media (hover: hover) and (pointer: fine) {
+  .assets-chart-other-toggle:hover {
+    background: color-mix(in srgb, var(--accent-asset) 8%, transparent);
+  }
 }
 
 .assets-chart-other-toggle:focus-visible {
@@ -1548,9 +1571,11 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
   transition: background 140ms ease, color 140ms ease;
 }
 
-.module-header-btn:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--heading-accent, var(--accent)) 14%, transparent);
-  color: var(--heading-accent, var(--accent));
+@media (hover: hover) and (pointer: fine) {
+  .module-header-btn:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--heading-accent, var(--accent)) 14%, transparent);
+    color: var(--heading-accent, var(--accent));
+  }
 }
 
 .module-header-btn:focus-visible {
@@ -1869,8 +1894,10 @@ button.assets-row-title {
   cursor: pointer;
 }
 
-button.assets-row-title:hover {
-  color: var(--accent-asset);
+@media (hover: hover) and (pointer: fine) {
+  button.assets-row-title:hover {
+    color: var(--accent-asset);
+  }
 }
 
 button.assets-row-title:focus-visible {
@@ -1892,9 +1919,11 @@ button.assets-row-title:focus-visible {
   cursor: pointer;
 }
 
-.assets-row-qty:hover,
-.assets-row-value:hover {
-  color: var(--accent-asset);
+@media (hover: hover) and (pointer: fine) {
+  .assets-row-qty:hover,
+  .assets-row-value:hover {
+    color: var(--accent-asset);
+  }
 }
 
 .assets-row-value {
@@ -2024,8 +2053,10 @@ button.assets-row-title:focus-visible {
   transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
 }
 
-.btn:hover {
-  transform: translateY(-1px);
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover {
+    transform: translateY(-1px);
+  }
 }
 
 .btn:disabled {
@@ -2039,8 +2070,10 @@ button.assets-row-title:focus-visible {
   color: #f4faf8;
 }
 
-.btn-primary:hover {
-  background: #16363b;
+@media (hover: hover) and (pointer: fine) {
+  .btn-primary:hover {
+    background: #16363b;
+  }
 }
 
 .btn-ghost {
@@ -2141,8 +2174,10 @@ button.assets-row-title:focus-visible {
   transition: background 160ms ease;
 }
 
-.object-row:hover {
-  background: color-mix(in srgb, var(--ink) 3%, transparent);
+@media (hover: hover) and (pointer: fine) {
+  .object-row:hover {
+    background: color-mix(in srgb, var(--ink) 3%, transparent);
+  }
 }
 
 .object-card {
@@ -2220,9 +2255,11 @@ button.assets-row-title:focus-visible {
   transition: transform 180ms ease, color 180ms ease;
 }
 
-.object-row:hover .object-row-arrow {
-  transform: translateX(4px);
-  color: var(--ink);
+@media (hover: hover) and (pointer: fine) {
+  .object-row:hover .object-row-arrow {
+    transform: translateX(4px);
+    color: var(--ink);
+  }
 }
 
 .type-badge {
@@ -2288,9 +2325,11 @@ button.assets-row-title:focus-visible {
   flex-shrink: 0;
 }
 
-.back-link:hover {
-  background: color-mix(in srgb, var(--muted) 14%, transparent);
-  color: var(--ink);
+@media (hover: hover) and (pointer: fine) {
+  .back-link:hover {
+    background: color-mix(in srgb, var(--muted) 14%, transparent);
+    color: var(--ink);
+  }
 }
 
 .back-link:focus-visible {
@@ -2346,8 +2385,10 @@ button.assets-row-title:focus-visible {
   color: var(--accent);
 }
 
-.object-visibility-field:hover {
-  background: color-mix(in srgb, var(--accent) 14%, transparent);
+@media (hover: hover) and (pointer: fine) {
+  .object-visibility-field:hover {
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+  }
 }
 
 .object-visibility-field select {
@@ -2402,8 +2443,10 @@ button.assets-row-title:focus-visible {
   transition: background 140ms ease, color 140ms ease, opacity 140ms ease;
 }
 
-.object-header-action:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--accent) 14%, transparent);
+@media (hover: hover) and (pointer: fine) {
+  .object-header-action:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+  }
 }
 
 .object-header-action:focus-visible {
@@ -2752,8 +2795,10 @@ select.inline-meta-control {
   cursor: pointer;
 }
 
-.inline-code-copy:hover {
-  color: var(--ink);
+@media (hover: hover) and (pointer: fine) {
+  .inline-code-copy:hover {
+    color: var(--ink);
+  }
 }
 
 .markdown-content > :first-child {
@@ -3165,8 +3210,10 @@ select.inline-meta-control {
   transition: background 160ms ease;
 }
 
-.settings-menu-item:hover {
-  background: color-mix(in srgb, var(--ink) 3%, transparent);
+@media (hover: hover) and (pointer: fine) {
+  .settings-menu-item:hover {
+    background: color-mix(in srgb, var(--ink) 3%, transparent);
+  }
 }
 
 .settings-menu-copy {
@@ -3205,8 +3252,10 @@ select.inline-meta-control {
   flex-wrap: wrap;
 }
 
-.settings-theme:hover {
-  background: transparent;
+@media (hover: hover) and (pointer: fine) {
+  .settings-theme:hover {
+    background: transparent;
+  }
 }
 
 .theme-options {
@@ -3236,8 +3285,10 @@ select.inline-meta-control {
   transition: background 150ms ease, color 150ms ease, box-shadow 150ms ease;
 }
 
-.theme-options button:hover {
-  color: var(--ink);
+@media (hover: hover) and (pointer: fine) {
+  .theme-options button:hover {
+    color: var(--ink);
+  }
 }
 
 .theme-options button.is-active {
@@ -3407,8 +3458,10 @@ select.inline-meta-control {
   cursor: pointer;
 }
 
-.card-edit-action:hover:not(:disabled) {
-  color: var(--ink);
+@media (hover: hover) and (pointer: fine) {
+  .card-edit-action:hover:not(:disabled) {
+    color: var(--ink);
+  }
 }
 
 .card-edit-action:disabled {
@@ -3428,7 +3481,12 @@ html[data-theme='dark'] .btn-ghost {
   background: var(--surface);
 }
 
-html[data-theme='dark'] .user-menu-trigger:hover,
+@media (hover: hover) and (pointer: fine) {
+  html[data-theme='dark'] .user-menu-trigger:hover {
+    background: var(--surface-solid);
+  }
+}
+
 html[data-theme='dark'] .user-menu-trigger[aria-expanded='true'] {
   background: var(--surface-solid);
 }
@@ -3455,10 +3513,15 @@ html[data-theme='dark'] .todo-box {
   box-shadow: none;
 }
 
-html[data-theme='dark'] .hub-card:hover,
-html[data-theme='dark'] .hub-dday-item:hover,
-html[data-theme='dark'] .object-row:hover,
-html[data-theme='dark'] .settings-menu-item:hover,
+@media (hover: hover) and (pointer: fine) {
+  html[data-theme='dark'] .hub-card:hover,
+  html[data-theme='dark'] .hub-dday-item:hover,
+  html[data-theme='dark'] .object-row:hover,
+  html[data-theme='dark'] .settings-menu-item:hover {
+    background: color-mix(in srgb, var(--ink) 6%, transparent);
+  }
+}
+
 html[data-theme='dark'] .assets-row.is-dragging {
   background: color-mix(in srgb, var(--ink) 6%, transparent);
 }
@@ -3468,8 +3531,10 @@ html[data-theme='dark'] .card-edit-row.is-dragging {
   background: color-mix(in srgb, var(--ink) 6%, transparent);
 }
 
-html[data-theme='dark'] .settings-theme:hover {
-  background: transparent;
+@media (hover: hover) and (pointer: fine) {
+  html[data-theme='dark'] .settings-theme:hover {
+    background: transparent;
+  }
 }
 
 html[data-theme='dark'] .assets-chart-toggle button.is-active,
@@ -3481,8 +3546,10 @@ html[data-theme='dark'] .type-badge {
   background: color-mix(in srgb, var(--badge-accent) 20%, transparent);
 }
 
-html[data-theme='dark'] .btn-primary:hover {
-  background: #857864;
+@media (hover: hover) and (pointer: fine) {
+  html[data-theme='dark'] .btn-primary:hover {
+    background: #857864;
+  }
 }
 
 html[data-theme='dark'] input,
@@ -3618,7 +3685,12 @@ html[data-theme='dark'] select option {
   pointer-events: none;
 }
 
-.clipboard-image-copy:enabled:hover .clipboard-image-copy-icon,
+@media (hover: hover) and (pointer: fine) {
+  .clipboard-image-copy:enabled:hover .clipboard-image-copy-icon {
+    opacity: 1;
+  }
+}
+
 .clipboard-image-copy:focus-visible .clipboard-image-copy-icon,
 .clipboard-image-copy-icon.is-copied {
   opacity: 1;
@@ -3641,8 +3713,10 @@ html[data-theme='dark'] select option {
   cursor: pointer;
 }
 
-.clipboard-image-remove:hover {
-  background: rgba(18, 32, 39, 0.82);
+@media (hover: hover) and (pointer: fine) {
+  .clipboard-image-remove:hover {
+    background: rgba(18, 32, 39, 0.82);
+  }
 }
 
 .clipboard-image-remove:focus-visible {
@@ -3673,8 +3747,10 @@ html[data-theme='dark'] .clipboard-image-remove {
   background: rgba(0, 0, 0, 0.72);
 }
 
-html[data-theme='dark'] .clipboard-image-remove:hover {
-  background: rgba(0, 0, 0, 0.88);
+@media (hover: hover) and (pointer: fine) {
+  html[data-theme='dark'] .clipboard-image-remove:hover {
+    background: rgba(0, 0, 0, 0.88);
+  }
 }
 
 @keyframes rise {
@@ -3807,9 +3883,11 @@ html[data-theme='dark'] .clipboard-image-remove:hover {
     height: 1.2rem;
   }
 
-  .sidebar-link:hover {
-    background: color-mix(in srgb, var(--ink) 4%, transparent);
-    color: var(--ink);
+  @media (hover: hover) and (pointer: fine) {
+    .sidebar-link:hover {
+      background: color-mix(in srgb, var(--ink) 4%, transparent);
+      color: var(--ink);
+    }
   }
 
   .sidebar-link:focus-visible {
@@ -3831,7 +3909,12 @@ html[data-theme='dark'] .clipboard-image-remove:hover {
   .sidebar-link--notes.is-active { color: var(--accent-note); }
   .sidebar-link--clipboard.is-active { color: var(--accent-clipboard); }
 
-  html[data-theme='dark'] .sidebar-link:hover,
+  @media (hover: hover) and (pointer: fine) {
+    html[data-theme='dark'] .sidebar-link:hover {
+      background: color-mix(in srgb, var(--ink) 8%, transparent);
+    }
+  }
+
   html[data-theme='dark'] .sidebar-link.is-active {
     background: color-mix(in srgb, var(--ink) 8%, transparent);
   }
@@ -3869,7 +3952,13 @@ html[data-theme='dark'] .clipboard-image-remove:hover {
     background: transparent;
   }
 
-  .user-menu--sidebar .user-menu-trigger:hover,
+  @media (hover: hover) and (pointer: fine) {
+    .user-menu--sidebar .user-menu-trigger:hover {
+      background: color-mix(in srgb, var(--ink) 5%, transparent);
+      border-color: transparent;
+    }
+  }
+
   .user-menu--sidebar .user-menu-trigger[aria-expanded='true'] {
     background: color-mix(in srgb, var(--ink) 5%, transparent);
     border-color: transparent;
@@ -3921,7 +4010,12 @@ html[data-theme='dark'] .clipboard-image-remove:hover {
     grid-column: 1;
   }
 
-  html[data-theme='dark'] .user-menu--sidebar .user-menu-trigger:hover,
+  @media (hover: hover) and (pointer: fine) {
+    html[data-theme='dark'] .user-menu--sidebar .user-menu-trigger:hover {
+      background: color-mix(in srgb, var(--ink) 8%, transparent);
+    }
+  }
+
   html[data-theme='dark'] .user-menu--sidebar .user-menu-trigger[aria-expanded='true'] {
     background: color-mix(in srgb, var(--ink) 8%, transparent);
   }
@@ -3964,7 +4058,9 @@ html[data-theme='dark'] .clipboard-image-remove:hover {
 
 .body-image-insert { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding: 8px 0; }
 .body-image-insert-button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; padding: 0 8px; border: 0; border-radius: 6px; background: transparent; color: var(--muted); font: inherit; font-size: 0.875rem; cursor: pointer; }
-.body-image-insert-button:hover:not(:disabled) { background: var(--surface); color: var(--ink); }
+@media (hover: hover) and (pointer: fine) {
+  .body-image-insert-button:hover:not(:disabled) { background: var(--surface); color: var(--ink); }
+}
 .body-image-insert-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .body-image-insert-button:disabled { opacity: 0.6; cursor: wait; }
 .markdown-content img[src] { width: 6.5rem; max-width: 100%; height: 6.5rem; object-fit: cover; cursor: zoom-in; border-radius: 12px; }
@@ -3997,7 +4093,10 @@ html[data-theme='dark'] .clipboard-image-remove:hover {
 .gallery-menu-toggle { top: max(12px, env(safe-area-inset-top)); right: 64px; }
 .gallery-menu { position: absolute; top: calc(max(12px, env(safe-area-inset-top)) + 52px); right: 64px; z-index: 3; width: 184px; padding: 6px; border: 1px solid #ffffff1f; border-radius: 16px; background: #25282df5; box-shadow: 0 8px 32px #0006; }
 .gallery-menu button { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 44px; padding: 10px 12px; border: 0; border-radius: 10px; background: transparent; color: #fff; text-align: left; cursor: pointer; }
-.gallery-menu button:hover, .gallery-menu button:active { background: #ffffff14; }
+@media (hover: hover) and (pointer: fine) {
+  .gallery-menu button:hover { background: #ffffff14; }
+}
+.gallery-menu button:active { background: #ffffff14; }
 .gallery-menu button:focus-visible { outline: 2px solid #fff; outline-offset: -2px; }
 .gallery-menu .gallery-menu-delete { color: #ff979d; border-top: 1px solid #ffffff14; border-radius: 0 0 10px 10px; margin-top: 4px; }
 .gallery-message { position: absolute; bottom: max(48px, calc(env(safe-area-inset-bottom) + 32px)); left: 24px; right: 24px; text-align: center; font-size: .9rem; }
@@ -4005,7 +4104,9 @@ html[data-theme='dark'] .clipboard-image-remove:hover {
 .notes-path { overflow-wrap: anywhere; min-width: 0; }
 .notes-path a { color: inherit; text-decoration: none; }
 .notes-path > span { color: var(--muted); }
-.notes-path a:hover { text-decoration: underline; }
+@media (hover: hover) and (pointer: fine) {
+  .notes-path a:hover { text-decoration: underline; }
+}
 .note-folder-row {
   display: flex; align-items: center; gap: 0.75rem; width: 100%; min-height: 48px;
   padding: 0.7rem 0.85rem; border: 1px solid var(--line); border-radius: 10px;
@@ -4013,7 +4114,9 @@ html[data-theme='dark'] .clipboard-image-remove:hover {
   text-decoration: none; cursor: pointer;
 }
 .note-folder-row > span { flex: 1; overflow-wrap: anywhere; }
-.note-folder-row:hover { background: color-mix(in srgb, var(--muted) 8%, transparent); }
+@media (hover: hover) and (pointer: fine) {
+  .note-folder-row:hover { background: color-mix(in srgb, var(--muted) 8%, transparent); }
+}
 .note-folder-row:focus-visible { outline: 2px solid var(--accent-note); outline-offset: 2px; }
 .note-folder-item h3 { display: flex; align-items: center; gap: 0.5rem; }
 .note-folder-item h3 > svg { flex-shrink: 0; color: var(--accent-note); }
@@ -4033,7 +4136,9 @@ html[data-theme='dark'] .clipboard-image-remove:hover {
 .folder-dialog-actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem; }
 .folder-picker-path { overflow-wrap: anywhere; margin-bottom: 0.75rem; color: var(--muted); }
 .folder-picker-path button { border: 0; background: transparent; color: inherit; font: inherit; padding: 0.25rem; cursor: pointer; }
-.folder-picker-path button:hover { text-decoration: underline; }
+@media (hover: hover) and (pointer: fine) {
+  .folder-picker-path button:hover { text-decoration: underline; }
+}
 .folder-picker-list { display: grid; gap: 0.35rem; max-height: 45dvh; overflow-y: auto; }
 .folder-picker-empty { color: var(--muted); padding: 0.5rem; }
 
