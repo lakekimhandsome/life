@@ -81,10 +81,10 @@ export const en = {
   'hub.clipboard.previewWithImages': '{preview} · {count} Images',
 
   'login.copy': 'Sign in to keep your life data in one place.',
-  'login.google': 'Continue with Google',
+  'login.google': 'Sign in with Google',
   'login.kakao': 'Login with Kakao',
   'login.naver': 'Login with NAVER',
-  'login.discord': 'Continue with Discord',
+  'login.discord': 'Sign in with Discord',
   'login.checking': 'Checking session…',
   'login.needSupabase': 'Set the Supabase environment variables.',
 
