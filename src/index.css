@@ -469,7 +469,7 @@ html[data-theme='dark'] .user-menu-item.is-action:hover:not(:disabled) {
 
 .login-btn-discord {
   display: grid;
-  grid-template-columns: 20px 1fr 20px;
+  grid-template-columns: 20px 1fr;
   align-items: center;
   gap: 11px;
   padding: 11px;
