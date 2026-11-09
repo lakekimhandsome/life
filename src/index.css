@@ -348,6 +348,7 @@ html[data-theme='dark'] .topbar {
   min-height: 100vh;
   display: grid;
   place-content: center;
+  justify-items: center;
   padding: 2rem 1rem;
 }
 
