@@ -6,6 +6,7 @@ import { ImagePlus as ImageIcon } from 'lucide-react'
 import { imageFilesFromDataTransfer } from '../../lib/clipboard'
 import { uploadBodyImage } from '../../lib/bodyImages'
 import { useT } from '../../state/LocaleContext'
+import { SavingIcon } from './SaveStatus'
 
 // oxlint-disable-next-line react/only-export-components
 function BodyImageInsert() {
@@ -84,7 +85,8 @@ function BodyImageInsert() {
         rememberSelection()
       }}
       onClick={() => { rememberSelection(); input.current?.click() }}>
-      <ImageIcon size={16} aria-hidden="true" /> {t(uploading ? 'bodyImage.uploading' : 'bodyImage.insert')}
+      {uploading ? <SavingIcon decorative /> : <ImageIcon size={16} aria-hidden="true" />}
+      {t(uploading ? 'bodyImage.uploading' : 'bodyImage.insert')}
     </button>
     <input ref={input} type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple hidden
       onChange={(event) => { void insert([...event.target.files ?? []]); event.target.value = '' }} />

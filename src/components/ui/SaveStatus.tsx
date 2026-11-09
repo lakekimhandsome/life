@@ -3,14 +3,14 @@ import { useT } from '../../state/LocaleContext'
 
 export type SaveState = 'saving' | 'saved' | 'error'
 
-export function SavingIcon({ size = 16 }: { size?: number }) {
+export function SavingIcon({ size = 16, decorative = false }: { size?: number; decorative?: boolean }) {
   const t = useT()
   return (
     <>
       <span className="saving-spinner" aria-hidden="true">
         <LoaderCircle size={size} strokeWidth={1.75} />
       </span>
-      <span className="sr-only">{t('common.saving')}</span>
+      {!decorative && <span className="sr-only">{t('common.saving')}</span>}
     </>
   )
 }
