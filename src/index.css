@@ -509,10 +509,15 @@ html[data-theme='dark'] .topbar {
 }
 
 .login-btn-naver,
-.login-btn-discord {
+.login-btn-discord,
+.login-btn-facebook {
   border-radius: 4px;
   color: #fff;
   font: 600 14px / 20px system-ui, sans-serif;
+}
+
+.login-btn-facebook {
+  background: #0866ff;
 }
 
 .login-btn-discord {

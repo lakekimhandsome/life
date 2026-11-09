@@ -87,6 +87,7 @@ export const en = {
   'login.kakao': 'Login with Kakao',
   'login.naver': 'Login with NAVER',
   'login.discord': 'Sign in with Discord',
+  'login.facebook': 'Continue with Facebook',
   'login.checking': 'Checking session…',
   'login.needSupabase': 'Set the Supabase environment variables.',
 
@@ -473,6 +474,7 @@ export const ko: Record<MessageKey, string> = {
   'login.kakao': '카카오 로그인',
   'login.naver': '네이버 로그인',
   'login.discord': 'Discord로 로그인',
+  'login.facebook': 'Facebook으로 계속하기',
   'login.checking': '세션 확인 중…',
   'login.needSupabase': 'Supabase 환경 변수를 설정하세요.',
 

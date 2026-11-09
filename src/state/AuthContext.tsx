@@ -11,7 +11,7 @@ import type { Session, User } from '@supabase/supabase-js'
 import { t } from '../i18n'
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
 
-export type LoginProvider = 'google' | 'kakao' | 'discord' | 'custom:naver'
+export type LoginProvider = 'google' | 'kakao' | 'discord' | 'facebook' | 'custom:naver'
 
 type AuthContextValue = {
   ready: boolean

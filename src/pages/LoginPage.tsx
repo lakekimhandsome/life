@@ -98,6 +98,16 @@ export function LoginPage() {
               <img src={discordMark} alt="" width={20} height={15} />
               <span>{t('login.discord')}</span>
             </button>
+            {import.meta.env.VITE_FACEBOOK_LOGIN_ENABLED === 'true' ? (
+              <button
+                type="button"
+                className="login-btn login-btn-facebook"
+                disabled={busy}
+                onClick={() => void handleLogin('facebook')}
+              >
+                {t('login.facebook')}
+              </button>
+            ) : null}
           </div>
         )}
 
