@@ -2,7 +2,7 @@ import { $createImageNode, addComposerChild$, realmPlugin } from '@mdxeditor/edi
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { $createParagraphNode, $getNodeByKey, $getSelection, $isRangeSelection, $insertNodes, $isRootOrShadowRoot, $setSelection } from 'lexical'
 import { useEffect, useRef, useState } from 'react'
-import { Image as ImageIcon } from 'lucide-react'
+import { ImagePlus as ImageIcon } from 'lucide-react'
 import { imageFilesFromDataTransfer } from '../../lib/clipboard'
 import { uploadBodyImage } from '../../lib/bodyImages'
 import { useT } from '../../state/LocaleContext'
