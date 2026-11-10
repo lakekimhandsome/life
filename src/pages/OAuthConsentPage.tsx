@@ -31,7 +31,7 @@ function ConnectionView({
     <div className="oauth-page">
       <div className="atmosphere" aria-hidden="true" />
       {demo ? (
-        <nav className="oauth-demo-nav" aria-label="Connection preview">
+        <nav className="oauth-demo-nav" aria-label={t('oauth.preview')}>
           <a className={client === 'ChatGPT' ? 'is-active' : undefined} href="?client=ChatGPT">
             ChatGPT
           </a>

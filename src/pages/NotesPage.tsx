@@ -98,7 +98,7 @@ export function NotesPage() {
                 return <Link key={folder.id} to={notesUrl(folder.id)} className="object-row note-folder-item">
                   <div className="object-row-main">
                     <h3><Folder size={20} strokeWidth={1.5} aria-hidden="true" />
-                      <span><span className="sr-only">Folder: </span>{folder.name}</span>
+                      <span><span className="sr-only">{t('folders.label')}{' '}</span>{folder.name}</span>
                     </h3>
                     {preview && <p>{preview}</p>}
                   </div>
