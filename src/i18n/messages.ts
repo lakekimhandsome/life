@@ -701,7 +701,7 @@ export const ko: Record<MessageKey, string> = {
   'detail.loadLinksError': '연결을 불러오지 못했습니다. 페이지를 새로고침해 주세요.',
   'share.visibility': '공유 범위',
   'share.private': '비공개',
-  'share.unlisted': '링크가 있는 사람만',
+  'share.unlisted': '링크 공유',
   'share.copyLink': '읽기 전용 링크 복사',
   'share.copied': '링크 복사됨',
   'share.saveFailed': '공유 설정을 변경하지 못했습니다.',
