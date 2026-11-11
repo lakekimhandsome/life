@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ArrowUp, Check, ChevronRight, Folder, FolderInput } from 'lucide-react'
+import { ArrowUp, Check, ChevronRight, Folder } from 'lucide-react'
 import type { LifeObject } from '../../core/types'
 import { folderPath } from '../../lib/noteFolders'
 import { useLife } from '../../state/LifeContext'
@@ -8,7 +8,7 @@ import { useNoteFolders } from '../../state/useNoteFolders'
 import { FolderDialog } from '../ui/FolderDialog'
 import { SavingIcon } from '../ui/SaveStatus'
 
-function MoveDialog({ object, onClose }: { object: LifeObject; onClose: () => void }) {
+export function NoteFolderMoveDialog({ object, onClose }: { object: LifeObject; onClose: () => void }) {
   const t = useT()
   const { updateObject } = useLife()
   const { folders, loading, error } = useNoteFolders()
@@ -50,14 +50,4 @@ function MoveDialog({ object, onClose }: { object: LifeObject; onClose: () => vo
         </button></div>
     </>}
   </FolderDialog>
-}
-
-export function NoteFolderControl({ object }: { object: LifeObject }) {
-  const t = useT()
-  const [open, setOpen] = useState(false)
-  return <>
-    <button type="button" className="object-header-action" aria-label={t('folders.move')}
-      title={t('folders.move')} onClick={() => setOpen(true)}><FolderInput size={20} strokeWidth={1.75} aria-hidden="true" /></button>
-    {open && <MoveDialog object={object} onClose={() => setOpen(false)} />}
-  </>
 }

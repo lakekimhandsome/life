@@ -2,7 +2,6 @@ import { useRef, useState } from 'react'
 import { Navigate, useParams, useSearchParams } from 'react-router-dom'
 import { InlineMarkdownObject } from '../components/object/InlineMarkdownObject'
 import type { SaveState } from '../components/ui/SaveStatus'
-import { BackLink } from '../components/ui/BackLink'
 import { OBJECT_TYPES, type LifeObject, type ObjectType } from '../core/types'
 import { getModuleForObjectType } from '../domain/modules'
 import { defaultMeta } from '../domain/schemas'
@@ -43,12 +42,9 @@ export function CreatePage() {
   }
   return (
     <article className="detail">
-      <div className="object-page-toolbar">
-        <BackLink to={backTo} />
-      </div>
-
       <InlineMarkdownObject
         object={draft}
+        backTo={backTo}
         saveState={saveState}
         onSaveStateChange={setSaveState}
         onSave={async ({ title, body, occurredAt, meta }) => {

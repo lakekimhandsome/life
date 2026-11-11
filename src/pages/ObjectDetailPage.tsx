@@ -1,12 +1,12 @@
 import { useRef, useState } from 'react'
-import { Trash2 } from 'lucide-react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import { InlineMarkdownObject } from '../components/object/InlineMarkdownObject'
 import type { SaveState } from '../components/ui/SaveStatus'
 import { BackLink } from '../components/ui/BackLink'
+import { HeaderMenu } from '../components/ui/HeaderMenu'
 import { TypeBadge } from '../components/ui/TypeBadge'
 import { ObjectRelations } from '../components/object/ObjectRelations'
-import { NoteFolderControl } from '../components/object/NoteFolderControl'
+import { NoteFolderMoveDialog } from '../components/object/NoteFolderMoveDialog'
 import { notesUrl } from '../lib/noteFolders'
 import { ObjectShareControl } from '../components/object/ObjectShareControl'
 import { isShareableObjectType, type LifeObject } from '../core/types'
@@ -23,6 +23,7 @@ export function ObjectDetailPage() {
   const t = useT()
   const [saveState, setSaveState] = useState<SaveState>('saved')
   const [deleting, setDeleting] = useState(false)
+  const [movingId, setMovingId] = useState<string | null>(null)
 
   const currentObject = id ? getObject(id) : undefined
   const lastObject = useRef<LifeObject | undefined>(undefined)
@@ -66,40 +67,45 @@ export function ObjectDetailPage() {
     }
   }
 
+  const actions = (
+    <div className="object-header-actions">
+      {isShareableObjectType(type) && supportsMarkdown && <ObjectShareControl key={objectId} object={object} />}
+      {!supportsMarkdown && <Link to={`/object/${objectId}/edit`} className="object-edit-link">
+        {t('common.edit')}
+      </Link>}
+      <HeaderMenu label={t('common.moreActions')}>
+        {type === 'note' && <button type="button" disabled={!currentObject} onClick={() => setMovingId(objectId)}>
+          {t('folders.move')}
+        </button>}
+        <button type="button" className="header-menu-danger"
+          aria-label={t('detail.deleteAria', { type: schema.label })}
+          disabled={deleting || !currentObject} onClick={() => void handleDelete()}>
+          {t('common.delete')}
+        </button>
+      </HeaderMenu>
+    </div>
+  )
+
   return (
     <article className="detail">
       {ready && !currentObject ? <p className="form-error" role="alert">{t('form.conflict')}</p> : null}
-      <div className="object-page-toolbar">
-        <BackLink to={backTo} />
-        {supportsMarkdown ? (
-          <div className="object-header-actions">
-            {object.type === 'note' ? <NoteFolderControl key={object.id} object={object} /> : null}
-            {isShareableObjectType(object.type) ? (
-              <ObjectShareControl object={object} />
-            ) : null}
-            <button
-              type="button"
-              className="object-header-action"
-              aria-label={t('detail.deleteAria', { type: schema.label })}
-              disabled={deleting || !currentObject}
-              onClick={() => void handleDelete()}
-            >
-              <Trash2 size={20} strokeWidth={1.75} aria-hidden="true" />
-            </button>
-          </div>
-        ) : null}
-      </div>
-
       {supportsMarkdown ? (
         <InlineMarkdownObject
           key={object.id}
           object={object}
+          backTo={backTo}
+          actions={actions}
           saveState={saveState}
           onSaveStateChange={setSaveState}
         />
       ) : (
         <>
           <header className="detail-header">
+            <div className="object-title-bar">
+              <BackLink to={backTo} />
+              <h1>{object.title}</h1>
+              {actions}
+            </div>
             <div className="detail-meta">
               <TypeBadge type={object.type} />
               {headerDate ? (
@@ -110,7 +116,6 @@ export function ObjectDetailPage() {
                 </time>
               ) : null}
             </div>
-            <h1>{object.title}</h1>
             {schema.description ? <p className="detail-sub">{schema.description}</p> : null}
           </header>
 
@@ -150,21 +155,7 @@ export function ObjectDetailPage() {
 
       <ObjectRelations key={`relationships:${object.id}`} object={object} />
 
-      {!supportsMarkdown ? (
-        <div className="detail-actions">
-          <Link to={`/object/${object.id}/edit`} className="btn btn-ghost">
-            {t('common.edit')}
-          </Link>
-          <button
-            type="button"
-            className="btn btn-danger"
-            disabled={deleting || !currentObject}
-            onClick={() => void handleDelete()}
-          >
-            {t('common.delete')}
-          </button>
-        </div>
-      ) : null}
+      {movingId === objectId && <NoteFolderMoveDialog object={object} onClose={() => setMovingId(null)} />}
     </article>
   )
 }

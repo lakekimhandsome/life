@@ -1,8 +1,9 @@
-import { Check, Share } from 'lucide-react'
+import { Check, Copy, Share } from 'lucide-react'
 import { useState } from 'react'
 import type { LifeObject, ObjectVisibility } from '../../core/types'
 import { useLife } from '../../state/LifeContext'
 import { useT } from '../../state/LocaleContext'
+import { HeaderMenu } from '../ui/HeaderMenu'
 
 export function ObjectShareControl({ object }: { object: LifeObject }) {
   const { updateObject } = useLife()
@@ -46,44 +47,46 @@ export function ObjectShareControl({ object }: { object: LifeObject }) {
   }
 
   return (
-    <div className="object-share-control">
-      <label className="object-visibility-field">
-        <span className="sr-only">{t('share.visibility')}</span>
-        <select
-          value={object.visibility}
-          disabled={saving}
-          aria-label={t('share.visibility')}
-          onChange={(event) =>
-            void changeVisibility(event.target.value as ObjectVisibility)
-          }
-        >
-          <option value="private">{t('share.private')}</option>
-          <option value="unlisted">{t('share.unlisted')}</option>
-        </select>
-      </label>
+    <HeaderMenu label={t('share.actions')} icon={<Share size={20} strokeWidth={1.75} aria-hidden="true" />}>
+      <div className="object-share-control">
+        <label className="object-visibility-field">
+          <span className="sr-only">{t('share.visibility')}</span>
+          <select
+            value={object.visibility}
+            disabled={saving}
+            aria-label={t('share.visibility')}
+            onChange={(event) =>
+              void changeVisibility(event.target.value as ObjectVisibility)
+            }
+          >
+            <option value="private">{t('share.private')}</option>
+            <option value="unlisted">{t('share.unlisted')}</option>
+          </select>
+        </label>
 
-      {object.visibility === 'unlisted' && object.shareToken ? (
-        <button
-          type="button"
-          className="object-header-action"
-          aria-label={copied ? t('share.copied') : t('share.copyLink')}
-          title={copied ? t('share.copied') : t('share.copyLink')}
-          onClick={() => void copyLink()}
-        >
-          {copied ? (
-            <Check size={18} strokeWidth={1.75} aria-hidden="true" />
-          ) : (
-            <Share size={18} strokeWidth={1.75} aria-hidden="true" />
-          )}
-        </button>
-      ) : null}
+        {object.visibility === 'unlisted' && object.shareToken ? (
+          <button
+            type="button"
+            className="object-header-action"
+            aria-label={copied ? t('share.copied') : t('share.copyLink')}
+            title={copied ? t('share.copied') : t('share.copyLink')}
+            onClick={() => void copyLink()}
+          >
+            {copied ? (
+              <Check size={18} strokeWidth={1.75} aria-hidden="true" />
+            ) : (
+              <Copy size={18} strokeWidth={1.75} aria-hidden="true" />
+            )}
+          </button>
+        ) : null}
 
-      <span
-        className={error ? 'object-share-feedback is-error' : 'sr-only'}
-        aria-live="polite"
-      >
-        {error ?? (copied ? t('share.copied') : '')}
-      </span>
-    </div>
+        <span
+          className={error ? 'object-share-feedback is-error' : 'sr-only'}
+          aria-live="polite"
+        >
+          {error ?? (copied ? t('share.copied') : '')}
+        </span>
+      </div>
+    </HeaderMenu>
   )
 }

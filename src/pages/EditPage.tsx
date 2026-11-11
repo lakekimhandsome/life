@@ -36,8 +36,9 @@ export function EditPage() {
   return (
     <div className="compose">
       <div className="compose-header">
-        <div className="object-page-toolbar">
+        <div className="object-title-bar">
           <BackLink to={`/object/${object.id}`} />
+          <h1>{t('edit.heading', { type: schema.label })}</h1>
           <div className="object-header-actions">
             <button
               type="submit"
@@ -50,10 +51,6 @@ export function EditPage() {
             </button>
           </div>
         </div>
-        <p className="eyebrow" style={{ color: schema.accent }}>
-          {schema.enLabel}
-        </p>
-        <h1>{t('edit.heading', { type: schema.label })}</h1>
         {schema.description ? <p className="compose-lead">{schema.description}</p> : null}
       </div>
 

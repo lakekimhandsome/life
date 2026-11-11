@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import type { LifeObject } from '../../core/types'
 import { getSchema } from '../../domain/schemas'
 import { formatDate, formatDateTime, fromDateInputValue, toDateInputValue } from '../../lib/format'
 import { useLife } from '../../state/LifeContext'
 import { useT } from '../../state/LocaleContext'
 import { MarkdownEditor } from '../ui/MarkdownEditor'
+import { BackLink } from '../ui/BackLink'
 import { SaveStatus, type SaveState } from '../ui/SaveStatus'
 import { TypeBadge } from '../ui/TypeBadge'
 
@@ -19,6 +20,8 @@ interface Draft {
 
 interface InlineMarkdownObjectProps {
   object: LifeObject
+  backTo: string
+  actions?: ReactNode
   saveState: SaveState
   onSaveStateChange: (state: SaveState) => void
   onSave?: (draft: Draft) => Promise<void>
@@ -54,6 +57,8 @@ function InlineDateInput({
 
 export function InlineMarkdownObject({
   object,
+  backTo,
+  actions,
   saveState,
   onSaveStateChange,
   onSave,
@@ -210,6 +215,24 @@ export function InlineMarkdownObject({
   return (
     <>
       <header className="detail-header">
+        <div className="object-title-bar">
+          <BackLink to={backTo} />
+          <div className="object-title-field" data-title={title}>
+            <textarea
+              className="inline-title-input"
+              rows={1}
+              value={title}
+              onChange={(event) => changeTitle(event.target.value.replace(/[\r\n]+/g, ' '))}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' && !event.nativeEvent.isComposing) event.preventDefault()
+              }}
+              onBlur={flushSave}
+              placeholder={schema.titlePlaceholder}
+              aria-label={t('form.title', { type: schema.label })}
+            />
+          </div>
+          {actions}
+        </div>
         <div className="detail-meta">
           <TypeBadge type={object.type} />
           {object.type === 'goal' ? (
@@ -229,14 +252,6 @@ export function InlineMarkdownObject({
           )}
           <SaveStatus state={saveState} />
         </div>
-        <input
-          className="inline-title-input"
-          value={title}
-          onChange={(event) => changeTitle(event.target.value)}
-          onBlur={flushSave}
-          placeholder={schema.titlePlaceholder}
-          aria-label={t('form.title', { type: schema.label })}
-        />
       </header>
 
       <section className="detail-body" aria-label={schema.bodyLabel}>
