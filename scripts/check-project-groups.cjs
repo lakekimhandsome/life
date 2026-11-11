@@ -23,8 +23,9 @@ async function check(engine) {
     }, user)
     await page.route('**/auth/v1/user', (route) => route.fulfill({ json: user }))
     let rejectPin = false
+    let folderRefresh
     const folders = []
-    await page.route('**/rest/v1/**', (route) => {
+    await page.route('**/rest/v1/**', async (route) => {
       const request = route.request()
       const url = new URL(request.url())
       const table = url.pathname.split('/').pop()
@@ -39,6 +40,7 @@ async function check(engine) {
         }
         return route.fulfill({ json: row ? [row] : [] })
       }
+      if (table === 'life_note_folders') await folderRefresh
       return route.fulfill({ json: table === 'life_objects' ? objects
         : table === 'life_user_prefs' ? { user_id: user.id, prefs: { locale: 'en' } }
         : table === 'life_note_folders' ? folders : [] })
@@ -107,10 +109,25 @@ async function check(engine) {
     const notePin = page.getByRole('button', { name: 'Pin to top: Older note' })
     await notePin.click()
     await page.locator('button[aria-label="Pin to top: Older note"][aria-pressed="true"]:enabled').waitFor()
-    assert.equal(await page.locator('.object-stream > :first-child h3').textContent(), 'Older note')
+    const list = await page.locator('.object-stream').elementHandle()
+    const refreshRequested = page.waitForRequest('**/rest/v1/life_note_folders?**')
+    const refreshCompleted = page.waitForResponse('**/rest/v1/life_note_folders?**')
+    const refresh = Promise.withResolvers()
+    folderRefresh = refresh.promise
+    try {
+      // Focus and Realtime broadcasts both run LifeProvider's sync callback.
+      await page.evaluate(() => window.dispatchEvent(new Event('focus')))
+      await refreshRequested
+      assert.equal(await list.isVisible(), true)
+    } finally {
+      refresh.resolve()
+      folderRefresh = undefined
+    }
+    await refreshCompleted
+    assert.deepEqual(await page.locator('.object-stream h3').allTextContents(), ['Folder: Child folder', 'Older note', 'note'])
     await page.getByRole('button', { name: 'Pin to top: note', exact: true }).click()
     await page.locator('button[aria-label="Pin to top: note"][aria-pressed="true"]:enabled').waitFor()
-    assert.deepEqual(await page.locator('.object-stream h3').allTextContents(), ['Older note', 'note', 'Folder: Child folder'])
+    assert.deepEqual(await page.locator('.object-stream h3').allTextContents(), ['Folder: Child folder', 'Older note', 'note'])
     rejectPin = true
     await notePin.click()
     await page.getByRole('alert').filter({ hasText: 'Could not save the pin' }).waitFor()
@@ -120,10 +137,10 @@ async function check(engine) {
     await page.locator('button[aria-label="Pin to top: Older note"][aria-pressed="false"]:enabled').waitFor()
     await page.reload()
     await page.getByRole('button', { name: 'Pin to top: Older note', pressed: false }).waitFor()
-    assert.deepEqual(await page.locator('.object-stream h3').allTextContents(), ['note', 'Folder: Child folder', 'Older note'])
+    assert.deepEqual(await page.locator('.object-stream h3').allTextContents(), ['Folder: Child folder', 'note', 'Older note'])
     await notePin.click()
     await page.locator('button[aria-label="Pin to top: Older note"][aria-pressed="true"]:enabled').waitFor()
-    assert.deepEqual(await page.locator('.object-stream h3').allTextContents(), ['note', 'Older note', 'Folder: Child folder'])
+    assert.deepEqual(await page.locator('.object-stream h3').allTextContents(), ['Folder: Child folder', 'note', 'Older note'])
     console.log(`${engine.name()}: project groups, pin ordering, reload and failed-save rollback passed`)
   } finally { await browser.close() }
 }

@@ -92,8 +92,6 @@ export function NotesPage() {
         : <>
           {children.length > 0 || notes.length > 0 ? <div className="object-stream">
             {[
-              ...notes.filter((note) => note.meta.pinned === true).sort(comparePinnedObjects)
-                .map((note) => <ObjectCard key={note.id} object={note} />),
               ...children.map((folder) => {
                 const preview = [...folders.filter((item) => item.parent_id === folder.id).map((item) => item.name),
                   ...allNotes.filter((note) => note.folderId === folder.id).map((note) => note.title)].join(', ')
@@ -107,7 +105,7 @@ export function NotesPage() {
                   <ChevronRight className="object-row-arrow" size={18} strokeWidth={2} aria-hidden="true" />
                 </Link>
               }),
-              ...notes.filter((note) => note.meta.pinned !== true).map((note) => <ObjectCard key={note.id} object={note} />),
+              ...notes.sort(comparePinnedObjects).map((note) => <ObjectCard key={note.id} object={note} />),
             ]}
           </div> : <div className="empty-panel">
             <h3>{t('module.emptyTitle')}</h3><p>{t('module.emptyBody', { type: t('object.note') })}</p>

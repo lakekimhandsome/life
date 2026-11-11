@@ -8,23 +8,22 @@ export function useNoteFolders() {
   const { user } = useAuth()
   const { dataRevision } = useLife()
   const userId = user?.id
-  const [folders, setFolders] = useState<NoteFolder[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(false)
+  const [result, setResult] = useState<{ userId: string; folders: NoteFolder[] | null }>()
+  const current = result?.userId === userId ? result : undefined
   useEffect(() => {
+    if (!userId) return
     let active = true
-    setLoading(true)
-    setError(false)
-    if (!userId) { setFolders([]); setLoading(false); return }
+    const loadFailed = () => {
+      if (!active) return
+      setResult((previous) => previous?.userId === userId && previous.folders
+        ? previous : { userId, folders: null })
+    }
     void supabase.from('life_note_folders').select('id,name,parent_id')
       .eq('user_id', userId).order('name').then(({ data, error }) => {
         if (!active) return
-        setFolders(data ?? [])
-        setError(Boolean(error))
-        setLoading(false)
-      }, () => {
-        if (active) { setError(true); setLoading(false) }
-      })
+        if (error) loadFailed()
+        else setResult({ userId, folders: data ?? [] })
+      }, loadFailed)
     return () => { active = false }
   }, [userId, dataRevision])
 
@@ -33,14 +32,27 @@ export function useNoteFolders() {
     const folder: NoteFolder = { id: crypto.randomUUID(), name: name.trim(), parent_id: parentId }
     const { error } = await supabase.from('life_note_folders').insert({ ...folder, user_id: user.id })
     if (error) throw error
-    setFolders((items) => [...items.filter((item) => item.id !== folder.id), folder].sort((a, b) => a.name.localeCompare(b.name)))
+    setResult((previous) => previous?.userId === user.id && previous.folders ? {
+      ...previous,
+      folders: [...previous.folders.filter((item) => item.id !== folder.id), folder]
+        .sort((a, b) => a.name.localeCompare(b.name)),
+    } : previous)
   }
   async function deleteFolder(id: string) {
     if (!user) throw new Error('Authentication required')
     const { data: parentId, error } = await supabase.rpc('delete_life_note_folder', { target_id: id })
     if (error) throw error
-    setFolders((items) => items.filter((folder) => folder.id !== id)
-      .map((folder) => folder.parent_id === id ? { ...folder, parent_id: parentId } : folder))
+    setResult((previous) => previous?.userId === user.id && previous.folders ? {
+      ...previous,
+      folders: previous.folders.filter((folder) => folder.id !== id)
+        .map((folder) => folder.parent_id === id ? { ...folder, parent_id: parentId } : folder),
+    } : previous)
   }
-  return { folders, loading, error, createFolder, deleteFolder }
+  return {
+    folders: current?.folders ?? [],
+    loading: Boolean(userId && !current),
+    error: current?.folders === null,
+    createFolder,
+    deleteFolder,
+  }
 }
