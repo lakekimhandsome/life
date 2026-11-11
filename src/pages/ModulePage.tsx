@@ -7,6 +7,7 @@ import type { LifeObject } from '../core/types'
 import { LIFE_MODULES, moduleTitle, type ModuleId } from '../domain/modules'
 import { getSchema } from '../domain/schemas'
 import type { MessageKey } from '../i18n'
+import { comparePinnedObjects } from '../lib/pinnedObjects'
 import { useLife } from '../state/LifeContext'
 import { useT } from '../state/LocaleContext'
 
@@ -43,7 +44,7 @@ export function ModulePage() {
   const module = LIFE_MODULES.find((item) => item.id === moduleId)
   const objectType = module?.objectType
   const items = useMemo(() => objectType
-    ? listByType(objectType).sort((a, b) => Number(b.meta.pinned === true) - Number(a.meta.pinned === true))
+    ? listByType(objectType).sort(comparePinnedObjects)
     : [], [listByType, objectType])
   const isProject = objectType === 'project'
 

@@ -7,6 +7,7 @@ import { BackLink } from '../components/ui/BackLink'
 import { FolderDialog } from '../components/ui/FolderDialog'
 import { SavingIcon } from '../components/ui/SaveStatus'
 import { folderPath, notesUrl } from '../lib/noteFolders'
+import { comparePinnedObjects } from '../lib/pinnedObjects'
 import { useLife } from '../state/LifeContext'
 import { useT } from '../state/LocaleContext'
 import { useNoteFolders } from '../state/useNoteFolders'
@@ -91,7 +92,8 @@ export function NotesPage() {
         : <>
           {children.length > 0 || notes.length > 0 ? <div className="object-stream">
             {[
-              ...notes.filter((note) => note.meta.pinned === true).map((note) => <ObjectCard key={note.id} object={note} />),
+              ...notes.filter((note) => note.meta.pinned === true).sort(comparePinnedObjects)
+                .map((note) => <ObjectCard key={note.id} object={note} />),
               ...children.map((folder) => {
                 const preview = [...folders.filter((item) => item.parent_id === folder.id).map((item) => item.name),
                   ...allNotes.filter((note) => note.folderId === folder.id).map((note) => note.title)].join(', ')

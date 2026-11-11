@@ -22,7 +22,7 @@ export function ObjectCard({ object }: { object: LifeObject }) {
     try {
       const updated = await updateObject(object.id, {
         expectedUpdatedAt: object.updatedAt,
-        meta: { ...object.meta, pinned: !pinned },
+        meta: { ...object.meta, pinned: !pinned, pinnedAt: pinned ? null : new Date().toISOString() },
       })
       if (!updated) setPinError(true)
     } catch {

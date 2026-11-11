@@ -97,12 +97,20 @@ async function check(engine) {
     await page.getByRole('button', { name: 'Pin to top: Older project', pressed: true }).waitFor()
     assert.deepEqual(await page.locator('.object-group').first().locator('h3').allTextContents(), ['Older project', 'active'])
     assert.equal(objects.at(-2).meta.status, 'active')
+    await page.getByRole('button', { name: 'Pin to top: active' }).click()
+    await page.locator('button[aria-label="Pin to top: active"][aria-pressed="true"]:enabled').waitFor()
+    await page.reload()
+    await page.getByRole('button', { name: 'Pin to top: active', pressed: true }).waitFor()
+    assert.deepEqual(await page.locator('.object-group').first().locator('h3').allTextContents(), ['Older project', 'active'])
 
     await page.goto(`${base}/notes`)
     const notePin = page.getByRole('button', { name: 'Pin to top: Older note' })
     await notePin.click()
     await page.locator('button[aria-label="Pin to top: Older note"][aria-pressed="true"]:enabled').waitFor()
     assert.equal(await page.locator('.object-stream > :first-child h3').textContent(), 'Older note')
+    await page.getByRole('button', { name: 'Pin to top: note', exact: true }).click()
+    await page.locator('button[aria-label="Pin to top: note"][aria-pressed="true"]:enabled').waitFor()
+    assert.deepEqual(await page.locator('.object-stream h3').allTextContents(), ['Older note', 'note', 'Folder: Child folder'])
     rejectPin = true
     await notePin.click()
     await page.getByRole('alert').filter({ hasText: 'Could not save the pin' }).waitFor()
@@ -112,7 +120,10 @@ async function check(engine) {
     await page.locator('button[aria-label="Pin to top: Older note"][aria-pressed="false"]:enabled').waitFor()
     await page.reload()
     await page.getByRole('button', { name: 'Pin to top: Older note', pressed: false }).waitFor()
-    assert.equal(await page.locator('.object-stream > :first-child').getAttribute('href'), '/notes?folder=child')
+    assert.deepEqual(await page.locator('.object-stream h3').allTextContents(), ['note', 'Folder: Child folder', 'Older note'])
+    await notePin.click()
+    await page.locator('button[aria-label="Pin to top: Older note"][aria-pressed="true"]:enabled').waitFor()
+    assert.deepEqual(await page.locator('.object-stream h3').allTextContents(), ['note', 'Older note', 'Folder: Child folder'])
     console.log(`${engine.name()}: project groups, pin ordering, reload and failed-save rollback passed`)
   } finally { await browser.close() }
 }
