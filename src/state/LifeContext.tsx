@@ -78,10 +78,16 @@ export function LifeProvider({ children }: { children: ReactNode }) {
     const nextObjects = await repository.listObjects()
     if (generation !== sessionGeneration.current || sequence !== refreshSequence.current) return
     const busy = (id: string) => pendingCreates.current.has(id) || updateQueues.current.has(id)
+    const pending = new Map(objectsRef.current.filter((object) => busy(object.id)).map((object) => [object.id, object]))
     const merged = [
-      ...nextObjects.filter((object) => !busy(object.id) && !pendingDeletes.current.has(object.id)),
-      ...objectsRef.current.filter((object) => busy(object.id) && !pendingDeletes.current.has(object.id)),
-    ]
+      ...nextObjects.map((object) => {
+        const current = pending.get(object.id)
+        pending.delete(object.id)
+        return current ?? object
+      }),
+      ...pending.values(),
+    ].filter((object) => !pendingDeletes.current.has(object.id))
+      .sort((a, b) => Date.parse(b.occurredAt) - Date.parse(a.occurredAt))
     replaceObjects(merged)
     const nextCounts = { ...emptyCounts }
     for (const object of merged) nextCounts[object.type]++

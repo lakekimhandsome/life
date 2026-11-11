@@ -24,6 +24,7 @@ async function check(engine) {
     await page.route('**/auth/v1/user', (route) => route.fulfill({ json: user }))
     let rejectPin = false
     let folderRefresh
+    let pinSave
     const folders = []
     await page.route('**/rest/v1/**', async (route) => {
       const request = route.request()
@@ -33,6 +34,7 @@ async function check(engine) {
       if (table === 'life_objects' && id) {
         const row = objects.find((object) => object.id === id)
         if (request.method() === 'PATCH') {
+          await pinSave
           if (rejectPin || url.searchParams.get('updated_at') !== `eq.${row.updated_at}`) {
             return route.fulfill({ json: [] })
           }
@@ -88,7 +90,7 @@ async function check(engine) {
       assert.equal(await page.locator('.object-group').count(), 0)
     }
     objects.push({ ...objects[0], id: 'project-to-pin', title: 'Older project' })
-    objects.push({ ...objects[4], id: 'note-to-pin', title: 'Older note' })
+    objects.push({ ...objects[4], id: 'note-to-pin', title: 'Older note', occurred_at: '2020-01-01T00:00:00Z' })
     folders.push({ id: 'child', parent_id: null, user_id: user.id, name: 'Child folder' })
 
     await page.goto(`${base}/projects`)
@@ -141,7 +143,22 @@ async function check(engine) {
     await notePin.click()
     await page.locator('button[aria-label="Pin to top: Older note"][aria-pressed="true"]:enabled').waitFor()
     assert.deepEqual(await page.locator('.object-stream h3').allTextContents(), ['Folder: Child folder', 'note', 'Older note'])
-    console.log(`${engine.name()}: project groups, pin ordering, reload and failed-save rollback passed`)
+
+    const save = Promise.withResolvers()
+    pinSave = save.promise
+    try {
+      await notePin.click()
+      await page.locator('button[aria-label="Pin to top: Older note"][aria-pressed="false"]:disabled').waitFor()
+      objects.push({ ...objects[4], id: 'oldest-note', title: 'Oldest note', occurred_at: '2010-01-01T00:00:00Z', meta: {} })
+      await page.evaluate(() => window.dispatchEvent(new Event('focus')))
+      await page.getByRole('heading', { name: 'Oldest note' }).waitFor()
+      assert.deepEqual(await page.locator('.object-stream h3').allTextContents(), ['Folder: Child folder', 'note', 'Older note', 'Oldest note'])
+    } finally {
+      save.resolve()
+    }
+    await page.locator('button[aria-label="Pin to top: Older note"][aria-pressed="false"]:enabled').waitFor()
+    assert.deepEqual(await page.locator('.object-stream h3').allTextContents(), ['Folder: Child folder', 'note', 'Older note', 'Oldest note'])
+    console.log(`${engine.name()}: project groups, pin order, reload, rollback, and unpin during sync passed`)
   } finally { await browser.close() }
 }
 ;(async () => { await check(chromium); await check(webkit) })().catch((error) => { console.error(error); process.exitCode = 1 })
