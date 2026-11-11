@@ -2498,6 +2498,10 @@ button.assets-row-title:focus-visible {
   cursor: not-allowed;
 }
 
+.object-pin:disabled {
+  opacity: 1;
+}
+
 .eyebrow {
   margin: 0 0 0.45rem;
   font-size: 0.8rem;
