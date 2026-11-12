@@ -930,7 +930,7 @@ html[data-theme='dark'] .topbar {
   max-width: min(15rem, calc(100vw - 9rem));
 }
 
-.header-menu-panel > :is(a, button) {
+:is(.header-menu-panel, .object-share-control) > :is(a, button) {
   display: block;
   width: 100%;
   min-height: 2.75rem;
@@ -945,7 +945,7 @@ html[data-theme='dark'] .topbar {
   cursor: pointer;
 }
 
-.header-menu-panel > :is(a, button):is(:hover, :focus-visible) {
+:is(.header-menu-panel, .object-share-control) > :is(a, button):is(:hover, :focus-visible) {
   background: color-mix(in srgb, var(--muted) 14%, transparent);
 }
 
@@ -2492,50 +2492,18 @@ button.assets-row-title:focus-visible {
   border: 0;
 }
 
-.object-share-control {
+.object-share-control > button {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: 0.15rem;
+  justify-content: space-between;
+  gap: 0.5rem;
 }
 
-.object-visibility-field {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  height: 2.5rem;
-  padding: 0 0.55rem;
-  border-radius: 10px;
-  color: var(--accent);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .object-visibility-field:hover {
-    background: color-mix(in srgb, var(--accent) 14%, transparent);
-  }
-}
-
-.object-visibility-field select {
-  width: auto;
-  min-width: 5.7rem;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  font-size: 0.82rem;
-  font-weight: 650;
-  cursor: pointer;
-}
-
-.object-visibility-field select:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--accent) 60%, white);
-  outline-offset: 4px;
-}
+.object-share-control > button[aria-pressed='true'] { color: var(--accent); }
+.object-share-control > button[aria-disabled='true'] { opacity: 0.5; cursor: wait; }
 
 .object-share-feedback {
-  flex-basis: 100%;
-  padding-inline: 0.55rem;
+  padding-inline: 0.65rem;
   color: var(--ink-soft);
   font-size: 0.75rem;
   line-height: 1.3;
