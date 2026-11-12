@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { ChevronRight, Folder, FolderPlus, Plus } from 'lucide-react'
+import { ChevronRight, Folder, FolderPlus, SquarePen } from 'lucide-react'
 import type { NoteFolder } from '../core/types'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { ObjectCard } from '../components/object/ObjectCard'
@@ -88,7 +88,7 @@ export function NotesPage() {
         <div className="module-header-actions">
           <Link to={`/create/note${folderId ? `?folder=${encodeURIComponent(folderId)}` : ''}`}
             className="module-header-btn" aria-label={t('module.addAria', { type: t('object.note') })}>
-            <Plus size={22} strokeWidth={1.75} aria-hidden="true" />
+            <SquarePen size={22} strokeWidth={1.75} aria-hidden="true" />
           </Link>
           <button type="button" className={`module-header-btn${current ? ' notes-folder-create' : ''}`} aria-label={t('folders.create')}
             disabled={loading || error || missing} onClick={openCreateFolder}>

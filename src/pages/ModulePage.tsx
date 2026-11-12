@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { ChevronRight, Plus } from 'lucide-react'
+import { ChevronRight, SquarePen } from 'lucide-react'
 import { Link, Navigate, useLocation } from 'react-router-dom'
 import { ObjectCard } from '../components/object/ObjectCard'
 import { BackLink } from '../components/ui/BackLink'
@@ -76,7 +76,7 @@ export function ModulePage() {
             className="module-header-btn"
             aria-label={t('module.addAria', { type: schema.label })}
           >
-            <Plus size={22} strokeWidth={1.75} aria-hidden="true" />
+            <SquarePen size={22} strokeWidth={1.75} aria-hidden="true" />
           </Link>
         </div>
       </div>
