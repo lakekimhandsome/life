@@ -1932,24 +1932,26 @@ html[data-theme='dark'] .topbar {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 1px;
+  background: var(--paper);
 }
 
 .assets-row {
   position: relative;
   overflow: hidden;
   border: 0;
-  border-bottom: 1px solid var(--line);
   border-radius: 0;
-  background: transparent;
+  background: var(--paper);
   touch-action: pan-y;
-  transition: opacity 160ms ease, background 160ms ease;
+  transition: transform 160ms ease, opacity 160ms ease, background 160ms ease;
 }
 
 .assets-row.is-dragging {
   z-index: 2;
   opacity: 0.72;
   background: color-mix(in srgb, var(--ink) 3%, transparent);
+  transition: opacity 160ms ease, background 160ms ease;
+  will-change: transform;
 }
 
 .assets-swipe-track {
@@ -3452,17 +3454,20 @@ select.inline-meta-control {
   background: var(--paper);
 }
 
+.assets-row:not(:last-child),
 .todo-item:not(:last-child),
 .card-edit-row:not(:last-child) {
   box-shadow: 0 1px 0 var(--line);
 }
 
+.assets-list.is-reordering,
 .todo-list.is-reordering,
 .card-edit-list.is-reordering {
   position: relative;
 }
 
 /* Draw above row backgrounds so fractional transforms cannot clip the lines. */
+.assets-list.is-reordering::after,
 .todo-list.is-reordering::after,
 .card-edit-list.is-reordering::after {
   content: '';
@@ -3476,6 +3481,7 @@ select.inline-meta-control {
   background-size: 100% 1px;
 }
 
+.assets-list.is-reordering > .assets-row,
 .todo-list.is-reordering > .todo-item,
 .card-edit-list.is-reordering > .card-edit-row {
   box-shadow: none;

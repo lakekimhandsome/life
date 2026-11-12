@@ -5,16 +5,19 @@ const { PNG } = require('pngjs')
 const { readFileSync } = require('node:fs')
 
 async function check(engine, scale) {
-  const browser = await engine.launch({ headless: true })
+  const browser = await engine.launch({ headless: true, ...(engine === chromium && process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {}) })
   try {
     const page = await browser.newPage({ deviceScaleFactor: scale, viewport: { width: 900, height: 1000 } })
     page.setDefaultTimeout(10000)
     const errors = []
     page.on('pageerror', (error) => errors.push(error.message))
     const user = { id: '00000000-0000-4000-8000-000000000001', aud: 'authenticated', role: 'authenticated', email: 'test@example.test', user_metadata: {} }
-    const ref = new URL(readFileSync('.env', 'utf8').match(/^VITE_SUPABASE_URL=(.*)$/m)[1].replace(/["']/g, '').trim()).hostname.split('.')[0]
+    const ref = new URL(process.env.VITE_SUPABASE_URL || readFileSync('.env', 'utf8').match(/^VITE_SUPABASE_URL=(.*)$/m)[1].replace(/["']/g, '').trim()).hostname.split('.')[0]
     const now = new Date().toISOString()
     let objects = Array.from({ length: 5 }, (_, index) => ({ id: `plan-${index}`, user_id: user.id, type: 'plan', title: `계획 ${index + 1}`, body: '', meta: { order: index }, occurred_at: now, created_at: now, updated_at: now, visibility: 'private', share_token: null }))
+    objects.push(...Array.from({ length: 5 }, (_, index) => ({ id: `asset-${index}`, user_id: user.id, type: 'asset', title: `현금 ${index + 1}`, body: '', meta: { kind: 'cash', symbol: 'KRW', quantity: (index + 1) * 10000, order: index }, occurred_at: now, created_at: now, updated_at: now, visibility: 'private', share_token: null })))
+    objects.push({ ...objects[5], id: 'other-asset', title: '부동산', meta: { kind: 'real_estate', symbol: 'KRW', quantity: 1000000, order: 0 } })
+    const patches = []
     let prefs = { locale: 'ko' }
     await page.addInitScript(({ user, ref }) => {
       localStorage.setItem('life-locale', 'ko')
@@ -31,15 +34,18 @@ async function check(engine, scale) {
       }
       if (table !== 'life_objects') return route.fulfill({ json: [] })
       const id = url.searchParams.get('id')?.replace(/^eq\./, '')
-      if (request.method() === 'PATCH') objects = objects.map((object) => object.id === id ? { ...object, ...request.postDataJSON() } : object)
-      const rows = id ? objects.filter((object) => object.id === id) : objects
+      if (request.method() === 'PATCH') { patches.push(id); objects = objects.map((object) => object.id === id ? { ...object, ...request.postDataJSON() } : object) }
+      const typeFilter = url.searchParams.get('type')
+      const type = typeFilter?.startsWith('eq.') ? typeFilter.slice(3) : null
+      const rows = objects.filter((object) => (!id || object.id === id) && (!type || object.type === type))
       return route.fulfill({ json: request.headers().accept?.includes('vnd.pgrst.object') ? rows[0] : rows })
     })
-    for (const [path, selector, attribute] of [['/plans', '.todo-list', 'data-todo-id'], ['/settings/cards', '.card-edit-list', 'data-card-id']]) {
+    for (const [path, selector, attribute] of [['/plans', '.todo-list', 'data-todo-id'], ['/settings/cards', '.card-edit-list', 'data-card-id'], ['/assets', '.assets-list', 'data-asset-id']]) {
       await page.goto(`${process.env.TEST_BASE_URL || 'http://127.0.0.1:5173'}${path}`)
       const list = page.locator(selector).first()
       const rows = list.locator(`:scope > [${attribute}]`)
       await rows.nth(4).waitFor()
+      await list.scrollIntoViewIfNeeded()
       await page.evaluate(() => document.fonts.ready)
       await page.evaluate(() => Promise.all(document.getAnimations().filter((animation) => animation.effect.getTiming().iterations !== Infinity).map((animation) => animation.finished.catch(() => {}))))
       for (const theme of ['light', 'dark']) {
@@ -51,7 +57,7 @@ async function check(engine, scale) {
         })
         const ids = await rows.evaluateAll((rows, attribute) => rows.map((row) => row.getAttribute(attribute)), attribute)
         const initial = await rows.evaluateAll((rows) => rows.map((row) => { const r = row.getBoundingClientRect(); return { top: r.top, bottom: r.bottom, height: r.height } }))
-        const handle = rows.nth(1).locator('.todo-handle')
+        const handle = rows.nth(1).locator(path === '/assets' ? '.assets-handle' : '.todo-handle')
         const box = await handle.boundingBox()
         const x = box.x + box.width / 2
         const y = box.y + box.height / 2
@@ -96,20 +102,41 @@ async function check(engine, scale) {
         }
         await page.mouse.move(x, initial[0].top + 2, { steps: 8 })
         await checkLines(0)
-        if (process.env.SCREENSHOT_DIR) await page.screenshot({ path: `${process.env.SCREENSHOT_DIR}/${path.includes('cards') ? 'cards' : 'plans'}-${theme}-${engine.name()}.png` })
+        if (process.env.SCREENSHOT_DIR) await page.screenshot({ path: `${process.env.SCREENSHOT_DIR}/${path.slice(1).replaceAll('/', '-')}-${theme}-${engine.name()}.png` })
+        const patchCount = patches.length
         await page.mouse.up()
         await page.waitForFunction((selector) => !document.querySelector(selector).classList.contains('is-reordering'), selector)
         assert.equal(await rows.first().getAttribute(attribute), ids[1], 'Drop still changes the order')
         assert.equal(await list.evaluate((list) => list.style.getPropertyValue('--reorder-lines')), '')
         assert(await rows.first().evaluate((row) => getComputedStyle(row).boxShadow !== 'none'), 'Normal separators return after drop')
         assert(await rows.evaluateAll((rows) => rows.every((row) => !row.style.transform)), 'Transforms are cleaned up')
+        if (path === '/assets') {
+          await page.waitForFunction(() => !document.querySelector('.assets-list .is-dragging'))
+          for (let attempt = 0; attempt < 100 && patches.length < patchCount + 5; attempt++) await page.waitForTimeout(20)
+          assert.equal(patches.length, patchCount + 5, 'Only the reordered asset group is saved')
+          assert(!patches.slice(patchCount).includes('other-asset'), 'Other asset groups stay unchanged')
+          await page.reload()
+          await rows.nth(4).waitFor()
+          assert.equal(await rows.first().getAttribute(attribute), ids[1], 'Saved order survives reload')
+          await list.scrollIntoViewIfNeeded()
+          const cancelIds = await rows.evaluateAll((rows) => rows.map((row) => row.dataset.assetId))
+          const cancelBox = await rows.first().locator('.assets-handle').boundingBox()
+          await page.mouse.move(cancelBox.x + cancelBox.width / 2, cancelBox.y + cancelBox.height / 2)
+          await page.mouse.down()
+          await page.mouse.move(cancelBox.x + cancelBox.width / 2, cancelBox.y + cancelBox.height * 3)
+          await rows.first().locator('.assets-handle').dispatchEvent('pointercancel', { pointerId: 1 })
+          await page.mouse.up()
+          await page.waitForFunction(() => !document.querySelector('.assets-list.is-reordering'))
+          assert.deepEqual(await rows.evaluateAll((rows) => rows.map((row) => row.dataset.assetId)), cancelIds, 'Cancellation restores original order')
+          assert.equal(patches.length, patchCount + 5, 'Cancellation does not save')
+        }
       }
     }
     assert.deepEqual(errors, [])
-    console.log(`PASS ${engine.name()} ${scale}x: plans/cards, light/dark, stationary separators, clear item/gap edges, reorder and cleanup`)
+    console.log(`PASS ${engine.name()} ${scale}x: plans/cards/assets, light/dark, stationary separators, clear item/gap edges, reorder and cleanup`)
   } finally {
     await browser.close()
   }
 }
-;(async () => { for (const engine of [chromium, webkit]) for (const scale of [1, 2]) await check(engine, scale) })()
+;(async () => { for (const engine of (process.env.CHROMIUM_PATH ? [chromium] : [chromium, webkit])) for (const scale of [1, 2]) await check(engine, scale) })()
   .catch((error) => { console.error(error); process.exitCode = 1 })

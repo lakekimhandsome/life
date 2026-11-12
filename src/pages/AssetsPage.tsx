@@ -30,6 +30,7 @@ import {
 } from '../domain/assets'
 import { t as translate } from '../i18n'
 import { evaluateArithmetic } from '../lib/arithmetic'
+import { startVerticalReorder } from '../lib/verticalReorder'
 import { ensureDailyAssetSnapshot } from '../lib/assetHistory'
 import { useLife } from '../state/LifeContext'
 import { useT } from '../state/LocaleContext'
@@ -446,10 +447,7 @@ export function AssetsPage() {
 
   const [dragId, setDragId] = useState<string | null>(null)
   const [dragKind, setDragKind] = useState<AssetKind | null>(null)
-  const dragIdRef = useRef<string | null>(null)
-  const dragKindRef = useRef<AssetKind | null>(null)
   const itemsRef = useRef<ValuedAsset[]>([])
-  const dragOrigin = useRef<ValuedAsset[] | null>(null)
   const listRefs = useRef<Partial<Record<AssetKind, HTMLUListElement | null>>>({})
 
   useEffect(() => {
@@ -610,30 +608,6 @@ export function AssetsPage() {
     await refresh()
   }
 
-  function moveDraggedToIndex(nextIndex: number) {
-    const id = dragIdRef.current
-    const groupKind = dragKindRef.current
-    if (!id || !groupKind) return
-
-    setItems((current) => {
-      const groupItems = current.filter((item) => item.kind === groupKind)
-      const fromIndex = groupItems.findIndex((item) => item.object.id === id)
-      if (fromIndex < 0 || fromIndex === nextIndex) return current
-
-      const nextGroup = [...groupItems]
-      const [moved] = nextGroup.splice(fromIndex, 1)
-      nextGroup.splice(nextIndex, 0, moved)
-
-      let cursor = 0
-      return current.map((item) => {
-        if (item.kind !== groupKind) return item
-        const replacement = nextGroup[cursor]
-        cursor += 1
-        return replacement
-      })
-    })
-  }
-
   function onReorderStart(
     groupKind: AssetKind,
     assetId: string,
@@ -642,59 +616,37 @@ export function AssetsPage() {
     if (event.button !== 0) return
     event.preventDefault()
 
-    dragOrigin.current = itemsRef.current
-    dragIdRef.current = assetId
-    dragKindRef.current = groupKind
+    const current = itemsRef.current
+    const groupItems = current.filter((item) => item.kind === groupKind)
+    const draggedIndex = groupItems.findIndex((item) => item.object.id === assetId)
+    const list = listRefs.current[groupKind]
+    if (draggedIndex < 0 || !list) return
+
     setDragId(assetId)
     setDragKind(groupKind)
-
-    const handle = event.currentTarget
-    handle.setPointerCapture(event.pointerId)
-
-    const onMove = (moveEvent: PointerEvent) => {
-      const list = listRefs.current[groupKind]
-      if (!list) return
-      const rows = [...list.querySelectorAll<HTMLElement>('[data-asset-id]')]
-      const y = moveEvent.clientY
-      let targetIndex = rows.length - 1
-      for (let index = 0; index < rows.length; index += 1) {
-        const rect = rows[index].getBoundingClientRect()
-        if (y < rect.top + rect.height / 2) {
-          targetIndex = index
-          break
-        }
-      }
-      moveDraggedToIndex(targetIndex)
-    }
-
-    const finish = () => {
-      handle.removeEventListener('pointermove', onMove)
-      handle.removeEventListener('pointerup', finish)
-      handle.removeEventListener('pointercancel', finish)
-
-      const current = itemsRef.current
-      const origin = dragOrigin.current
-      const activeKind = dragKindRef.current
-      dragOrigin.current = null
-      dragIdRef.current = null
-      dragKindRef.current = null
-      setDragId(null)
-      setDragKind(null)
-
-      if (!activeKind) return
-
-      const originGroup = origin?.filter((item) => item.kind === activeKind) ?? []
-      const currentGroup = current.filter((item) => item.kind === activeKind)
-      const changed =
-        originGroup.length !== currentGroup.length ||
-        originGroup.some((item, index) => item.object.id !== currentGroup[index]?.object.id)
-
-      if (changed) void persistOrder(currentGroup)
-    }
-
-    handle.addEventListener('pointermove', onMove)
-    handle.addEventListener('pointerup', finish)
-    handle.addEventListener('pointercancel', finish)
+    startVerticalReorder({
+      handle: event.currentTarget,
+      pointerId: event.pointerId,
+      startY: event.clientY,
+      rows: [...list.querySelectorAll<HTMLElement>('[data-asset-id]')],
+      draggedIndex,
+      onDrop: (nextIndex) => {
+        setDragId(null)
+        setDragKind(null)
+        if (nextIndex === draggedIndex) return
+        const nextGroup = [...groupItems]
+        const [moved] = nextGroup.splice(draggedIndex, 1)
+        nextGroup.splice(nextIndex, 0, moved)
+        let cursor = 0
+        const next = current.map((item) =>
+          item.kind === groupKind ? nextGroup[cursor++] : item,
+        )
+        itemsRef.current = next
+        setValued(next)
+        setItems(next)
+        void persistOrder(nextGroup)
+      },
+    })
   }
 
   async function handleSave(event: FormEvent) {
