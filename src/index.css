@@ -9,6 +9,7 @@
   --accent: #1f6f78;
   --accent-deep: #0f2a2e;
   --danger: #a33b3b;
+  --success: #2f7d4a;
   --shadow: 0 24px 60px rgba(15, 42, 46, 0.08);
   --surface: rgba(255, 255, 255, 0.72);
   --surface-strong: rgba(255, 255, 255, 0.92);
@@ -48,6 +49,7 @@ html[data-theme='dark'] {
   --accent: #b6aa96;
   --accent-deep: #766a58;
   --danger: #ed8585;
+  --success: #78ae8b;
   --shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
   --surface: rgba(24, 24, 24, 0.78);
   --surface-strong: rgba(31, 31, 31, 0.96);
@@ -3694,6 +3696,10 @@ html[data-theme='dark'] select option {
   color: var(--muted);
   font-size: 0.82rem;
   font-weight: 600;
+}
+
+.clipboard-save.is-saved {
+  color: var(--success);
 }
 
 .clipboard-save.is-error {

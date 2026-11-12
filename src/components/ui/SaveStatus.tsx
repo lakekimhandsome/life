@@ -19,7 +19,7 @@ export function SaveStatus({ state }: { state: SaveState | 'loading' }) {
   const t = useT()
   return (
     <span
-      className={`clipboard-save${state === 'error' ? ' is-error' : ''}`}
+      className={`clipboard-save${state === 'saved' ? ' is-saved' : state === 'error' ? ' is-error' : ''}`}
       role="status"
       title={state === 'saving' ? t('common.saving') : state === 'saved' ? t('clipboard.saved') : undefined}
     >
