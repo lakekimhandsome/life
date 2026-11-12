@@ -1,4 +1,4 @@
-import { SaveCheck } from 'lucide-react'
+import { Circle, SaveCheck } from 'lucide-react'
 import { useT } from '../../state/LocaleContext'
 
 export type SaveState = 'saving' | 'saved' | 'error'
@@ -8,9 +8,7 @@ export function SavingIcon({ size = 16, decorative = false }: { size?: number; d
   return (
     <>
       <span className="saving-spinner" aria-hidden="true">
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round">
-          <circle cx="12" cy="12" r="9" pathLength="100" strokeDasharray="75 25" />
-        </svg>
+        <Circle size={size} strokeWidth={1.75} />
       </span>
       {!decorative && <span className="sr-only">{t('common.saving')}</span>}
     </>

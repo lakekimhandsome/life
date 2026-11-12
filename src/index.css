@@ -3716,6 +3716,12 @@ html[data-theme='dark'] select option {
   flex: none;
 }
 
+.saving-spinner circle {
+  /* Lucide Circle has radius 10 in its 24 × 24 viewBox: circumference = 2πr. */
+  --saving-circumference: 62.8318530718;
+  stroke-dasharray: calc(var(--saving-circumference) * 0.75) calc(var(--saving-circumference) * 0.25);
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .saving-spinner circle {
     /* Keep the circle stationary; move only its gap along the path. */
@@ -3724,7 +3730,7 @@ html[data-theme='dark'] select option {
 }
 
 @keyframes saving-gap {
-  to { stroke-dashoffset: -100; }
+  to { stroke-dashoffset: calc(-1 * var(--saving-circumference)); }
 }
 
 .clipboard-error {
