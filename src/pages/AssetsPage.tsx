@@ -7,7 +7,7 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
   type PointerEvent as ReactPointerEvent,
 } from 'react'
-import { ChartNoAxesCombined, GripVertical, Plus, X } from 'lucide-react'
+import { ChartLine, GripVertical, Plus, X } from 'lucide-react'
 import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { AssetsPieChart } from '../components/assets/AssetsPieChart'
@@ -766,7 +766,7 @@ export function AssetsPage() {
             className="module-header-btn"
             aria-label={t('assets.history')}
           >
-            <ChartNoAxesCombined size={22} strokeWidth={1.75} aria-hidden="true" />
+            <ChartLine size={22} strokeWidth={1.75} aria-hidden="true" />
           </Link>
         </div>
       </div>
