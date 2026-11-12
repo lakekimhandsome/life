@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
-import { ChevronLeft, ChevronRight, Copy, Download, Ellipsis, Trash2, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Copy, Download, EllipsisVertical, Trash2, X } from 'lucide-react'
 import { copyImageBlob } from '../../lib/clipboard'
 import { useT } from '../../state/LocaleContext'
 import { ImageRemovalContext } from './imageRemovalContext'
@@ -154,7 +154,7 @@ export function ImageGallery({ children }: { children: ReactNode }) {
       }}
       >
       <button type="button" className="gallery-close" aria-label={t('common.close')} onClick={() => setGallery(null)}><X /></button>
-      <button type="button" className="gallery-menu-toggle" ref={menuToggle} aria-label={t('bodyImage.menu')} aria-expanded={menuOpen} aria-controls={menuOpen ? menuId : undefined} onClick={() => setMenuOpen(!menuOpen)}><Ellipsis /></button>
+      <button type="button" className="gallery-menu-toggle" ref={menuToggle} aria-label={t('bodyImage.menu')} aria-expanded={menuOpen} aria-controls={menuOpen ? menuId : undefined} onClick={() => setMenuOpen(!menuOpen)}><EllipsisVertical /></button>
       {menuOpen && <div id={menuId} className="gallery-menu" role="group" aria-label={t('bodyImage.menu')}>
         <button type="button" disabled={busy} onClick={() => void imageAction('save')}><Download size={18} aria-hidden="true" />{t('bodyImage.save')}</button>
         <button type="button" disabled={busy} onClick={() => void imageAction('copy')}><Copy size={18} aria-hidden="true" />{t('clipboard.copyImage')}</button>

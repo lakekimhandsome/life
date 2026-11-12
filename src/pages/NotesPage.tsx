@@ -76,7 +76,7 @@ export function NotesPage() {
             <Link className="notes-path-root" to="/notes">{t('modules.notes')}</Link>
             <span className="notes-path-root" aria-hidden="true">/</span>
             {ancestors.length > 0 && <>
-              <HeaderMenu alignStart label={t('folders.ancestors')}>
+              <HeaderMenu alignStart orientation="horizontal" label={t('folders.ancestors')}>
                 <Link className="notes-path-root-compact" to="/notes">{t('modules.notes')}</Link>
                 {ancestors.map((folder) => <Link key={folder.id} to={notesUrl(folder.id)}>{folder.name}</Link>)}
               </HeaderMenu>

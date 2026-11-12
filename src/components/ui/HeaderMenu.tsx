@@ -1,11 +1,13 @@
 import { useEffect, useRef, type ReactNode } from 'react'
-import { Ellipsis } from 'lucide-react'
+import { Ellipsis, EllipsisVertical } from 'lucide-react'
 
-export function HeaderMenu({ label, children, alignStart = false }: {
+export function HeaderMenu({ label, children, alignStart = false, orientation = 'vertical' }: {
   label: string
   children: ReactNode
   alignStart?: boolean
+  orientation?: 'horizontal' | 'vertical'
 }) {
+  const Icon = orientation === 'horizontal' ? Ellipsis : EllipsisVertical
   const ref = useRef<HTMLDetailsElement>(null)
   useEffect(() => {
     function closeOutside(event: PointerEvent) {
@@ -30,7 +32,7 @@ export function HeaderMenu({ label, children, alignStart = false }: {
       }}
     >
       <summary className="module-header-btn" aria-label={label} title={label}>
-        <Ellipsis size={22} aria-hidden="true" />
+        <Icon size={22} aria-hidden="true" />
       </summary>
       <div className="header-menu-panel" onClick={(event) => {
         const action = event.target instanceof Element && event.target.closest('a, button:not(:disabled)')
