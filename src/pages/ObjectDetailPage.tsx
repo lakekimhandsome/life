@@ -67,22 +67,29 @@ export function ObjectDetailPage() {
     }
   }
 
+  const overflowActions = (
+    <>
+      {type === 'note' && <button type="button" disabled={!currentObject} onClick={() => setMovingId(objectId)}>
+        {t('folders.move')}
+      </button>}
+      <button type="button" className="header-menu-danger"
+        aria-label={t('detail.deleteAria', { type: schema.label })}
+        disabled={deleting || !currentObject} onClick={() => void handleDelete()}>
+        {t('common.delete')}
+      </button>
+    </>
+  )
+
   const actions = (
     <div className="object-header-actions">
-      {isShareableObjectType(type) && supportsMarkdown && <ObjectShareControl key={objectId} object={object} />}
       {!supportsMarkdown && <Link to={`/object/${objectId}/edit`} className="object-edit-link">
         {t('common.edit')}
       </Link>}
-      <HeaderMenu label={t('common.moreActions')}>
-        {type === 'note' && <button type="button" disabled={!currentObject} onClick={() => setMovingId(objectId)}>
-          {t('folders.move')}
-        </button>}
-        <button type="button" className="header-menu-danger"
-          aria-label={t('detail.deleteAria', { type: schema.label })}
-          disabled={deleting || !currentObject} onClick={() => void handleDelete()}>
-          {t('common.delete')}
-        </button>
-      </HeaderMenu>
+      {isShareableObjectType(type) && supportsMarkdown ? (
+        <ObjectShareControl key={objectId} object={object}>{overflowActions}</ObjectShareControl>
+      ) : (
+        <HeaderMenu label={t('common.moreActions')}>{overflowActions}</HeaderMenu>
+      )}
     </div>
   )
 

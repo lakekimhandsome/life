@@ -1,10 +1,9 @@
 import { useEffect, useRef, type ReactNode } from 'react'
 import { Ellipsis } from 'lucide-react'
 
-export function HeaderMenu({ label, children, icon, alignStart = false }: {
+export function HeaderMenu({ label, children, alignStart = false }: {
   label: string
   children: ReactNode
-  icon?: ReactNode
   alignStart?: boolean
 }) {
   const ref = useRef<HTMLDetailsElement>(null)
@@ -31,7 +30,7 @@ export function HeaderMenu({ label, children, icon, alignStart = false }: {
       }}
     >
       <summary className="module-header-btn" aria-label={label} title={label}>
-        {icon ?? <Ellipsis size={22} aria-hidden="true" />}
+        <Ellipsis size={22} aria-hidden="true" />
       </summary>
       <div className="header-menu-panel" onClick={(event) => {
         const action = event.target instanceof Element && event.target.closest('a, button:not(:disabled)')
