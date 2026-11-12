@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { Trash2 } from 'lucide-react'
+import { FolderInput, Trash2 } from 'lucide-react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import { InlineMarkdownObject } from '../components/object/InlineMarkdownObject'
 import type { SaveState } from '../components/ui/SaveStatus'
@@ -71,6 +71,7 @@ export function ObjectDetailPage() {
   const overflowActions = (
     <>
       {type === 'note' && <button type="button" disabled={!currentObject} onClick={() => setMovingId(objectId)}>
+        <FolderInput size={16} aria-hidden="true" />
         {t('folders.move')}
       </button>}
       <button type="button" className="header-menu-danger"
