@@ -3718,7 +3718,7 @@ html[data-theme='dark'] select option {
 
 .saving-spinner circle {
   /* Lucide Circle has radius 10 in its 24 × 24 viewBox: circumference = 2πr. */
-  --saving-circumference: 62.8318530718;
+  --saving-circumference: 62.8318530718px;
   stroke-dasharray: calc(var(--saving-circumference) * 0.75) calc(var(--saving-circumference) * 0.25);
 }
 
