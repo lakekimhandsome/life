@@ -949,6 +949,14 @@ html[data-theme='dark'] .topbar {
   background: color-mix(in srgb, var(--muted) 14%, transparent);
 }
 
+.header-menu-panel > button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.header-menu-panel > button > svg { flex-shrink: 0; }
+
 .header-menu-panel > .header-menu-danger { color: var(--danger); }
 .header-menu-panel > button:disabled { opacity: 0.5; cursor: not-allowed; }
 .header-menu-panel > .notes-folder-create-compact { display: none; }

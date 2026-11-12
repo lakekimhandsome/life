@@ -1,4 +1,4 @@
-import { Check, Copy } from 'lucide-react'
+import { Check, Link2, Lock, Share } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import type { LifeObject } from '../../core/types'
 import { useLife } from '../../state/LifeContext'
@@ -53,11 +53,12 @@ export function ObjectShareControl({ object, children }: { object: LifeObject; c
     {shareUrl && (
       <button type="button" className="object-header-action" disabled={saving}
         aria-label={copyLabel} title={copyLabel} onClick={() => void copyLink()}>
-        {copied ? <Check size={20} aria-hidden="true" /> : <Copy size={20} aria-hidden="true" />}
+        {copied ? <Check size={20} aria-hidden="true" /> : <Share size={20} strokeWidth={1.75} aria-hidden="true" />}
       </button>
     )}
     <HeaderMenu label={t('common.moreActions')}>
       <button type="button" disabled={saving} onClick={() => void changeVisibility()}>
+        {shared ? <Lock size={16} aria-hidden="true" /> : <Link2 size={16} aria-hidden="true" />}
         {t(shared ? 'share.makePrivate' : 'share.enableLink')}
       </button>
       {children}
