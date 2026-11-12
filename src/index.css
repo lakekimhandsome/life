@@ -3708,10 +3708,18 @@ html[data-theme='dark'] select option {
 
 .saving-spinner {
   display: inline-flex;
+  flex: none;
+}
+
+.saving-spinner > svg {
+  display: block;
+  flex: none;
+  transform-box: view-box;
+  transform-origin: 50% 50%;
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .saving-spinner {
+  .saving-spinner > svg {
     animation: saving-spin 800ms linear infinite;
   }
 }
