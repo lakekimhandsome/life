@@ -11,18 +11,21 @@ import { comparePinnedObjects } from '../lib/pinnedObjects'
 import { useLife } from '../state/LifeContext'
 import { useT } from '../state/LocaleContext'
 
-const PROJECT_STATUS_VALUES = ['active', 'idea', 'paused', 'done'] as const
-const PROJECT_GROUP_STORAGE_KEY = 'life-project-group-'
-const PROJECT_STATUS_KEYS: Record<(typeof PROJECT_STATUS_VALUES)[number], MessageKey> = {
+const STATUS_VALUES = {
+  project: ['active', 'idea', 'paused', 'done'],
+  goal: ['active', 'achieved', 'paused'],
+} as const
+const STATUS_KEYS: Record<string, MessageKey> = {
   active: 'status.active',
   idea: 'status.idea',
   paused: 'status.paused',
   done: 'status.done',
+  achieved: 'status.achieved',
 }
 
-function projectStatus(object: LifeObject): (typeof PROJECT_STATUS_VALUES)[number] {
+function objectStatus(object: LifeObject, values: readonly string[]): string {
   const status = object.meta.status
-  if (status === 'idea' || status === 'paused' || status === 'done' || status === 'active') {
+  if (typeof status === 'string' && values.includes(status)) {
     return status
   }
   return 'active'
@@ -34,7 +37,9 @@ export function ModulePage() {
   const { ready, listByType } = useLife()
   const [closedGroups, setClosedGroups] = useState(() => {
     try {
-      return PROJECT_STATUS_VALUES.filter((status) => localStorage.getItem(PROJECT_GROUP_STORAGE_KEY + status) === 'closed')
+      return Object.entries(STATUS_VALUES).flatMap(([type, statuses]) =>
+        statuses.map((status) => `life-${type}-group-${status}`)
+          .filter((key) => localStorage.getItem(key) === 'closed'))
     } catch {
       return []
     }
@@ -46,16 +51,18 @@ export function ModulePage() {
   const items = useMemo(() => objectType
     ? listByType(objectType).sort(comparePinnedObjects)
     : [], [listByType, objectType])
-  const isProject = objectType === 'project'
+  const groupedType = objectType === 'project' || objectType === 'goal' ? objectType : null
 
-  const projectGroups = useMemo(() => {
-    if (!isProject) return []
-    return PROJECT_STATUS_VALUES.map((value) => ({
+  const statusGroups = useMemo(() => {
+    if (!groupedType) return []
+    const values = STATUS_VALUES[groupedType]
+    return values.map((value) => ({
       value,
-      label: t(PROJECT_STATUS_KEYS[value]),
-      items: items.filter((object) => projectStatus(object) === value),
+      storageKey: `life-${groupedType}-group-${value}`,
+      label: t(STATUS_KEYS[value]),
+      items: items.filter((object) => objectStatus(object, values) === value),
     }))
-  }, [isProject, items, t])
+  }, [groupedType, items, t])
 
   if (!module || !objectType) {
     return <Navigate to="/" replace />
@@ -88,16 +95,16 @@ export function ModulePage() {
           <h3>{t('module.emptyTitle')}</h3>
           <p>{t('module.emptyBody', { type: schema.label })}</p>
         </div>
-      ) : isProject ? (
+      ) : groupedType ? (
         <div className="object-groups">
-          {projectGroups.map((group) => (
-            <details key={group.value} className="object-group" open={!closedGroups.includes(group.value)}
+          {statusGroups.map((group) => (
+            <details key={group.storageKey} className="object-group" open={!closedGroups.includes(group.storageKey)}
               onToggle={(event) => {
                 const closed = !event.currentTarget.open
-                setClosedGroups((previous) => previous.includes(group.value) === closed ? previous
-                  : closed ? [...previous, group.value] : previous.filter((status) => status !== group.value))
+                setClosedGroups((previous) => previous.includes(group.storageKey) === closed ? previous
+                  : closed ? [...previous, group.storageKey] : previous.filter((key) => key !== group.storageKey))
                 try {
-                  localStorage.setItem(PROJECT_GROUP_STORAGE_KEY + group.value, closed ? 'closed' : 'open')
+                  localStorage.setItem(group.storageKey, closed ? 'closed' : 'open')
                 } catch { /* Keep toggling available when storage is blocked. */ }
               }}>
               <summary className="object-group-header">

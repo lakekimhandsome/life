@@ -84,11 +84,30 @@ async function check(engine) {
     await page.reload()
     await page.locator('.object-group').first().waitFor()
     assert.deepEqual(await page.locator('.object-group').evaluateAll((groups) => groups.map((group) => group.open)), [true, true, false, true])
-    for (const path of ['notes', 'journal', 'goals']) {
+    for (const path of ['notes', 'journal']) {
       await page.goto(`${base}/${path}`)
       await page.locator('.object-row').first().waitFor()
       assert.equal(await page.locator('.object-group').count(), 0)
     }
+    const goalStatuses = ['active', 'achieved', 'paused']
+    objects.push(...goalStatuses.map((status) => ({ ...objects[6], id: `goal-${status}`,
+      title: `Goal ${status}`, meta: { status, targetDate: '2027-01-01' } })),
+      { ...objects[6], id: 'goal-unknown', title: 'Unknown status goal', meta: { status: 'unknown' } })
+    await page.goto(`${base}/goals`)
+    await page.locator('.object-group').first().waitFor()
+    assert.deepEqual(await page.locator('.object-group h2').allTextContents(), ['In progress', 'Achieved', 'Paused'])
+    assert.deepEqual(await page.locator('.object-group strong').allTextContents(), ['3', '1', '1'])
+    assert.equal(await page.locator('.object-row-tags span').count(), 0)
+    assert.equal(await page.locator('.object-row time').count(), 3)
+    await page.locator('.object-group summary').first().click()
+    await page.waitForFunction(() => localStorage.getItem('life-goal-group-active') === 'closed')
+    await page.reload()
+    await page.locator('.object-group').first().waitFor()
+    assert.deepEqual(await page.locator('.object-group').evaluateAll((groups) => groups.map((group) => group.open)), [false, true, true])
+    await page.locator('.sidebar-nav a[href="/projects"]').click()
+    await page.waitForURL(`${base}/projects`)
+    await page.waitForFunction(() => document.querySelectorAll('.object-group').length === 4)
+    assert.deepEqual(await page.locator('.object-group').evaluateAll((groups) => groups.map((group) => group.open)), [true, true, false, true])
     objects.push({ ...objects[0], id: 'project-to-pin', title: 'Older project' })
     objects.push({ ...objects[4], id: 'note-to-pin', title: 'Older note', occurred_at: '2020-01-01T00:00:00Z' })
     folders.push({ id: 'child', parent_id: null, user_id: user.id, name: 'Child folder' })

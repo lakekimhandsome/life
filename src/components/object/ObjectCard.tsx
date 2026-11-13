@@ -39,7 +39,7 @@ export function ObjectCard({ object }: { object: LifeObject }) {
   const shownDate = object.type === 'goal' ? goalTargetDate : object.occurredAt
   const metaBits = schema.fields
     .filter((field) => object.type !== 'goal' || field.key !== 'targetDate')
-    .filter((field) => object.type !== 'project' || field.key !== 'status')
+    .filter((field) => (object.type !== 'project' && object.type !== 'goal') || field.key !== 'status')
     .map((field) => formatMetaValue(object.type, field.key, object.meta[field.key] ?? null))
     .filter(Boolean)
     .slice(0, 2)
