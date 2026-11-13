@@ -859,7 +859,7 @@ html[data-theme='dark'] .topbar {
   margin-bottom: 1.75rem;
 }
 
-.module-header:is(.module-heading--projects, .module-heading--notes, .module-heading--goals, .module-heading--journal) {
+.app-shell :is(.module-header, .detail-header, .compose-header) {
   position: sticky;
   top: var(--topbar-height);
   z-index: 10;
