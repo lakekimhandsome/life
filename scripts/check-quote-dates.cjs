@@ -1,0 +1,48 @@
+// Start npm run dev first. Playwright is supplied through NODE_PATH.
+const { chromium } = require('playwright')
+const assert = require('node:assert/strict')
+
+;(async () => {
+  const browser = await chromium.launch({ headless: true, ...(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {}) })
+  try {
+    const page = await browser.newPage()
+    const errors = []
+    page.on('pageerror', (error) => errors.push(error.message))
+    await page.goto(`${process.env.TEST_BASE_URL || 'http://127.0.0.1:5173'}/code-editor-check.html`)
+    const editor = page.getByRole('region', { name: 'Quote check', exact: true }).locator('[contenteditable="true"]')
+    await editor.waitFor()
+    assert.equal(await editor.locator('ol').count(), 0)
+    assert.deepEqual(await editor.locator('blockquote').allTextContents(), ['2027. 1. 1. CMJ 75cm', '2027. 6. 1. CMJ 80cm'])
+    const preview = page.getByRole('region', { name: 'Quote preview' })
+    assert.equal(await preview.locator('ol').count(), 0)
+    assert.equal(await preview.locator('blockquote').innerText(), '2027. 1. 1. CMJ 75cm')
+    await editor.locator('blockquote').last().click()
+    await page.keyboard.press('End')
+    await page.keyboard.press('Enter')
+    await page.keyboard.press('Enter')
+    await page.keyboard.type('Outside quote')
+    assert.equal(await editor.locator(':scope > p').filter({ hasText: 'Outside quote' }).count(), 1)
+    const serialized = await page.getByLabel('Serialized quote markdown').innerText()
+    assert(serialized.includes('2027\\. 1. 1. CMJ 75cm'))
+    assert(serialized.endsWith('\n\nOutside quote'))
+    await page.getByRole('button', { name: 'Reload quote markdown' }).click()
+    assert.equal(await editor.locator('ol').count(), 0)
+    assert.equal(await editor.locator('blockquote').count(), 2)
+    assert.equal(await editor.locator(':scope > p').filter({ hasText: 'Outside quote' }).count(), 1)
+
+    const list = page.getByRole('region', { name: 'List quote check' }).locator('[contenteditable="true"]')
+    assert.equal(await list.locator('ol li').innerText(), 'real list item')
+    await list.locator('li').click()
+    await page.keyboard.press('End')
+    await page.keyboard.press('Enter')
+    await page.keyboard.press('Enter')
+    await page.keyboard.press('Enter')
+    await page.keyboard.type('Outside list quote')
+    assert.equal(await list.locator('ol li').count(), 1)
+    assert.equal(await list.locator(':scope > p').filter({ hasText: 'Outside list quote' }).count(), 1)
+    assert.deepEqual(errors, [])
+    console.log('PASS: date import, read preview, quote exit, serialized reload, genuine list exit')
+  } finally {
+    await browser.close()
+  }
+})().catch((error) => { console.error(error); process.exitCode = 1 })

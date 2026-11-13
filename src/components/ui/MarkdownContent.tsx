@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type ComponentProps } from 'react'
 import Markdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { remarkCalendarDates } from '../../lib/markdownDates'
 import { bodyImageResolver } from '../../lib/bodyImages'
 import { ImageGallery } from './ImageGallery'
 import { useT } from '../../state/LocaleContext'
@@ -33,6 +34,6 @@ export function MarkdownContent({ children, className, shareToken }: MarkdownCon
     img: ({ node: _node, ...props }: ComponentProps<'img'> & { node?: unknown }) => <BodyImage {...props} resolve={resolve} />,
   }), [resolve])
   return <ImageGallery><div className={className}>
-    <Markdown remarkPlugins={[remarkGfm]} components={components}>{children}</Markdown>
+    <Markdown remarkPlugins={[remarkGfm, remarkCalendarDates]} components={components}>{children}</Markdown>
   </div></ImageGallery>
 }

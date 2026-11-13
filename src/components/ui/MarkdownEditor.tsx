@@ -2,6 +2,7 @@ import {
   MDXEditor,
   $createTableNode,
   addComposerChild$,
+  addImportVisitor$,
   realmPlugin,
   codeBlockPlugin,
   headingsPlugin,
@@ -16,8 +17,11 @@ import {
   type CodeBlockEditorDescriptor,
   type CodeBlockEditorProps,
   type MDXEditorMethods,
+  type MdastImportVisitor,
 } from '@mdxeditor/editor'
 import { $isListItemNode } from '@lexical/list'
+import type { Nodes } from 'mdast'
+import { dateListParagraphs } from '../../lib/markdownDates'
 import { STRIKETHROUGH } from '@lexical/markdown'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { MarkdownShortcutPlugin as LexicalMarkdownShortcutPlugin } from '@lexical/react/LexicalMarkdownShortcutPlugin'
@@ -46,6 +50,19 @@ import { ImageGallery } from './ImageGallery'
 import { resolveBodyImage } from '../../lib/bodyImages'
 
 import { registerFormatExit } from './formatExit'
+
+const calendarDatePlugin = realmPlugin({
+  init(realm) {
+    const visitor: MdastImportVisitor<Nodes> = {
+      priority: 100,
+      testNode: (node) => dateListParagraphs(node) !== null,
+      visitNode: ({ mdastNode, lexicalParent, actions }) => {
+        actions.visitChildren({ type: 'root', children: dateListParagraphs(mdastNode)! }, lexicalParent)
+      },
+    }
+    realm.pub(addImportVisitor$, visitor)
+  },
+})
 
 function FormatExitPlugin() {
   const [editor] = useLexicalComposerContext()
@@ -416,6 +433,7 @@ export function MarkdownEditor({
       bodyImageInsertPlugin(),
       listsPlugin(),
       quotePlugin(),
+      calendarDatePlugin(),
       formatExitPlugin(),
       thematicBreakPlugin(),
       linkPlugin(),

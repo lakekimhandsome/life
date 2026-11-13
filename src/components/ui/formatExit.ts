@@ -26,6 +26,8 @@ export function registerFormatExit(editor: LexicalEditor) {
   return mergeRegister(
     // Imported quotes contain paragraphs; normalize shortcut-created quotes to the same structure.
     editor.registerNodeTransform(QuoteNode, (quote) => {
+      // Lists can exit empty items only when their container is a root or shadow root.
+      if (!quote.isShadowRoot()) quote.setIsShadowRoot(true)
       let paragraph: ParagraphNode | null = null
       for (const child of quote.getChildren()) {
         if ($isElementNode(child) && !child.isInline()) {
