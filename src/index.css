@@ -2912,6 +2912,7 @@ select.inline-meta-control {
 }
 
 .body-image-insert.body-image-insert--toolbar {
+  order: -1;
   position: relative;
   padding: 0;
 }
