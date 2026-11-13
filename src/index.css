@@ -99,6 +99,7 @@ select {
 }
 
 .app-shell {
+  --topbar-height: calc(4.25rem + 1px);
   position: relative;
   min-height: 100vh;
   overflow-x: clip;
@@ -150,6 +151,7 @@ html[data-theme='dark'] .atmosphere::after {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  height: var(--topbar-height);
   padding: 1rem 1.5rem;
   backdrop-filter: blur(16px);
   background: rgba(243, 247, 246, 0.72);
@@ -855,6 +857,16 @@ html[data-theme='dark'] .topbar {
 
 .module-header {
   margin-bottom: 1.75rem;
+}
+
+.module-header:is(.module-heading--projects, .module-heading--notes, .module-heading--goals, .module-heading--journal) {
+  position: sticky;
+  top: var(--topbar-height);
+  z-index: 10;
+  padding: 0.75rem;
+  margin: -0.75rem -0.75rem 1rem;
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
 }
 
 .module-header > .back-link--home { display: none; }
@@ -3890,6 +3902,7 @@ html[data-theme='dark'] .clipboard-image-remove {
 
 @media (min-width: 800px) {
   .app-shell {
+    --topbar-height: 0px;
     display: grid;
     grid-template-columns: var(--sidebar-width, 248px) minmax(0, 1fr);
     height: 100vh;
