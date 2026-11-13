@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "test": "node --test scripts/check-share-preview.test.ts supabase/functions/life-mcp/*.test.ts",
+    "test": "node --test scripts/*.test.ts supabase/functions/life-mcp/*.test.ts",
     "build": "tsc -b && vite build && cp dist/index.html dist/404.html",
     "lint": "oxlint",
     "preview": "vite preview",
