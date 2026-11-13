@@ -52,6 +52,12 @@ import { ImageGallery } from './ImageGallery'
 import { resolveBodyImage } from '../../lib/bodyImages'
 
 import { registerFormatExit } from './formatExit'
+import { EditorToolbarTargetContext } from './editorToolbarTarget'
+import { EditorToolbarPortal } from './EditorToolbarPortal'
+
+function EditorHistoryActions() {
+  return <EditorToolbarPortal><div className="editor-history-actions"><UndoRedo /></div></EditorToolbarPortal>
+}
 
 const calendarDatePlugin = realmPlugin({
   init(realm) {
@@ -415,6 +421,7 @@ interface MarkdownEditorProps {
   onBlur?: () => void
   onError?: (message: string) => void
   placeholder?: string
+  toolbarTarget?: HTMLElement | null
 }
 
 export function MarkdownEditor({
@@ -423,6 +430,7 @@ export function MarkdownEditor({
   onBlur,
   onError,
   placeholder,
+  toolbarTarget,
 }: MarkdownEditorProps) {
   const t = useT()
   const editorRef = useRef<MDXEditorMethods>(null)
@@ -433,7 +441,7 @@ export function MarkdownEditor({
     () => [
       toolbarPlugin({
         toolbarClassName: 'editor-history-toolbar',
-        toolbarContents: () => <UndoRedo />,
+        toolbarContents: () => <EditorHistoryActions />,
       }),
       headingsPlugin(),
       imagePlugin({ imagePreviewHandler: resolveBodyImage, disableImageResize: true, EditImageToolbar: BodyImageToolbar, imagePlaceholder: BodyImagePlaceholder }),
@@ -455,7 +463,7 @@ export function MarkdownEditor({
   )
 
   return (
-    <ImageGallery><div onClickCapture={(event) => {
+    <EditorToolbarTargetContext.Provider value={toolbarTarget ?? null}><ImageGallery><div onClickCapture={(event) => {
       const link = event.target instanceof Element ? event.target.closest('a') : null
       if (!(link instanceof HTMLAnchorElement)) return
       event.preventDefault()
@@ -481,6 +489,6 @@ export function MarkdownEditor({
         onError={({ error }) => onError?.(error)}
         plugins={plugins}
       />
-    </div></ImageGallery>
+    </div></ImageGallery></EditorToolbarTargetContext.Provider>
   )
 }

@@ -1,17 +1,20 @@
 import { $createImageNode, addComposerChild$, realmPlugin } from '@mdxeditor/editor'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { $createParagraphNode, $getNodeByKey, $getSelection, $isRangeSelection, $insertNodes, $isRootOrShadowRoot, $setSelection } from 'lexical'
-import { useEffect, useRef, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import { ImagePlus as ImageIcon } from 'lucide-react'
 import { imageFilesFromDataTransfer } from '../../lib/clipboard'
 import { uploadBodyImage } from '../../lib/bodyImages'
 import { useT } from '../../state/LocaleContext'
 import { SavingIcon } from './SaveStatus'
+import { EditorToolbarPortal } from './EditorToolbarPortal'
+import { EditorToolbarTargetContext } from './editorToolbarTarget'
 
 // oxlint-disable-next-line react/only-export-components
 function BodyImageInsert() {
   const [editor] = useLexicalComposerContext()
   const t = useT()
+  const toolbarTarget = useContext(EditorToolbarTargetContext)
   const input = useRef<HTMLInputElement>(null)
   const selection = useRef<ReturnType<typeof $getSelection>>(null)
   const mounted = useRef(true)
@@ -78,20 +81,22 @@ function BodyImageInsert() {
     }
   }, [editor])
 
-  return <div className="body-image-insert" contentEditable={false}>
+  return <EditorToolbarPortal><div className={`body-image-insert${toolbarTarget ? ' body-image-insert--toolbar' : ''}`} contentEditable={false}>
     <button type="button" className="body-image-insert-button" disabled={uploading}
+      aria-label={t(uploading ? 'bodyImage.uploading' : 'bodyImage.insert')}
+      title={t(uploading ? 'bodyImage.uploading' : 'bodyImage.insert')}
       onPointerDown={(event) => {
         if (event.pointerType === 'mouse') event.preventDefault()
         rememberSelection()
       }}
       onClick={() => { rememberSelection(); input.current?.click() }}>
       {uploading ? <SavingIcon decorative /> : <ImageIcon size={16} aria-hidden="true" />}
-      {t(uploading ? 'bodyImage.uploading' : 'bodyImage.insert')}
+      {!toolbarTarget && t(uploading ? 'bodyImage.uploading' : 'bodyImage.insert')}
     </button>
     <input ref={input} type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple hidden
       onChange={(event) => { void insert([...event.target.files ?? []]); event.target.value = '' }} />
     {error && <span role="alert" className="form-error">{error}</span>}
-  </div>
+  </div></EditorToolbarPortal>
 }
 
 export const bodyImageInsertPlugin = realmPlugin({

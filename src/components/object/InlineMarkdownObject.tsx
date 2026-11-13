@@ -85,6 +85,7 @@ export function InlineMarkdownObject({
   const [occurredAt, setOccurredAt] = useState(initialOccurredAt)
   const [meta, setMeta] = useState(object.meta)
   const [error, setError] = useState<string | null>(null)
+  const [toolbarTarget, setToolbarTarget] = useState<HTMLDivElement | null>(null)
 
   const persistNow = useCallback(async () => {
     if (!dirtyRef.current) return
@@ -250,12 +251,16 @@ export function InlineMarkdownObject({
               includeTime
             />
           )}
-          <SaveStatus state={saveState} />
+          <div className="detail-editor-tools">
+            <SaveStatus state={saveState} />
+            <div className="editor-toolbar-target" ref={setToolbarTarget} />
+          </div>
         </div>
       </header>
 
       <section className="detail-body" aria-label={schema.bodyLabel}>
         <MarkdownEditor
+          toolbarTarget={toolbarTarget}
           value={body}
           onChange={changeBody}
           onBlur={flushSave}
