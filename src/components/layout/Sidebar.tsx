@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { House } from 'lucide-react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { OBJECT_TYPES, type ObjectType } from '../../core/types'
-import { resolveExcludedModules, resolveHubModules } from '../../domain/hubLayout'
+import { resolveHubModules } from '../../domain/hubLayout'
 import { getModuleForObjectType, moduleTitle } from '../../domain/modules'
 import { useLife } from '../../state/LifeContext'
 import { useT } from '../../state/LocaleContext'
@@ -30,7 +30,7 @@ export function Sidebar() {
   const { getObject } = useLife()
   const { hubLayout } = usePrefs()
   const modules = useMemo(
-    () => [...resolveHubModules(hubLayout), ...resolveExcludedModules(hubLayout)],
+    () => resolveHubModules(hubLayout),
     [hubLayout],
   )
 
