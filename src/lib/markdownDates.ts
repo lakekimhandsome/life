@@ -6,8 +6,23 @@ export function dateListParagraphs(node: Nodes): Paragraph[] | null {
   if (node.type !== 'list' || !node.ordered || !node.start || node.start < 1000 || node.start > 9999) return null
   const paragraphs: Paragraph[] = []
   for (const [index, item] of node.children.entries()) {
-    const paragraph = item.children[0]
-    if (item.children.length !== 1 || paragraph?.type !== 'paragraph') return null
+    let content = item.children[0]
+    if (item.children.length !== 1) return null
+    let prefix = ''
+    // Unescaped month/day markers form nested lists on the same source line.
+    while (content?.type === 'list') {
+      if (!content.ordered || content.start == null || content.children.length !== 1
+        || content.position?.start.line !== item.position?.start.line) return null
+      const nestedItem = content.children[0]
+      if (nestedItem.children.length !== 1) return null
+      prefix += `${content.start}. `
+      content = nestedItem.children[0]
+    }
+    if (content?.type !== 'paragraph') return null
+    const paragraph: Paragraph = prefix ? { ...content, children: [
+      { type: 'text', value: prefix + (content.children[0]?.type === 'text' ? content.children[0].value : '') },
+      ...content.children.slice(content.children[0]?.type === 'text' ? 1 : 0),
+    ] } : content
     const first = paragraph.children[0]
     if (first?.type !== 'text') return null
     const match = /^(\d{1,2})\.\s+(\d{1,2})\.(?:\s|$)/.exec(first.value)

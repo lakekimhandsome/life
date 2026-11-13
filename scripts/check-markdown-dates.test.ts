@@ -13,7 +13,7 @@ test('calendar dates preserve inline content and valid leap dates', () => {
 })
 
 test('ordinary lists, invalid dates, nested lists and code remain intact', () => {
-  for (const input of ['1. first', '2027. ordinary item', '2027. 2. 29. invalid', '2027. 13. 1. invalid', '2027. 1. 1. date\n   - child', '```\n2027. 1. 1. code\n```']) {
+  for (const input of ['1. first', '2027. ordinary item', '2027. 2. 29. invalid', '2027. 13. 1. invalid', '2027. 1\\. 1. date\n       - child', '```\n2027. 1. 1. code\n```']) {
     const tree = fromMarkdown(input)
     const before = structuredClone(tree)
     remarkCalendarDates()(tree)
