@@ -1279,7 +1279,6 @@ html[data-theme='dark'] .topbar {
   gap: 0;
   margin: 0.15rem 0 1.35rem;
   align-items: stretch;
-  border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
 }
 
@@ -1813,7 +1812,6 @@ html[data-theme='dark'] .topbar {
   margin: 0 0 0.35rem;
   padding: 0.85rem 0.1rem 0.55rem;
   border: 0;
-  border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
   border-radius: 0;
   background: transparent;
@@ -2289,15 +2287,10 @@ button.assets-row-title:focus-visible {
   font-size: 0.9rem;
 }
 
-.object-group .object-stream {
-  border-top: 0;
-}
-
 .object-stream {
   display: flex;
   flex-direction: column;
   gap: 0;
-  border-top: 1px solid var(--line);
 }
 
 .object-row {
@@ -2416,10 +2409,6 @@ button.assets-row-title:focus-visible {
 .empty-panel {
   padding: 2.5rem 0;
   color: var(--ink-soft);
-}
-
-.empty-panel {
-  border-top: 1px solid var(--line);
 }
 
 .empty-panel h3 {
@@ -2716,6 +2705,10 @@ button.assets-row-title:focus-visible {
 .detail-relations {
   padding: 1.4rem 0;
   border-top: 1px solid var(--line);
+}
+
+.app-shell .detail-header + :is(.detail-body, .detail-fields, .detail-relations) {
+  border-top: 0;
 }
 
 .detail-body p {
