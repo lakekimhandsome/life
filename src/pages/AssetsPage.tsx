@@ -345,7 +345,7 @@ function AssetRow({
                 editingField === 'quantity' ? (
                   <input
                     className="assets-inline-input assets-inline-quantity"
-                    inputMode="decimal"
+                    inputMode="text"
                     value={draft}
                     autoFocus
                     disabled={saving}
@@ -375,7 +375,7 @@ function AssetRow({
             {isDirectPriceKind(item.kind) && editingField === 'quantity' ? (
               <input
                 className="assets-inline-input assets-inline-value"
-                inputMode="decimal"
+                inputMode="text"
                 value={draft}
                 autoFocus
                 disabled={saving}
