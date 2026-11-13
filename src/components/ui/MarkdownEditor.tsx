@@ -1,5 +1,6 @@
 import {
   MDXEditor,
+  UndoRedo,
   $createTableNode,
   addComposerChild$,
   addImportVisitor$,
@@ -13,6 +14,7 @@ import {
   quotePlugin,
   tablePlugin,
   thematicBreakPlugin,
+  toolbarPlugin,
   useCodeBlockEditorContext,
   type CodeBlockEditorDescriptor,
   type CodeBlockEditorProps,
@@ -422,12 +424,17 @@ export function MarkdownEditor({
   onError,
   placeholder,
 }: MarkdownEditorProps) {
+  const t = useT()
   const editorRef = useRef<MDXEditorMethods>(null)
   useEffect(() => {
     if (editorRef.current?.getMarkdown() !== value) editorRef.current?.setMarkdown(value)
   }, [value])
   const plugins = useMemo(
     () => [
+      toolbarPlugin({
+        toolbarClassName: 'editor-history-toolbar',
+        toolbarContents: () => <UndoRedo />,
+      }),
       headingsPlugin(),
       imagePlugin({ imagePreviewHandler: resolveBodyImage, disableImageResize: true, EditImageToolbar: BodyImageToolbar, imagePlaceholder: BodyImagePlaceholder }),
       bodyImageInsertPlugin(),
@@ -461,6 +468,11 @@ export function MarkdownEditor({
         contentEditableClassName="markdown-content inline-markdown-content"
         markdown={value}
         suppressHtmlProcessing
+        translation={(key, defaultValue, interpolations) => {
+          if (key === 'toolbar.undo') return t('editor.undo', { shortcut: String(interpolations?.shortcut ?? '') })
+          if (key === 'toolbar.redo') return t('editor.redo', { shortcut: String(interpolations?.shortcut ?? '') })
+          return defaultValue.replace(/\{\{(\w+)\}\}/g, (_, name: string) => String(interpolations?.[name] ?? ''))
+        }}
         placeholder={placeholder}
         onChange={(markdown, initialMarkdownNormalize) => {
           if (!initialMarkdownNormalize) onChange(markdown)
